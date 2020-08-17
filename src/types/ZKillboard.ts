@@ -1,0 +1,5 @@
+export const enum ZKB_STATUS {
+	DISCONNECTED,
+	CONNECTING,
+	CONNECTED,
+}

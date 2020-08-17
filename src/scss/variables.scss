@@ -1,0 +1,17 @@
+$list-item-child-min-width: 16px !default;
+$list-item-action-icon-margin: 16px !default;
+$body-font-family: "Eve Sans Neue", sans-serif !default;
+//$body-font-family: 'Roboto Condensed', sans-serif !default;
+
+$font-weights: (
+	'thin': 300,
+	'light': 300,
+	'regular': 400,
+	'medium': 400,
+	'bold': 700,
+	'black': 700
+);
+
+html {
+	overflow-y: hidden !important;
+}

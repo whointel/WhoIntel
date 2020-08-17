@@ -1,0 +1,26 @@
+{
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "extends": [
+    "plugin:vue/essential",
+    "eslint:recommended",
+    "@vue/typescript"
+  ],
+  "plugins": [
+    "vuetify"
+  ],
+  "rules": {
+    "vuetify/no-deprecated-classes": "error",
+    "vuetify/grid-unknown-attributes": "error",
+    "vuetify/no-legacy-grid": "off",
+    "vue/no-use-v-if-with-v-for": "off",
+    "no-debugger": "warn",
+    "semi": "off",
+    "no-console": "off"
+  },
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser"
+  }
+}
