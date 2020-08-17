@@ -12,7 +12,7 @@
 					v-bind="attrs"
 					v-on="on"
 				>
-					{{ overlay === OVERLAY_TYPE.ALERT ? "overlay" : overlay }}
+					{{ overlay === OVERLAY_TYPE.ALERT ? "слои" : overlay }}
 				</v-chip>
 			</template>
 
@@ -23,7 +23,7 @@
 						label color="grey" class="mx-1"
 						:outlined="overlay !== OVERLAY_TYPE.ALERT"
 						@click="setOverlay(OVERLAY_TYPE.ALERT)"
-					>alarm
+					>alert
 					</v-chip>
 
 					<v-chip
@@ -44,7 +44,7 @@
 						label color="green" class="mx-1"
 						:outlined="overlay !== OVERLAY_TYPE.NPC_KILLS"
 						@click="setOverlay(OVERLAY_TYPE.NPC_KILLS)"
-					>npc
+					>npc kill
 					</v-chip>
 
 				</v-card-text>

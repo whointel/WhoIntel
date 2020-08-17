@@ -2,7 +2,7 @@
 	<v-navigation-drawer app :permanent="false" stateless :value="isShow">
 		<template v-slot:prepend>
 			<div class="ma-2">
-				<div class="ml-4 blue--text subtitle-1">
+				<div class="ml-4 subtitle-1">
 					{{ startSystemName }} -> {{ endSystemName }}
 					<v-tooltip bottom transition="fade-transition">
 						<template v-slot:activator="{ on, attrs }">
@@ -13,6 +13,7 @@
 						<span>Скопировать путь в буфер обмена</span>
 					</v-tooltip>
 				</div>
+			<!--	TODO			<div class="ml-4 caption">для персонажа</div>-->
 			</div>
 		</template>
 

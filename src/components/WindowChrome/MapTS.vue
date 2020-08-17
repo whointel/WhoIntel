@@ -1,5 +1,5 @@
 <template>
-	<span v-if="ts"><br>map: {{ time }}</span>
+	<span v-if="ts"><br>кэш карты региона: {{ time }}</span>
 </template>
 
 <script lang="ts">

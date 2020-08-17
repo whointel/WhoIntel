@@ -301,12 +301,6 @@ export default class RegionMap extends Vue {
 					<line x1="0" y1="10000" x2="0" y2="0" style="stroke:#462CFF"></line>
         </g>
 			`)
-		//
-		// svg.prepend(`
-		//     <g id="char_marker" opacity="0"  transform="translate(0, 0)">
-		// 			<ellipse cx="0" cy="0" rx="0" ry="0" style="fill:#8B008D"></ellipse>
-		//     </g>
-		// 	`)
 
 		chee("#jumps > line").removeClass().addClass("j")
 		chee("defs > symbol rect").css("fill", "#FFFFFF")
@@ -320,7 +314,7 @@ export default class RegionMap extends Vue {
 
 		chee("#sysuse > use").each((index, use) => {
 			const href = use.attribs["href"]
-			const id = Number(href.substring(4))
+			const id = Number(href.substring(4)) // eg xlink:href="#def10000001"
 			uses[id] = {
 				x: parseFloat(use.attribs["x"]),
 				y: parseFloat(use.attribs["y"]),
@@ -341,12 +335,6 @@ export default class RegionMap extends Vue {
 
 			const id = Number(idString)
 			if (id.toString() !== idString) return
-
-			// const name = chee(symbol.find("text")[0]).text()
-			// NOTE not all systems has dashes
-			// if (!name.includes("-")) {
-			// 	return
-			// }
 
 			systemManager.systemSetMap(id, uses[id], this.svgContainer)
 		})

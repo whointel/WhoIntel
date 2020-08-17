@@ -195,6 +195,38 @@ export default class EdenMapPopup extends Vue {
 		const viewBox = svg.attr("viewBox").split(" ")
 		this.svgOrigWidth = viewBox[2]
 
+		const regionID = systemManager.currentRegion?.id
+
+		if (regionID) {
+			chee("#sysuse > use").each((index, use) => {
+				const href = use.attribs["href"]
+				const id = Number(href.substring(4)) // eg xlink:href="#def10000001"
+				if (id !== regionID) return
+
+				const uses = {
+					x: parseFloat(use.attribs["x"]),
+					y: parseFloat(use.attribs["y"]),
+					width: parseFloat(use.attribs["width"]),
+					height: parseFloat(use.attribs["height"]),
+					center_x: 0.0,
+					center_y: 0.0,
+				}
+				uses.center_x = (uses.x + (uses.width / 2))
+				uses.center_y = (uses.y + (uses.height / 2))
+
+				svg.prepend(`
+					<g>
+						<ellipse
+						cx="${uses.center_x - 2.5}"
+						cy="${uses.center_y}"
+						rx="${(uses.width / 2) + 4}"
+						ry="${(uses.height / 2) + 4}"
+						style="fill:#8B008D"></ellipse>
+					</g>
+				`)
+			})
+		}
+
 		this.svgContent = cheerio.html(svg)
 	}
 }

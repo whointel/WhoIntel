@@ -46,6 +46,7 @@
 					>mdi-information-variant
 					</v-icon>
 				</template>
+				используется памяти:<br>
 				<span>{{ usedJSHeapSize }}/{{ totalJSHeapSize }} Mb front</span>
 				<br>
 				<span>{{ heapTotal }}/{{ heapUsed }}/{{ externalMem }} Mb back</span>
