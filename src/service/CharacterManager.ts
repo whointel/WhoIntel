@@ -9,14 +9,14 @@ import Vue from "vue"
 export interface ICharacterManagerCharacter {
 	isAuthed: boolean
 	name: string
+	system: EVESystem | null
 }
 
 class CharacterManager {
-	characters: { [key: string]: ICharacterManagerCharacter } = {}
+	characters: { [characterName: string]: ICharacterManagerCharacter } = {}
 
 	activeCharacter: ICharacterManagerCharacter | null = null
 
-	charToSystem: { [key: string]: number } = {}
 	regionSystemToChars: {
 		[regionID: number]: {
 			[systemID: number]: Set<string>
@@ -46,21 +46,12 @@ class CharacterManager {
 				if (!this.activeCharacter) this.setActiveCharacter(name)
 			}
 		}, {immediate: true})
-
-		// setTimeout(() => {
-		// 	Vue.set(this.characters, "!@#", {
-		// 		name: "!@#",
-		// 		uuid: "!@#",
-		// 		isAuthed: false,
-		// 	})
-		// }, 1000)
 	}
 
 	public async setActiveCharacter(name: string) {
 		this.activeCharacter = this.findCreateCharacter(name)
 
-		const systemId = this.charToSystem[name]
-		const system = systemManager.getSystemById(systemId)
+		const system = this.activeCharacter.system
 		if (
 			system
 			&& systemManager.currentRegion
@@ -85,6 +76,7 @@ class CharacterManager {
 			character = {
 				name: name,
 				isAuthed: false,
+				system: null,
 			}
 			Vue.set(this.characters, name, character)
 		}
@@ -95,15 +87,14 @@ class CharacterManager {
 		if (!system) return
 
 		if (!this.activeCharacter) this.setActiveCharacter(characterName)
-		this.findCreateCharacter(characterName)
+		const character = this.findCreateCharacter(characterName)
 
-		const oldSystemId = this.charToSystem[characterName]
-		if (oldSystemId) {
+		if (character.system) {
 			this.regionSystemToChars[
-				systemManager.getSystemById(oldSystemId)!.region_id
-				]?.[oldSystemId]?.delete(characterName)
+				character.system.region_id
+				]?.[character.system.id]?.delete(characterName)
 		}
-		this.charToSystem[characterName] = system.id
+		character.system = system
 
 		if (!this.regionSystemToChars[system.region_id]) {
 			this.regionSystemToChars[system.region_id] = {}
@@ -113,7 +104,7 @@ class CharacterManager {
 		}
 		this.regionSystemToChars[system.region_id][system.id].add(characterName)
 
-		if (this.activeCharacter?.name === characterName) {
+		if (this.activeCharacter!.name === characterName) {
 			if (
 				systemManager.currentRegion
 				&&
@@ -125,7 +116,6 @@ class CharacterManager {
 				this.sendUpdateNotification()
 			} else if (
 				settingsService.$.followCharacterRegion
-				&& characterName === this.activeCharacter.name
 			) {
 				await systemManager.setCurrentRegion(system.region_id)
 			} else {
@@ -137,11 +127,11 @@ class CharacterManager {
 	}
 
 	getCurrentSystem(): EVESystem | null {
-		if (!this.activeCharacter || !this.charToSystem[this.activeCharacter.name]) {
+		if (!this.activeCharacter) {
 			return null
 		}
 
-		return systemManager.getSystemById(this.charToSystem[this.activeCharacter.name])
+		return this.activeCharacter.system
 	}
 
 	private sendUpdateNotification() {

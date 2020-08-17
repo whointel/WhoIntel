@@ -1,100 +1,114 @@
 <template>
 	<div>
-		<v-expansion-panels inset tile>
-			<v-expansion-panel>
-				<v-expansion-panel-header disable-icon-rotate>
-					Как искать
-				</v-expansion-panel-header>
-				<v-expansion-panel-content>
-					Поиск через ESI API структур типа бридж к которым игрок имеет доступ.
-					<br>
-					Оставьте строку поиска по умолчанию или добавьте свой шаблон поиска (например, название системы).
-					<br>
-					Шаблон должен содержать символ "»" и быть не менее 3 символов.
-				</v-expansion-panel-content>
-			</v-expansion-panel>
-		</v-expansion-panels>
+		<v-alert
+			border="left"
+			colored-border
+			type="error"
+			elevation="2"
+			class="mx-2"
+			v-if="!isAuth"
+		>
+			Вы не авторизованы через игру.<br>
+			Для поиска структур необходимо авторизоваться в меню наверху справа.
+		</v-alert>
 
-		<v-card-title>
-			<v-text-field
-				v-model="findPattern"
-				label="Find JB"
-				append-icon="mdi-close"
-				@click:append="clearFindPattern"
-			/>
-			<v-btn
-				@click="refreshAPI"
-				class="mr-5" text
-				:disabled="isLoading || !findPattern || findPattern.length < 3 || !findPattern.includes('»')"
-			>
-				<v-icon left>mdi-cloud-refresh</v-icon>
-				find
-			</v-btn>
-			<v-btn
-				color="red"
-				v-if="isLoading"
-				text
-				@click="refreshAPIStop = true"
-			>Stop JB finding
-			</v-btn>
-			<v-spacer/>
-			<v-text-field
-				v-model="filter"
-				append-icon="mdi-magnify"
-				label="Filter"
-				clearable
-			/>
-		</v-card-title>
-		<v-card-text>
-			<v-data-table
-				:items="jb"
-				:headers="headers"
-				:loading="isLoading"
-				:search="filter"
-				item-key="uuid"
-				:item-class="itemJBClass"
-				dense
-			>
-				<template v-slot:progress>
-					<v-progress-linear :value="isLoadingCurrentPercent"/>
-				</template>
+		<v-card flat :disabled="!isAuth">
+			<v-expansion-panels inset tile>
+				<v-expansion-panel>
+					<v-expansion-panel-header disable-icon-rotate>
+						Как искать
+					</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						Поиск через ESI API структур типа бридж к которым игрок имеет доступ.
+						<br>
+						Оставьте строку поиска по умолчанию или добавьте свой шаблон поиска (например, название системы).
+						<br>
+						Шаблон должен содержать символ "»" и быть не менее 3 символов.
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+			</v-expansion-panels>
 
-				<template v-slot:no-data>
-					<h3 class="red--text">No jump bridges</h3>
-				</template>
+			<v-card-title>
+				<v-text-field
+					v-model="findPattern"
+					label="Find JB"
+					append-icon="mdi-close"
+					@click:append="clearFindPattern"
+				/>
+				<v-btn
+					@click="refreshAPI"
+					class="mr-5" text
+					:disabled="isLoading || !findPattern || findPattern.length < 3 || !findPattern.includes('»')"
+				>
+					<v-icon left>mdi-cloud-refresh</v-icon>
+					find
+				</v-btn>
+				<v-btn
+					color="red"
+					v-if="isLoading"
+					text
+					@click="refreshAPIStop = true"
+				>Stop JB finding
+				</v-btn>
+				<v-spacer/>
+				<v-text-field
+					v-model="filter"
+					append-icon="mdi-magnify"
+					label="Filter"
+					clearable
+				/>
+			</v-card-title>
+			<v-card-text>
+				<v-data-table
+					:items="jb"
+					:headers="headers"
+					:loading="isLoading"
+					:search="filter"
+					item-key="uuid"
+					:item-class="itemJBClass"
+					dense
+				>
+					<template v-slot:progress>
+						<v-progress-linear :value="isLoadingCurrentPercent"/>
+					</template>
 
-				<template v-slot:item.status="{ item }">
-					<v-tooltip bottom transition="fade-transition">
-						<template v-slot:activator="{ on, attrs }">
-							<v-icon v-if="item.status === EVE_JUMP_BRIDE_STATUS.NEW"
-											v-bind="attrs" v-on="on" small>mdi-new-box
-							</v-icon>
-							<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FOUND"
-											v-bind="attrs" v-on="on" small>mdi-check
-							</v-icon>
-							<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_UNAVAILABLE"
-											v-bind="attrs" v-on="on" small>mdi-lan-disconnect
-							</v-icon>
-							<v-icon v-else
-											v-bind="attrs" v-on="on" small>mdi-alert-circle-outline
-							</v-icon>
-						</template>
-						<span>{{ item.status }}</span>
-					</v-tooltip>
-				</template>
+					<template v-slot:no-data>
+						<h3 class="red--text">No jump bridges</h3>
+					</template>
 
-				<template v-slot:item.action="{ item }">
-					<v-btn icon @click="refreshJB(item)" :disabled="isLoading">
-						<v-icon>mdi-cloud-refresh</v-icon>
-					</v-btn>
+					<template v-slot:item.status="{ item }">
+						<v-tooltip bottom transition="fade-transition">
+							<template v-slot:activator="{ on, attrs }">
+								<v-icon v-if="item.status === EVE_JUMP_BRIDE_STATUS.NEW"
+												v-bind="attrs" v-on="on" small>mdi-new-box
+								</v-icon>
+								<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FOUND"
+												v-bind="attrs" v-on="on" small>mdi-check
+								</v-icon>
+								<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_UNAVAILABLE"
+												v-bind="attrs" v-on="on" small>mdi-lan-disconnect
+								</v-icon>
+								<v-icon v-else
+												v-bind="attrs" v-on="on" small>mdi-alert-circle-outline
+								</v-icon>
+							</template>
+							<span>{{ item.status }}</span>
+						</v-tooltip>
+					</template>
 
-					<v-btn icon @click="deleteJB(item)" :disabled="isLoading">
-						<v-icon color="red">mdi-close</v-icon>
-					</v-btn>
-				</template>
-			</v-data-table>
+					<template v-slot:item.action="{ item }">
+						<v-btn icon @click="refreshJB(item)" :disabled="isLoading">
+							<v-icon>mdi-cloud-refresh</v-icon>
+						</v-btn>
 
-		</v-card-text>
+						<v-btn icon @click="deleteJB(item)" :disabled="isLoading">
+							<v-icon color="red">mdi-close</v-icon>
+						</v-btn>
+					</template>
+				</v-data-table>
+
+			</v-card-text>
+		</v-card>
 	</div>
 </template>
 
@@ -149,6 +163,10 @@ export default class JBConfig extends Vue {
 	]
 
 	findPattern: string = INITIAL_FIND_PATTERN
+
+	get isAuth(): boolean {
+		return api.auth.isAuth
+	}
 
 	get jb() {
 		return systemManager.jb

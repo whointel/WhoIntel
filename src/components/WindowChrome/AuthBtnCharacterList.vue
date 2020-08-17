@@ -12,13 +12,17 @@
 					{{ item.name }}
 				</v-list-item-title>
 			</v-list-item-content>
-			<v-list-item-action v-if="item.isAuthed">
-				<span class="green--text text--darken-3 caption">game auth</span>
+			<v-list-item-action>
+				<div>
+					<span class="green--text text--darken-3 caption mr-2" v-if="item.isAuthed">game auth</span>
+					<span class="grey--text caption" v-if="item.system">{{ item.system.name }}</span>
+				</div>
 			</v-list-item-action>
 		</template>
 
 		<template v-slot:selection="{ item }">
-			<div>{{ item.name }}
+			<div>
+				{{ item.name }}
 				<span v-if="item.isAuthed" class="green--text text--darken-3 caption">game auth</span>
 			</div>
 		</template>

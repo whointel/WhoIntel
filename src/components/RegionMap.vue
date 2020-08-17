@@ -492,13 +492,13 @@ export default class RegionMap extends Vue {
 			// }
 
 			// no system for char found
-			const systemIDNew = characterManager.charToSystem[characterName]
-			if (!systemIDNew) {
+			const systemNew = characterManager.characters[characterName]?.system
+			if (!systemNew || !systemNew.mapCoordinates) {
 				marker.remove()
 				return
 			}
 
-			marker.setAttribute("data-system-id", systemIDNew as unknown as string)
+			marker.setAttribute("data-system-id", systemNew.id as unknown as string)
 
 			const markerEclipse = marker.firstElementChild // .querySelector("ellipse")
 
@@ -507,17 +507,10 @@ export default class RegionMap extends Vue {
 				return
 			}
 
-			const system = systemManager.getSystemById(systemIDNew)
-
-			if (!system || !system.mapCoordinates) {
-				marker.remove()
-				return
-			}
-
-			markerEclipse.setAttribute("cx", system.mapCoordinates.center_x - 2.5 as unknown as string)
-			markerEclipse.setAttribute("cy", system.mapCoordinates.center_y as unknown as string)
-			markerEclipse.setAttribute("rx", (system.mapCoordinates.width / 2) + 4 as unknown as string)
-			markerEclipse.setAttribute("ry", (system.mapCoordinates.height / 2) + 4 as unknown as string)
+			markerEclipse.setAttribute("cx", systemNew.mapCoordinates.center_x - 2.5 as unknown as string)
+			markerEclipse.setAttribute("cy", systemNew.mapCoordinates.center_y as unknown as string)
+			markerEclipse.setAttribute("rx", (systemNew.mapCoordinates.width / 2) + 4 as unknown as string)
+			markerEclipse.setAttribute("ry", (systemNew.mapCoordinates.height / 2) + 4 as unknown as string)
 
 			markerEclipse.setAttribute("style",
 				characterName === characterManager.activeCharacter?.name ? "fill:#8B008D" : "fill:#FB00FF"
@@ -527,15 +520,14 @@ export default class RegionMap extends Vue {
 		})
 
 		characterToAdd.forEach(characterName => {
-			const systemID = characterManager.charToSystem[characterName]
-			const system = systemManager.getSystemById(systemID)
+			const system = characterManager.characters[characterName].system
 
 			if (!system || !system.mapCoordinates) {
 				return
 			}
 
 			const marker = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-			marker.setAttribute("data-system-id", systemID as unknown as string)
+			marker.setAttribute("data-system-id", system.id as unknown as string)
 			marker.setAttribute("data-character-name", characterName)
 			marker.classList.add("char_marker")
 
