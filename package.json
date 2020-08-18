@@ -17,7 +17,6 @@
   },
   "main": "background.js",
   "dependencies": {
-    "@types/lodash": "^4.14.159",
     "@vue/composition-api": "^1.0.0-beta.10",
     "autolinker": "^3.14.1",
     "await-timeout": "^1.1.1",
@@ -53,6 +52,8 @@
     "yaml": "^1.10.0"
   },
   "devDependencies": {
+		"@types/cheerio": "^0.22.21",
+		"@types/lodash": "^4.14.159",
     "@babel/plugin-proposal-optional-chaining": "^7.11.0",
     "@fortawesome/fontawesome-free": "^5.14.0",
     "@mdi/font": "^5.5.55",
