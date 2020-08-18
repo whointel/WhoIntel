@@ -7,13 +7,13 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
 	state: {
-		isLoaded: false,
+		isAppReady: false,
+		isLoading: true,
 		isJBShow: false,
 		isAuth: false,
 		EVEStatus: null,
 		logs: [],
 		ZKBStatus: ZKB_STATUS.DISCONNECTED,
-		isRegionLoading: true,
 		overlay: OVERLAY_TYPE.ALERT,
 		error: "",
 		showFleet: false,
@@ -23,12 +23,12 @@ const store = new Vuex.Store({
 
 	getters: {
 		logs: state => state.logs,
-		isLoaded: state => state.isLoaded,
+		isAppReady: state => state.isAppReady,
+		isLoading: state => state.isLoading,
 		isJBShow: state => state.isJBShow,
 		isAuth: state => state.isAuth,
 		EVEStatus: state => state.EVEStatus,
 		ZKBStatus: state => state.ZKBStatus,
-		isRegionLoading: state => state.isRegionLoading,
 		overlay: state => state.overlay,
 		error: state => state.error,
 		showFleet: state => state.showFleet,
@@ -37,8 +37,11 @@ const store = new Vuex.Store({
 	},
 
 	mutations: {
-		isLoaded: (state, loaded) => {
-			state.isLoaded = loaded
+		setAppReady: (state) => {
+			state.isAppReady = true
+		},
+		setLoading: (state, loading) => {
+			state.isLoading = loading
 		},
 		addLog: (state, entry) => {
 			// @ts-ignore
@@ -52,9 +55,6 @@ const store = new Vuex.Store({
 		},
 		setZKBStatus: (state, status: ZKB_STATUS) => {
 			state.ZKBStatus = status
-		},
-		setRegionLoading: (state, loading) => {
-			state.isRegionLoading = loading
 		},
 		setOverlay: (state, overlay) => {
 			state.overlay = overlay

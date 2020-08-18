@@ -16,13 +16,12 @@
 				</v-chip>
 			</template>
 
-			<v-card>
+			<v-card :disabled="isLoading">
 				<v-card-text>
 					<v-row>
 						<v-col :cols="10" class="pr-0">
 							<v-autocomplete
 								v-model="region"
-								:disabled="isRegionLoading"
 								:items="regions"
 								item-text="name"
 								outlined autofocus dense hide-details
@@ -41,7 +40,6 @@
 								v-for="region in favoriteRegions"
 								:key="region.id"
 								class="mr-3"
-								:disabled="isRegionLoading"
 								@click="setRegion(region)"
 							>
 								{{ region.name }}
@@ -72,12 +70,12 @@ export default class RegionsMenu extends Vue {
 		this.menu = false
 	}
 
-	get isRegionLoading() {
-		return this.$store.getters.isRegionLoading
+	get isLoading() {
+		return this.$store.getters.isLoading
 	}
 
 	get regions(): IREGION[] {
-		if (!this.$store.getters.isLoaded) return []
+		if (!this.$store.getters.isAppReady) return []
 
 		return Object.values(systemManager.regions)
 	}

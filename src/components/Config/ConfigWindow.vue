@@ -184,7 +184,7 @@ export default class ConfigWindow extends Vue {
 	}
 
 	get regions() {
-		if (!this.$store.getters.isLoaded) return []
+		if (!this.$store.getters.isAppReady) return []
 
 		return Object.values(systemManager.regions)
 	}

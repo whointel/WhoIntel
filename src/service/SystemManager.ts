@@ -5,15 +5,13 @@ import store from "@/store"
 import * as log from "electron-log"
 import sortBy from "lodash/sortBy"
 import find from "lodash/find"
-import EVEJumpBride, {EVE_JUMP_BRIDE_STATUS, IEVEJumpBrideExport} from "@/lib/EVEJumpBride"
+import EVEJumpBride, {EVE_JUMP_BRIDE_STATUS} from "@/lib/EVEJumpBride"
 import db, {IRegionMapExport} from "@/service/Database"
 import Vue from "vue"
 import Timeout from "await-timeout"
 import findIndex from "lodash/findIndex"
 import {IREGION, OVERLAY_TYPE} from "@/types/MAP"
 import {API_SYSTEM_JUMPS, API_SYSTEM_KILLS} from "@/types/API"
-import settingsService from "@/service/settings"
-import characterManager from "@/service/CharacterManager"
 
 const SPECIAL_REGIONS = {
 	NEW_EDEN: -1,
@@ -116,7 +114,7 @@ class SystemManager {
 		Vue.nextTick(() => this.initJBs())
 
 		log.info("SystemManager: finish loading systems")
-		store.commit("isLoaded", true)
+		store.commit("setAppReady")
 		events.$emit("systemManager:ready")
 	}
 
@@ -184,6 +182,8 @@ class SystemManager {
 	}
 
 	async loadNewEdenRegion() {
+		store.commit("setLoading", true)
+
 		const record = await this.getMap(Object.preventExtensions({
 			id: SPECIAL_REGIONS.NEW_EDEN,
 			name: "New Eden",
@@ -193,13 +193,15 @@ class SystemManager {
 		}))
 
 		events.$emit("showRegionMapNewEden", record)
+
+		store.commit("setLoading", false)
 	}
 
 	async setCurrentRegion(region_id: number): Promise<boolean> {
 		const region = this.regions[region_id]
 		if (!region) return false
 
-		store.commit("setRegionLoading", true)
+		store.commit("setLoading", true)
 
 		const loadMapPromise = this.getMap(region)
 
@@ -213,11 +215,11 @@ class SystemManager {
 		// @see systemSetMap()
 		// this.currentRegion.systems.forEach(system => system.show())
 
-		store.commit("setRegionLoading", false)
-
 		events.$emit("setRegionMap", record)
 		events.$emit("updateCurrentRegion", this.currentRegion)
 		events.$emit("hideRegionMapNewEden")
+
+		store.commit("setLoading", false)
 
 		return true
 	}
@@ -283,25 +285,6 @@ class SystemManager {
 		system.jumps = record.ship_jumps
 	}
 
-	// async setCurrentSystem(system: EVESystem, force = false) {
-	// 	if (!system) return
-	//
-	// 	this.currentSystem = system
-	// 	if (
-	// 		this.currentRegion
-	// 		&&
-	// 		(
-	// 			system.region_id === this.currentRegion.id
-	// 			|| system.neighbourRegions.includes(this.currentRegion.id)
-	// 		)
-	// 	) {
-	// 		events.$emit("updateLocationMarker", system)
-	// 	} else if (force && settingsService.$.followCharacterRegion) {
-	// 		await this.setCurrentRegion(system.region_id)
-	// 		events.$emit("updateLocationMarker", system)
-	// 	}
-	// }
-
 	async markSystem(system: EVESystem, change_region: boolean = false, force_change_region = false) {
 		if (
 			system.region_id !== this.currentRegion?.id
@@ -321,10 +304,6 @@ class SystemManager {
 
 		events.$emit("markSystem", system)
 	}
-
-	// getCurrentSystem(): EVESystem | null {
-	// 	return this.currentSystem
-	// }
 
 	systemSetMap(id: number, mapCoordinates: MapCoordinates, svgContainer: HTMLElement) {
 		const system = this.systemsById[id]

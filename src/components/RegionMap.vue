@@ -41,8 +41,9 @@ import {JB_DIRECTION_DIRECTION} from "@/lib/EVEJumpBride"
 // eslint-disable-next-line no-unused-vars
 import {IRegionMapExport} from "@/service/Database"
 import * as log from "electron-log"
-import {IWindowLayoutScroll} from "@/types/WidnowLayout";
-import characterManager from "@/service/CharacterManager";
+// eslint-disable-next-line no-unused-vars
+import {IWindowLayoutScroll} from "@/types/WidnowLayout"
+import characterManager from "@/service/CharacterManager"
 
 const JB_COLORS = ["800000", "808000", "BC8F8F", "ff00ff", "c83737", "FF6347", "917c6f", "ffcc00",
 	"88aa00", "FFE4E1", "008080", "00BFFF", "4682B4", "00FF7F", "7FFF00", "ff6600",
@@ -89,8 +90,8 @@ export default class RegionMap extends Vue {
 		contentContainer: Vue,
 	}
 
-	get isGlobalLoaded() {
-		return this.$store.getters.isLoaded
+	get isAppReady() {
+		return this.$store.getters.isAppReady
 	}
 
 	get contentContainer(): HTMLElement {
@@ -109,8 +110,8 @@ export default class RegionMap extends Vue {
 		this.markTime = null
 	}
 
-	@Watch("isGlobalLoaded")
-	isGlobalLoadedWatcher(val) {
+	@Watch("isAppReady")
+	isAppReadyWatcher(val) {
 		if (val) {
 			this.loadMap()
 		}
@@ -248,7 +249,7 @@ export default class RegionMap extends Vue {
 	}
 
 	async loadMap() {
-		if (!this.isGlobalLoaded || !this.initMapData) return
+		if (!this.isAppReady || !this.initMapData) return
 		log.debug("RegionMap, start loading svg")
 		this.init()
 		// this.loadPercent = 10

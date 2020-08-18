@@ -59,10 +59,6 @@ export default class AuthBtnCharacterList extends Vue {
 		return Object.values(characterManager.characters)
 	}
 
-	created() {
-		console.debug(characterManager.characters)
-	}
-
 	get activeCharacter(): ICharacterManagerCharacter | null {
 		return characterManager.activeCharacter
 	}

@@ -71,8 +71,8 @@ export default class EdenMapPopup extends Vue {
 		contentContainer: Vue,
 	}
 
-	get isGlobalLoaded() {
-		return this.$store.getters.isLoaded
+	get isAppReady() {
+		return this.$store.getters.isAppReady
 	}
 
 	get contentContainer(): HTMLElement {
@@ -83,8 +83,8 @@ export default class EdenMapPopup extends Vue {
 		return this.$refs.svgContainer
 	}
 
-	@Watch("isGlobalLoaded")
-	isGlobalLoadedWatcher(val) {
+	@Watch("isAppReady")
+	isAppReadyWatcher(val) {
 		if (val) {
 			this.loadMap()
 		}
@@ -180,7 +180,7 @@ export default class EdenMapPopup extends Vue {
 	}
 
 	async loadMap() {
-		if (!this.isGlobalLoaded || !this.initMapData) return
+		if (!this.isAppReady || !this.initMapData) return
 		log.debug("NewEdenMap, start loading svg")
 
 		const chee = cheerio.load(this.initMapData.svg);

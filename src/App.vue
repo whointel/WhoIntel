@@ -2,8 +2,8 @@
 	<v-app>
 		<window-chrome/>
 		<path-finder/>
-
 		<v-main :class="showTopPanel ? 'main-container-window-chrome-gap' : 'main-container-window-chrome-nogap'">
+			<loader-main/>
 			<v-row no-gutters :class="showTopPanel ? 'main-container-window-chrome-gap' : 'main-container-window-chrome-nogap'">
 				<fleet v-if="isFleetShow"/>
 				<region-map :cols="mapCols"/>
@@ -35,9 +35,11 @@ import Fleet from "@/components/Fleet.vue"
 import ErrorPopup from "@/components/ErrorPopup.vue"
 import LikeDislikeWindow from "@/components/LikeDislikeWindow.vue";
 import EdenMapPopup from "@/components/EdenMapPopup.vue";
+import LoaderMain from "@/components/LoaderMain.vue";
 
 @Component({
 	components: {
+		LoaderMain,
 		EdenMapPopup,
 		LikeDislikeWindow,
 		ErrorPopup,
