@@ -65,7 +65,6 @@ const SCALE_FACTOR = 10
 	}
 })
 export default class RegionMap extends Vue {
-	svgOrigWidth = 0
 	svgScale = 100
 	svgContent = ""
 	isMapDragging = false
@@ -263,8 +262,6 @@ export default class RegionMap extends Vue {
 		svg.attr("style", `width:${this.svgScale}%;height:${this.svgScale}%`)
 		svg.removeAttr("height")
 		svg.removeAttr("width")
-		const viewBox = svg.attr("viewBox").split(" ")
-		this.svgOrigWidth = viewBox[2]
 
 		JB_COLORS.forEach(jbColor => {
 			svg.prepend(`
@@ -330,7 +327,7 @@ export default class RegionMap extends Vue {
 
 		chee("defs > symbol").each((index, element) => {
 			const symbol = chee(element)
-			const idString = symbol.attr("id").substring(3)
+			const idString = symbol.attr("id")?.substring(3)
 
 			if (!idString || idString.length !== 8) return
 

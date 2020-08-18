@@ -54,7 +54,6 @@ export default class EdenMapPopup extends Vue {
 		if (!val) this.$emit("close")
 	}
 
-	svgOrigWidth = 0
 	svgScale = 100
 	svgContent = ""
 	isMapDragging = false
@@ -186,14 +185,13 @@ export default class EdenMapPopup extends Vue {
 		const chee = cheerio.load(this.initMapData.svg);
 		chee("script").remove()
 		chee("#controls").remove()
+		// TODO check for valid svg
 		const svg = chee("svg")
 		svg.addClass("pa-3")
 		svg.removeAttr("onload")
 		svg.attr("style", `width:${this.svgScale}%;height:${this.svgScale}%`)
 		svg.removeAttr("height")
 		svg.removeAttr("width")
-		const viewBox = svg.attr("viewBox").split(" ")
-		this.svgOrigWidth = viewBox[2]
 
 		const regionID = systemManager.currentRegion?.id
 
