@@ -89,6 +89,7 @@ export default class LogWatcher extends EventEmitter {
 					this.emit("change", filepath, stats_new)
 				}
 			} catch (e) {
+				log.warn(`LogWatcher:filesPooling:unwatch:${filepath}:error:`, e)
 				this.unwatch(filepath)
 			}
 		})
@@ -99,8 +100,8 @@ export default class LogWatcher extends EventEmitter {
 		this.filesWatched.forEach((stats, filepath) => {
 			const diffH = differenceInHours(nowDate, stats.mtime)
 			if (diffH > 24) {
+				log.info(`LogWatcher:cleaning:diffH=${diffH}:`, filepath)
 				this.unwatch(filepath)
-				log.info("LogWatcher: cleaning", filepath, diffH)
 			}
 		})
 	}
