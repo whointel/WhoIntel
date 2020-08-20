@@ -53,16 +53,16 @@ app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
 const contextMenu = require("electron-context-menu")
 contextMenu()
 
-// const gotTheLock = app.requestSingleInstanceLock()
-// if (!gotTheLock) {
-// 	app.quit()
-// } else {
-// 	app.on("second-instance", (event, commandLine, workingDirectory) => {
-// 		// Someone tried to run a second instance, we should focus our window.
-// 		log.info("second window started")
-// 		mainWindow.restoreWindow()
-// 	})
-// }
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+	app.quit()
+} else {
+	app.on("second-instance", (event, commandLine, workingDirectory) => {
+		// Someone tried to run a second instance, we should focus our window.
+		log.info("second window started")
+		mainWindow.show()
+	})
+}
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
