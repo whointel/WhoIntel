@@ -17,7 +17,7 @@ import timeUsedService from "@/service/TimeUsed"
 import settingsService from "@/service/settings"
 import layoutService from "@/service/LayoutService"
 import VueCompositionAPI from '@vue/composition-api'
-import characterManager from "@/service/CharacterManager";
+import characterManager from "@/service/CharacterManager"
 
 declare global {
 	interface Window {

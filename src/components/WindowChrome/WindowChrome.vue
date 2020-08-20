@@ -7,20 +7,20 @@
 		app dark
 		color="#3B4252"
 	>
-		<div class="titlebar-hamburger titlebar--nodrag">
-			<button
-				title="Menu" class="titlebar-button"
-				@click="openMenu"
-				@contextmenu="openMenu"
-			>
-				<svg width="18" viewBox="0 0 24 15.5" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M0 0H24V1.5H0ZM0 7H24V8.5H0ZM0 14H24V15.5H0Z" fill="#D8DEE9"></path>
-				</svg>
-			</button>
-		</div>
+		<v-row class="align-center mx-0">
+			<div class="titlebar-hamburger titlebar--nodrag mr-1 d-flex" v-if="isPlatformWindows">
+				<button
+					title="Menu" class="titlebar-button"
+					@click="openMenu"
+					@contextmenu="openMenu"
+				>
+					<svg width="18" viewBox="0 0 24 15.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M0 0H24V1.5H0ZM0 7H24V8.5H0ZM0 14H24V15.5H0Z" fill="#D8DEE9"></path>
+					</svg>
+				</button>
+			</div>
 
-		<v-row class="titlebar-content">
-			<div class="mr-4">
+			<div class="ml-1 mr-4 mt-1">
 				<span>WhoIntel</span>
 			</div>
 			<j-b-btn class="titlebar--nodrag"/>
@@ -32,7 +32,7 @@
 			<history-btn class="titlebar--nodrag ml-4"/>
 			<v-spacer/>
 			<portal-target name="chrome-window-btn" class="titlebar--nodrag"/>
-<!--						<test-btn class="titlebar&#45;&#45;nodrag ml-4"/>-->
+			<!--						<test-btn class="titlebar&#45;&#45;nodrag ml-4"/>-->
 			<v-spacer/>
 			<search class="titlebar--nodrag ml-4"/>
 			<no-log-channels-alarm class="titlebar--nodrag ml-4"/>
@@ -40,7 +40,7 @@
 			<v-tooltip eager bottom transition="fade-transition">
 				<template v-slot:activator="{ on, attrs }">
 					<v-icon
-						class="titlebar--nodrag ml-4"
+						class="titlebar--nodrag ml-4 mt-1"
 						v-bind="attrs"
 						v-on="on"
 					>mdi-information-variant
@@ -53,50 +53,50 @@
 				<map-t-s/>
 			</v-tooltip>
 
-			<stats-server class="ml-4"/>
-			<auth-btn class="titlebar--nodrag ml-4"/>
-		</v-row>
+			<stats-server class="ml-4 mt-1"/>
+			<auth-btn class="titlebar--nodrag ml-4 mr-1"/>
 
-		<div class="titlebar-controls titlebar--nodrag">
-			<button
-				class="titlebar-button" title="Minimize"
-				@click="minimizeWindow">
-				<svg width="10" height="1" viewBox="0 0 10 1" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M0 0H10V1H0Z" fill="#D8DEE9"></path>
-				</svg>
-			</button>
+			<div class="titlebar-controls titlebar--nodrag d-flex ml-1" v-if="isPlatformWindows">
+				<button
+					class="titlebar-button" title="Minimize"
+					@click="minimizeWindow">
+					<svg width="10" height="1" viewBox="0 0 10 1" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M0 0H10V1H0Z" fill="#D8DEE9"></path>
+					</svg>
+				</button>
 
-			<button
-				class="titlebar-button"
-				v-if="isMaximized"
-				@click="unMaximizeWindow"
-			>
-				<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M10 8 H8 V10 H0 V2 H2 V0 H10 V8 Z
+				<button
+					class="titlebar-button"
+					v-if="isMaximized"
+					@click="unMaximizeWindow"
+				>
+					<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M10 8 H8 V10 H0 V2 H2 V0 H10 V8 Z
 											M1 3 V9 H7 V3 Z
                      M9 1 H3 V2 H8 V7 H9 V1 Z" fill="#D8DEE9"></path>
-				</svg>
-			</button>
+					</svg>
+				</button>
 
-			<button
-				class="titlebar-button"
-				v-if="!isMaximized"
-				@click="maximizeWindow"
-			>
-				<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M0 0H10V10H0ZM1 1V9H9V1Z" fill="#D8DEE9"></path>
-				</svg>
-			</button>
+				<button
+					class="titlebar-button"
+					v-if="!isMaximized"
+					@click="maximizeWindow"
+				>
+					<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M0 0H10V10H0ZM1 1V9H9V1Z" fill="#D8DEE9"></path>
+					</svg>
+				</button>
 
-			<button
-				class="titlebar-button titlebar-button--close"
-				@click="closeWindow"
-			>
-				<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M0.7 0L10 9.3L9.3 10L0 0.7ZM0 9.3L9.3 0L10 0.7L0.7 10Z" fill="#D8DEE9"></path>
-				</svg>
-			</button>
-		</div>
+				<button
+					class="titlebar-button titlebar-button--close"
+					@click="closeWindow"
+				>
+					<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M0.7 0L10 9.3L9.3 10L0 0.7ZM0 9.3L9.3 0L10 0.7L0.7 10Z" fill="#D8DEE9"></path>
+					</svg>
+				</button>
+			</div>
+		</v-row>
 	</v-system-bar>
 </template>
 
@@ -118,6 +118,7 @@ import TestBtn from "@/components/WindowChrome/TestBtn.vue";
 import OverlayBtn from "@/components/WindowChrome/OverlayBtn.vue";
 import FleetBtn from "@/components/WindowChrome/FleetBtn.vue";
 import ShowLDBtn from "@/components/WindowChrome/ShowLDBtn.vue";
+import settingsService from "@/service/settings";
 
 @Component({
 	components: {ShowLDBtn, FleetBtn, OverlayBtn, TestBtn, HistoryBtn, ExtWinBtn, MapTS, Search, ZKBBtn, StatsServer, NoLogChannelsAlarm, AuthBtn, RegionsMenu, JBBtn}
@@ -130,6 +131,8 @@ export default class WindowChrome extends Vue {
 	externalMem = 0
 	isFocus = true
 	isMaximized = true
+
+	isPlatformWindows = settingsService.platform === "win32"
 
 	get showTopPanel(): boolean {
 		return this.$store.getters.showTopPanel
@@ -213,29 +216,17 @@ export default class WindowChrome extends Vue {
 	background: #3B4252;
 	color: #D8DEE9;
 	box-shadow: 0 1px 0 0 rgba(216, 222, 233, 0.1);
+	padding: 0;
 
 	&--blurred {
 		filter: contrast(.8) brightness(.8);
 	}
 
 	&-hamburger {
-		position: fixed;
-		top: 0;
-		left: 0;
 		height: 30px;
 	}
 
-	&-content {
-		margin-left: 40px;
-		margin-right: 140px;
-	}
-
 	&-controls {
-		display: flex;
-		justify-content: flex-end;
-		position: fixed;
-		top: 0;
-		right: 0;
 		height: 30px;
 	}
 

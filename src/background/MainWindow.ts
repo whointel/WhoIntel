@@ -6,6 +6,7 @@ import * as path from "path"
 import {getMenu} from "@/background/MainWindowMenu"
 import * as log from "electron-log"
 import {IWindowLayout} from "@/types/WidnowLayout"
+import {isPlatformWin} from "@/background/helpers"
 
 class MainWindow {
 	// Keep a global reference of the window object, if you don't, the window will
@@ -108,7 +109,7 @@ class MainWindow {
 		this.win = new BrowserWindow({
 			show: false,
 			backgroundColor: "#FFFFFF",
-			frame: false,
+			frame: !isPlatformWin,
 			title: "WhoIntel",
 			// @ts-ignore
 			icon: path.join(__static, "icon.png"),

@@ -1,24 +1,31 @@
-import {MenuItem, Menu, ipcMain} from "electron"
+import {MenuItem, Menu, ipcMain, MenuItemConstructorOptions} from "electron"
 import mainWindow from "@/background/MainWindow"
+import {isPlatformMacOS} from "@/background/helpers"
+
+const fileSubMenu: MenuItemConstructorOptions[] = [
+	{
+		label: "Settings",
+		click() {
+			mainWindow.send("open:config")
+		}
+	},
+	{type: "separator"},
+	{
+		label: "Quit",
+		click() {
+			mainWindow.closeExit()
+		},
+	},
+]
+
+if (isPlatformMacOS) {
+	fileSubMenu.unshift({type: "separator"})
+	fileSubMenu.unshift({role: "services"})
+}
 
 const winMenu: MenuItem = new MenuItem({
 	label: "File",
-	submenu: [
-		{
-			label: "Settings",
-			click() {
-				mainWindow.send("open:config")
-			}
-		},
-		{type: "separator"},
-		{role: "close"},
-		{
-			label: "Quit",
-			click() {
-				mainWindow.closeExit()
-			},
-		},
-	]
+	submenu: fileSubMenu,
 })
 
 const viewMenu: MenuItem = new MenuItem({
@@ -114,6 +121,6 @@ export default function createMenu() {
 		win && win.webContents.send("app-menu:unmaximize")
 	})
 
-	Menu.setApplicationMenu(null)
-	// Menu.setApplicationMenu(appMenu)
+	// Menu.setApplicationMenu(null)
+	Menu.setApplicationMenu(appMenu)
 }

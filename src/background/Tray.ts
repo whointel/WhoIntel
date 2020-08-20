@@ -23,6 +23,10 @@ export default class TrayMenu {
 			mainWindow.switchVisibility()
 		})
 
+		this.tray.on("right-click", () => {
+			this.tray.popUpContextMenu()
+		})
+
 		ipcMain.on("window:layouts", (event, layouts: ITrayMenuLayout[]) => {
 			this.layouts = layouts
 			this.setContextMenu()

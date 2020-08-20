@@ -54,7 +54,7 @@ class LayoutsWindow {
 			}
 		})
 
-		// this.win.setMenu(getMenu())
+		this.win.setMenu(null)
 
 		this.win.once('ready-to-show', () => {
 			if (!this.win) return

@@ -1,6 +1,8 @@
 import Vue from "vue"
 import storageService from "@/service/storage"
 import debounce from "lodash/debounce"
+import Platform = NodeJS.Platform
+import {ipcRenderer} from "electron"
 
 class SettingsService {
 	private settingsDefault = {
@@ -10,7 +12,7 @@ class SettingsService {
 		alarmSound: true,
 		alarmVolume: 100,
 		alarmMedia: null,
-		logChannels:  [],
+		logChannels: [],
 		favoriteRegions: [],
 		zkbEnable: false,
 		favoriteZKBRegions: [],
@@ -24,7 +26,12 @@ class SettingsService {
 
 	settings: Vue
 
+	platform: Platform
+
 	constructor() {
+		// NOTE sync call
+		this.platform = ipcRenderer.sendSync("getPlatform")
+
 		const settings = storageService.getObject("settings") || {}
 		this.settings = new Vue({
 			data: {

@@ -15,6 +15,7 @@ import {getAsses} from "@/background/Assets"
 import {registerSoundProtocol} from "@/background/SoundProtocol"
 import layoutsWindow from "@/background/LayoutsWindow"
 import {dirname} from "path"
+import {isPlatformMacOS, isPlatformWin} from "@/background/helpers"
 
 log.transports.file.maxSize = 1024 * 1024 * 20 // 20Mb
 
@@ -66,7 +67,7 @@ if (!gotTheLock) {
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
-	if (process.platform === "win32") {
+	if (isPlatformWin) {
 		process.on("message", data => {
 			if (data === "graceful-exit") {
 				app.quit()
@@ -87,9 +88,9 @@ app.on("activate", () => {
 app.on("window-all-closed", () => {
 	// On macOS it is common for applications and their menu bar
 	// to stay active until the user quits explicitly with Cmd + Q
-	if (process.platform !== "darwin") {
-		app.quit()
-	}
+	// if (!isPlatformMacOS) {
+	app.quit()
+	// }
 })
 
 // This method will be called when Electron has finished
@@ -110,6 +111,8 @@ app.on("ready", async () => {
 			electron: process.versions
 		})
 	})
+
+	ipcMain.on("getPlatform", event => event.returnValue = process.platform)
 
 	ipcMain.on("open:layouts", (event, arg) => {
 		layoutsWindow.createWindow()
