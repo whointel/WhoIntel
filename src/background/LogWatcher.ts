@@ -32,13 +32,18 @@ export default class LogWatcher extends EventEmitter {
 		}
 
 		this.dirWatcher = fs.watch(dir, (eventType, filename) => {
-			if (eventType === "rename") {
-				return
-			}
+			log.debug(`LogWatcher:watch:event:${eventType}:`, filename)
+
 			const filepath = normalizePath(dir + path.sep + filename)
 
 			if (!fs.existsSync(filepath)) {
+				log.debug(`LogWatcher:watch:delete:`, filename)
 				this.files.delete(filepath)
+				this.unwatch(filepath)
+				return
+			}
+
+			if (this.files.has(filepath)) {
 				return
 			}
 
@@ -46,9 +51,7 @@ export default class LogWatcher extends EventEmitter {
 			if (!stats.isFile()) {
 				return
 			}
-			if (this.files.has(filepath)) {
-				return
-			}
+
 			this.files.add(filepath)
 
 			this.emit("add", filepath, stats)
