@@ -66,6 +66,7 @@
 					:search="filter"
 					item-key="uuid"
 					:item-class="itemJBClass"
+					sort-by="status" :sort-desc="false"
 					dense
 				>
 					<template v-slot:progress>
@@ -74,6 +75,14 @@
 
 					<template v-slot:no-data>
 						<h3 class="red--text">No jump bridges</h3>
+					</template>
+
+					<template v-slot:item.systemTo.name="{ item }">
+						<span v-if="item.systemTo">{{ item.systemTo.name }} <span class="grey--text">{{ item.systemTo.region.name }}</span></span>
+					</template>
+
+					<template v-slot:item.systemFrom.name="{ item }">
+						<span v-if="item.systemFrom">{{ item.systemFrom.name }} <span class="grey--text">{{ item.systemFrom.region.name }}</span></span>
 					</template>
 
 					<template v-slot:item.status="{ item }">
@@ -88,11 +97,18 @@
 								<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_UNAVAILABLE"
 												v-bind="attrs" v-on="on" small>mdi-lan-disconnect
 								</v-icon>
+								<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FORBIDDEN"
+												v-bind="attrs" v-on="on" small>mdi-alert-circle-outline
+								</v-icon>
 								<v-icon v-else
 												v-bind="attrs" v-on="on" small>mdi-alert-circle-outline
 								</v-icon>
 							</template>
-							<span>{{ item.status }}</span>
+							<span v-if="item.status === EVE_JUMP_BRIDE_STATUS.NEW">Новый</span>
+							<span v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FOUND">OK</span>
+							<span v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_UNAVAILABLE">Ошибка API</span>
+							<span v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FORBIDDEN">Нет доступа к структуре</span>
+							<span v-else>{{ item.status }}</span>
 						</v-tooltip>
 					</template>
 
@@ -138,11 +154,11 @@ export default class JBConfig extends Vue {
 		// 	filterable: true,
 		// },
 		{
-			text: "Sts",
+			text: "",
 			sortable: true,
 			value: "status",
 			filterable: false,
-			width: "70px",
+			width: "10px",
 		},
 		{
 			text: "Name",
@@ -151,12 +167,12 @@ export default class JBConfig extends Vue {
 		},
 		{
 			text: "From",
-			// sortable: false,
+			sortable: true,
 			value: "systemFrom.name",
 		},
 		{
 			text: "To",
-			// sortable: false,
+			sortable: true,
 			value: "systemTo.name",
 		},
 		{text: "action", value: "action", sortable: false, align: "end", filterable: false,},
