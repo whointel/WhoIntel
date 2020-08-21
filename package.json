@@ -1,6 +1,6 @@
 {
 	"name": "whointel",
-	"version": "0.7.10-dev",
+	"version": "0.7.10",
 	"private": true,
 	"description": "WhoIntel - EVE Online secure tool",
 	"author": "WhoIntel",
@@ -22,7 +22,7 @@
 		"@vue/composition-api": "^1.0.0-beta.10",
 		"autolinker": "^3.14.1",
 		"await-timeout": "^1.1.1",
-		"axios": "^0.19.2",
+		"axios": "^0.20.0",
 		"axios-observable": "^1.1.3",
 		"backoff-rxjs": "^6.5.7",
 		"base64url": "^3.0.1",
@@ -45,7 +45,7 @@
 		"rxjs": "^6.6.2",
 		"rxjs-websockets": "^8.0.1",
 		"uuid": "^8.3.0",
-		"vue": "^2.6.11",
+		"vue": "^2.6.12",
 		"vue-class-component": "^7.2.5",
 		"vue-dragscroll": "^2.1.0",
 		"vue-property-decorator": "^9.0.0",
@@ -80,10 +80,10 @@
 		"eslint-plugin-vuetify": "^1.0.0-beta.7",
 		"sass": "^1.26.10",
 		"sass-loader": "^8.0.2",
-		"typescript": "~3.9.7",
+		"typescript": "~4.0.2",
 		"vue-cli-plugin-electron-builder": "^2.0.0-rc.4",
 		"vue-cli-plugin-vuetify": "^2.0.7",
-		"vue-template-compiler": "^2.6.11",
+		"vue-template-compiler": "^2.6.12",
 		"vuetify-loader": "^1.6.0"
 	},
 	"eslintConfig": {
