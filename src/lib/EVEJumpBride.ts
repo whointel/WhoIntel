@@ -67,9 +67,9 @@ export default class EVEJumpBride implements IEVEJumpBrideExport {
 		if (!this.isExpired()) return
 
 		let structure: API_STRUCTURE
-		let headers: any
+		let expires: string
 		try {
-			({data: structure, headers} = await api.getStructure$(this.structure_id)
+			({data: structure, headers: {expires}} = await api.getStructure$(this.structure_id)
 				.toPromise())
 		} catch (error) {
 			this.expires = new Date()
@@ -103,7 +103,7 @@ export default class EVEJumpBride implements IEVEJumpBrideExport {
 		// 	return
 		// }
 
-		this.expires = new Date(headers.expires as string)
+		this.expires = new Date(expires)
 
 		if (structure.type_id !== 35841) {
 			this.status = EVE_JUMP_BRIDE_STATUS.API_WRONG_STRUCTURE

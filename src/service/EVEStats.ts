@@ -1,4 +1,4 @@
-import api from "@/lib/EVEApi"
+import api, {apiPoll} from "@/lib/EVEApi"
 import store from "@/store"
 import systemManager from "@/service/SystemManager"
 import events from "@/service/EventBus"
@@ -16,7 +16,7 @@ class EVEStats {
 	}
 
 	requestStatus() {
-		const status$ = api.status$()
+		const status$ = apiPoll(api.status$(), {name: "status"})
 		status$.subscribe(
 			(data) => {
 				store.commit("setEVEStatus", data)
@@ -25,7 +25,7 @@ class EVEStats {
 	}
 
 	requestKills() {
-		const kills$ = api.system_kills$()
+		const kills$ = apiPoll(api.system_kills$(), {name: "system_kills"})
 		kills$.subscribe(
 			(kills) => {
 				if (!kills) return
@@ -35,7 +35,7 @@ class EVEStats {
 	}
 
 	requestJumps() {
-		const jumps$ = api.system_jumps$()
+		const jumps$ = apiPoll(api.system_jumps$(), {name: "system_jumps"})
 		jumps$.subscribe(
 			(jumps) => {
 				if (!jumps) return

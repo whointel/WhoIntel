@@ -75,6 +75,52 @@ export interface API_SYSTEM_KILLS {
 	system_id: number
 }
 
+export interface API_KILLMAIL {
+	killmail_id: number
+	killmail_time: string
+	solar_system_id: number
+	moon_id?: number
+	war_id?: number
+	victim: {
+		alliance_id?: number
+		character_id?: number
+		corporation_id?: number
+		damage_taken: number
+		faction_id?: number
+		items: {
+			flag: number
+			item_type_id: number
+			items: {
+				flag: number
+				item_type_id: number
+				quantity_destroyed?: number
+				quantity_dropped?: number
+				singleton: number
+			}[]
+			quantity_destroyed?: number
+			quantity_dropped?: number
+			singleton: number
+		}[]
+		position: {
+			x: number
+			y: number
+			z: number
+		}
+		ship_type_id: number
+	}
+	attackers: {
+		alliance_id?: number
+		character_id?: number
+		corporation_id?: number
+		damage_done: number
+		faction_id?: number
+		final_blow: boolean
+		security_status: number
+		ship_type_id?: number
+		weapon_type_id?: number
+	}[]
+}
+
 export interface IAPICharacter {
 	alliance_id: number | null
 	ancestry_id: number

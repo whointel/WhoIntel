@@ -11,6 +11,7 @@ import {
 	API_CHARACTER_SHIP,
 	API_FLEET,
 	API_FLEET_MEMBER,
+	API_KILLMAIL,
 	API_STATUS, API_STRUCTURE,
 	API_SYSTEM_JUMPS,
 	API_SYSTEM_KILLS,
@@ -54,6 +55,14 @@ interface API_POLL_OPTIONS {
 	name?: string // name for log
 	interval?: number // interval in ms, default use expire header
 	backoff?: RetryBackoffConfig
+}
+
+const regularRetryBackoffConfig = {
+	initialInterval: 10,
+	maxInterval: 1000,
+	maxRetries: 5,
+	resetOnSuccess: true,
+	shouldRetry: axiosShouldRetryOnServerError,
 }
 
 class EVEApi {
@@ -108,10 +117,6 @@ class EVEApi {
 		})
 
 		this.startRefreshTimer()
-	}
-
-	getToken() {
-		return this.auth.access_token
 	}
 
 	init() {
@@ -200,14 +205,6 @@ class EVEApi {
 		}
 	}
 
-	private getAuthHeaders() {
-		const token = this.getToken()
-
-		return {
-			Authorization: `Bearer ${token}`,
-		}
-	}
-
 	private checkScope(scope: string) {
 		if (!this.auth?.isAuth || !this.auth.token?.scp) {
 			throw new Error("API call for undefined user")
@@ -219,203 +216,139 @@ class EVEApi {
 		}
 	}
 
-	character_online(): AxiosObservable<API_CHARACTER_ONLINE> {
+	character_online$(): AxiosObservable<API_CHARACTER_ONLINE> {
 		this.checkScope("esi-location.read_online.v1")
 
 		return this.axios$.get<API_CHARACTER_ONLINE>(`characters/${this.auth.character_id}/online/`)
 	}
 
-	character_online$(): Observable<API_CHARACTER_ONLINE | null> {
-		return apiPoll(this.character_online(), {name: "character_online"})
-	}
-
-	character_ship(): AxiosObservable<API_CHARACTER_SHIP> {
+	character_ship$(): AxiosObservable<API_CHARACTER_SHIP> {
 		this.checkScope("esi-location.read_ship_type.v1")
 
 		return this.axios$.get<API_CHARACTER_SHIP>(`characters/${this.auth.character_id}/ship/`)
 	}
 
-	character_ship$(): Observable<API_CHARACTER_SHIP | null> {
-		return apiPoll(this.character_ship(), {name: "character_ship", interval: 60_000})
-	}
-
-	character_location(): AxiosObservable<API_CHARACTER_LOCATION> {
+	character_location$(): AxiosObservable<API_CHARACTER_LOCATION> {
 		this.checkScope("esi-location.read_location.v1")
 
 		return this.axios$.get<API_CHARACTER_LOCATION>(`characters/${this.auth.character_id}/location/`)
 	}
 
-	character_location$(): Observable<API_CHARACTER_LOCATION | null> {
-		return apiPoll(this.character_location(), {name: "character_location", interval: 30_000})
-	}
-
-	status(): AxiosObservable<API_STATUS> {
+	status$(): AxiosObservable<API_STATUS> {
 		return this.axios$.get<API_STATUS>("status/")
 	}
 
-	status$(): Observable<API_STATUS | null> {
-		return apiPoll(this.status(), {name: "status"})
-	}
-
-	system_kills(): AxiosObservable<API_SYSTEM_KILLS[]> {
+	system_kills$(): AxiosObservable<API_SYSTEM_KILLS[]> {
 		return this.axios$.get<API_SYSTEM_KILLS[]>("universe/system_kills/")
 	}
 
-	system_kills$(): Observable<API_SYSTEM_KILLS[] | null> {
-		return apiPoll(this.system_kills(), {name: "system_kills"})
-	}
-
-	system_jumps(): AxiosObservable<API_SYSTEM_JUMPS[]> {
+	system_jumps$(): AxiosObservable<API_SYSTEM_JUMPS[]> {
 		return this.axios$.get<API_SYSTEM_JUMPS[]>("universe/system_jumps/")
 	}
 
-	system_jumps$(): Observable<API_SYSTEM_JUMPS[] | null> {
-		return apiPoll(this.system_jumps(), {name: "system_jumps"})
-	}
+	searchStructure$(search: string, strict = true): AxiosObservable<{ structure: number[] }> {
+		this.checkScope("esi-search.search_structures.v1")
 
-	async getJBs(search: string): Promise<Array<number>> {
-		return (await this.call(
-			false,
-			[],
+		return this.axios$.get<{ structure: number[] }>(
 			`characters/${this.auth.character_id}/search/`,
-			"get",
-			null,
 			{
-				categories: "structure",
-				search: search,
-				strict: false,
+				params: {
+					categories: "structure",
+					search: search,
+					strict: strict,
+				}
 			}
-		)).data.structure
+		).pipe(
+			retryBackoff(regularRetryBackoffConfig),
+		)
 	}
 
-	async myFleet(): Promise<API_FLEET> {
-		return (await this.call(
-			false,
-			[],
-			`characters/${this.auth.character_id}/fleet/`,
-			"get",
-			null, null
-		)).data
+	getMyFleet$(): AxiosObservable<API_FLEET> {
+		this.checkScope("esi-fleets.read_fleet.v1")
+
+		return this.axios$.get<API_FLEET>(`characters/${this.auth.character_id}/fleet/`).pipe(
+			retryBackoff(regularRetryBackoffConfig),
+		)
 	}
 
-	async fleetMembers(fleet_id: number): Promise<API_FLEET_MEMBER[]> {
-		return (await this.call(
-			false,
-			[],
-			`fleets/${fleet_id}/members/`,
-			"get",
-			null, null
-		)).data
+	getFleetMembers$(fleet_id: number): AxiosObservable<API_FLEET_MEMBER[]> {
+		this.checkScope("esi-fleets.read_fleet.v1")
+
+		return this.axios$.get<API_FLEET_MEMBER[]>(`fleets/${fleet_id}/members/`).pipe(
+			retryBackoff(regularRetryBackoffConfig),
+		)
 	}
 
-	async searchCharacter(name: string): Promise<Array<number>> {
-		return (await this.call(
-			false,
-			[],
-			`search/`,
-			"get",
-			null,
-			{
+	searchCharacter$(name: string): AxiosObservable<{ character: Array<number> }> {
+		return this.axios$.get<{ character: Array<number> }>("search/", {
+			params: {
 				categories: "character",
 				search: name,
 				strict: true,
 			}
-		)).data.character
+		}).pipe(
+			retryBackoff(regularRetryBackoffConfig),
+		)
 	}
 
-	async getCharacter(id: number): Promise<IAPICharacter> {
-		const result = await this.call(
-			false,
-			[],
-			`characters/${id}/`,
-			"get",
-			null, null
+	getCharacter$(id: number): AxiosObservable<IAPICharacter> {
+		return this.axios$.get<IAPICharacter>(`characters/${id}/`).pipe(
+			retryBackoff(regularRetryBackoffConfig),
 		)
-
-		const data = result.data
-		result.data.expires = new Date(result.headers.expires)
-		return data
 	}
 
 	getStructure$(id: number): AxiosObservable<API_STRUCTURE> {
 		return this.axios$.get<API_STRUCTURE>(`universe/structures/${id}/`).pipe(
 			retryBackoff({
-				initialInterval: 50,
+				initialInterval: 10,
 				maxInterval: 1000,
 				maxRetries: 10,
 				resetOnSuccess: true,
-				shouldRetry: ((error: AxiosError) => {
-					const code = Number(error.response?.status)
-					return code > 0 && (code >= 500 && code <= 504)
-				})
+				shouldRetry: axiosShouldRetryOnServerError,
 			}),
 		)
 	}
 
 	async setWaypoint(destination_id: number, clear_other_waypoints: boolean = true, add_to_beginning: boolean = false) {
-		return (await this.call(
-			true,
-			[],
+		this.checkScope("esi-ui.write_waypoint.v1")
+
+		return this.axios$.post(
 			"ui/autopilot/waypoint",
-			"post",
-			null,
-			{
-				destination_id,
-				clear_other_waypoints,
-				add_to_beginning,
-			})).data
-	}
-
-	async killmail(killmail_id: number, killmail_hash: string) {
-		return (await this.call(
-			false,
-			[],
-			`killmails/${killmail_id}/${killmail_hash}/`,
-			"get",
-			null, null
-		)).data
-	}
-
-	private async call(debug: boolean, errors: number[], method, HTTPMethod, data, params, addition = {}) {
-		const url = API_BASE_URL + method
-		if (debug) events.$emit("api:start")
-
-		try {
-			const result = await axios({
-				url: url,
-				method: HTTPMethod,
-				params: params,
-				data: data,
-				...addition,
-				headers: this.getAuthHeaders(),
-			})
-
-			if (debug) events.$emit("api:end")
-
-			return result
-		} catch (e) {
-			if (
-				e.response
-				&& e.response.data
-			) {
-				const data = e.response.data
-				if (data && data.error) {
-					if (debug) events.$emit("api:end", data.error)
-
-					throw new Error(data.error)
+			null, {
+				params: {
+					destination_id,
+					clear_other_waypoints,
+					add_to_beginning,
 				}
 			}
+		).pipe(
+			tap(() => {
+				events.$emit("api:start")
+			}),
+			retryBackoff(regularRetryBackoffConfig),
+			tap(() => {
+				events.$emit("api:end")
+			}, (e) => {
+				events.$emit("api:end", e)
+			}),
+		).toPromise()
+	}
 
-			events.$emit("api:end", e)
-
-			throw e
-		}
+	killmail$(killmail_id: number, killmail_hash: string): AxiosObservable<API_KILLMAIL> {
+		return this.axios$.get<API_KILLMAIL>(`killmails/${killmail_id}/${killmail_hash}/`).pipe(
+			retryBackoff(regularRetryBackoffConfig),
+		)
 	}
 }
 
 const api = new EVEApi()
 
 export default api
+
+function axiosShouldRetryOnServerError(error: AxiosError) {
+	const code = Number(error.response?.status)
+	return code > 0 && (code >= 500 && code <= 504)
+}
 
 export function extractExpires(response: AxiosResponse): Date {
 	if (!response.headers.expires) {
@@ -448,12 +381,16 @@ export function apiPollResponse<T>(api$: AxiosObservable<T>, options: API_POLL_O
 			concatMap(_ => api$),
 			tap({
 				error: (error) => {
-					log.error(`EVEApi:poll:${options.name}:error:`, error)
+					if (axiosShouldRetryOnServerError(error)) {
+						log.debug(`EVEApi:poll:${options.name}:error:`, error.message)
+					} else {
+						log.debug(`EVEApi:poll:${options.name}:error:`, error)
+					}
 					observer.next({data: null})
 				}
 			}),
 			retryBackoff(options.backoff || {
-				initialInterval: 1000,
+				initialInterval: 500,
 				maxInterval: 20000,
 				resetOnSuccess: true,
 			}),

@@ -77,7 +77,9 @@ export default class Fleet extends Vue {
 
 	async refreshFleet() {
 		try {
-			this.fleet = await api.myFleet()
+			const {data: fleet} = await api.getMyFleet$().toPromise()
+			this.fleet = fleet
+
 			if (!this.fleet) return
 			if (!this.timerMembers) {
 				this.refreshMembers()
@@ -85,9 +87,6 @@ export default class Fleet extends Vue {
 		} catch (e) {
 			if (this.timerMembers) {
 				clearTimeout(this.timerMembers)
-			}
-			if (e.message.startsWith("token is not valid for scope: ")) {
-				this.$store.commit("setError", "You need logout and login with new permission scope (esi-fleets.read_fleet.v1)")
 			}
 			this.members = []
 			this.fleet = null
@@ -99,8 +98,7 @@ export default class Fleet extends Vue {
 	async refreshMembers() {
 		if (!this.fleet) return
 		try {
-
-			const fleet_members = await api.fleetMembers(this.fleet.fleet_id)
+			const {data: fleet_members} = await api.getFleetMembers$(this.fleet.fleet_id).toPromise()
 			const members: FLEET_MEMBER[] = []
 
 			for (let i = 0; i < fleet_members.length; i++) {

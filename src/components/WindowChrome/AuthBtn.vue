@@ -99,7 +99,7 @@
 import {Component, Vue, Watch} from "vue-property-decorator"
 import parseJSONDate from "date-fns/parseJSON"
 import format from "date-fns/format"
-import api from "@/lib/EVEApi"
+import api, {apiPoll} from "@/lib/EVEApi"
 // eslint-disable-next-line no-unused-vars
 import {Subscription} from "rxjs"
 // eslint-disable-next-line no-unused-vars
@@ -119,6 +119,7 @@ import characterManager, {ICharacterManagerCharacter} from "@/service/CharacterM
 })
 export default class AuthBtn extends Vue {
 	menu = false
+
 	// menu = true
 
 	get api() {
@@ -210,13 +211,25 @@ export default class AuthBtn extends Vue {
 	authChangeHandler(val) {
 		if (val) {
 			this.unsubscribeAll()
-			this.online$ = api.character_online$().subscribe(
+
+			this.online$ = apiPoll(
+				api.character_online$(),
+				{name: "character_online"}
+			).subscribe(
 				online => this.online = online
 			)
-			this.ship$ = api.character_ship$().subscribe(
+
+			this.ship$ = apiPoll(
+				api.character_ship$(),
+				{name: "character_ship", interval: 60_000}
+			).subscribe(
 				ship => this.ship = ship
 			)
-			this.location$ = api.character_location$().subscribe(
+
+			this.location$ = apiPoll(
+				api.character_location$(),
+				{name: "character_location", interval: 30_000}
+			).subscribe(
 				location => {
 					this.location = Object.assign({}, location, location ? {
 						system: systemManager.getSystemById(location.solar_system_id)

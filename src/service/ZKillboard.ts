@@ -15,6 +15,7 @@ import {Observable, Subscription} from "rxjs"
 import {share, switchMap, map, tap} from "rxjs/operators"
 import makeWebSocketObservable from "@/service/WS"
 import {retryBackoff} from "backoff-rxjs"
+import {API_KILLMAIL} from "@/types/API"
 
 class ZKillboard {
 	private messagesSubscription: Subscription | null = null
@@ -113,9 +114,9 @@ class ZKillboard {
 	async processZK(data: any) {
 		log.warn("zkillboard: message", data)
 		const zk_data = data
-		let killmail
+		let killmail: API_KILLMAIL
 		try {
-			killmail = await api.killmail(zk_data.killID, zk_data.hash)
+			({data: killmail} = await api.killmail$(zk_data.killID, zk_data.hash).toPromise())
 			log.warn("zkillboard: killmail", killmail)
 		} catch (e) {
 			log.warn(e)
@@ -167,15 +168,15 @@ class ZKillboard {
 		})
 	}
 
-	private static isNPC(killmail: any) {
+	private static isNPC(killmail: API_KILLMAIL) {
 		const victim = killmail.victim
-		if (victim.character_id == undefined && victim.corporation_id > 1 && victim.corporation_id < 1999999) {
+		if (victim.character_id == undefined && victim.corporation_id && (victim.corporation_id > 1 && victim.corporation_id < 1999999)) {
 			return true
 		}
 
 		for (const attacker of killmail.attackers) {
-			if (attacker.character_id > 3999999) return false
-			if (attacker.corporation_id > 1999999) return false
+			if (attacker.character_id && attacker.character_id > 3999999) return false
+			if (attacker.corporation_id && attacker.corporation_id > 1999999) return false
 		}
 
 		return true

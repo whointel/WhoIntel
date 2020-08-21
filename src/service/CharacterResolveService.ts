@@ -65,7 +65,7 @@ class CharacterResolveService {
 
 			// If expired
 			try {
-				const apiIDs = await api.searchCharacter(name)
+				const {data: {character: apiIDs}} = await api.searchCharacter$(name).toPromise()
 				if (!apiIDs || apiIDs.length === 0) {
 					const dbCharNew: ICharacterExport = {
 						id: 0,
@@ -79,16 +79,16 @@ class CharacterResolveService {
 					return dbCharNew
 				}
 
-				for (let i = 0; i< apiIDs.length; i++) {
-						const apiChar = await api.getCharacter(apiIDs[i])
-						const dbCharNew: ICharacterExport = {
-							id: apiIDs[i],
-							name: apiChar.name,
-							corporation_id: apiChar.corporation_id,
-							expires: apiChar.expires,
-							exists: true,
-						}
-						await this.dbPut(dbCharNew)
+				for (let i = 0; i < apiIDs.length; i++) {
+					const {data: apiChar, headers: {expires}} = await api.getCharacter$(apiIDs[i]).toPromise()
+					const dbCharNew: ICharacterExport = {
+						id: apiIDs[i],
+						name: apiChar.name,
+						corporation_id: apiChar.corporation_id,
+						expires: new Date(expires),
+						exists: true,
+					}
+					await this.dbPut(dbCharNew)
 
 					if (apiChar.name === name) {
 						return dbCharNew
@@ -103,7 +103,7 @@ class CharacterResolveService {
 		}
 
 		try {
-			const apiIDs = await api.searchCharacter(name)
+			const {data: {character: apiIDs}} = await api.searchCharacter$(name).toPromise()
 			if (!apiIDs || apiIDs.length === 0) {
 				const dbCharNew: ICharacterExport = {
 					id: 0,
@@ -117,13 +117,14 @@ class CharacterResolveService {
 				return dbCharNew
 			}
 
-			for (let i = 0; i< apiIDs.length; i++) {
-				const apiChar = await api.getCharacter(apiIDs[i])
+			for (let i = 0; i < apiIDs.length; i++) {
+				const {data: apiChar, headers: {expires}} = await api.getCharacter$(apiIDs[i]).toPromise()
+
 				const dbCharNew: ICharacterExport = {
 					id: apiIDs[i],
 					name: apiChar.name,
 					corporation_id: apiChar.corporation_id,
-					expires: apiChar.expires,
+					expires: new Date(expires),
 					exists: true,
 				}
 				await this.dbPut(dbCharNew)
@@ -168,12 +169,13 @@ class CharacterResolveService {
 
 			// If expired
 			try {
-				const apiChar = await api.getCharacter(id)
+				const {data: apiChar, headers: {expires}} = await api.getCharacter$(id).toPromise()
+
 				const dbCharNew: ICharacterExport = {
 					id: id,
 					name: apiChar.name,
 					corporation_id: apiChar.corporation_id,
-					expires: apiChar.expires,
+					expires: new Date(expires),
 					exists: true,
 				}
 				await this.dbPut(dbCharNew)
@@ -185,12 +187,12 @@ class CharacterResolveService {
 		}
 
 		try {
-			const apiChar = await api.getCharacter(id)
+			const {data: apiChar, headers: {expires}} = await api.getCharacter$(id).toPromise()
 			const dbCharNew: ICharacterExport = {
 				id: id,
 				name: apiChar.name,
 				corporation_id: apiChar.corporation_id,
-				expires: apiChar.expires,
+				expires: new Date(expires),
 				exists: true,
 			}
 			await this.dbPut(dbCharNew)

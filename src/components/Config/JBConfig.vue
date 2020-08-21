@@ -206,7 +206,7 @@ export default class JBConfig extends Vue {
 	}
 
 	async loadStructures(search: string) {
-		let structures = await api.getJBs(search)
+		const {data: {structure: structures}} = await api.searchStructure$(search, false).toPromise()
 
 		if (!structures) {
 			return
