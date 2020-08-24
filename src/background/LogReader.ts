@@ -57,7 +57,13 @@ export default class LogListener {
 			this.watcher = null
 		}
 
-		this.watcher = new LogWatcher(EVE_LOG_FOLDER)
+		try {
+			this.watcher = new LogWatcher(EVE_LOG_FOLDER)
+		} catch (e) {
+			// TODO notify frontend
+			log.warn("LogListener:", e.message)
+			return
+		}
 
 		this.watcher
 			.on("unwatch", filepath => {
@@ -172,8 +178,6 @@ export default class LogListener {
 			log.error(`LogListener: blocks error: block.start ${block.start}: block.end ${block.end}`)
 			return
 		}
-
-		// log.info("LogListener: processQueue: ", block)
 
 		if (block.watchedFile.character === null) {
 			const streamCharacterSync = fs.createReadStream(block.watchedFile.filepath, {encoding: "utf16le"})

@@ -26,6 +26,11 @@ export default class LogWatcher extends EventEmitter {
 
 	private watchDir(dir: string): boolean {
 		dir = normalizePath(dir)
+
+		if (!fs.existsSync(dir)) {
+			return false
+		}
+
 		const stats = fs.statSync(dir)
 		if (!stats.isDirectory()) {
 			return false
