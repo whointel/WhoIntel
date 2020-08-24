@@ -1,7 +1,8 @@
 import {ipcMain, Menu, MenuItemConstructorOptions, Tray} from "electron"
 import mainWindow from "@/background/MainWindow"
 import {getAsses} from "@/background/Assets"
-import layoutsWindow from "@/background/LayoutsWindow";
+import layoutsWindow from "@/background/LayoutsWindow"
+import {isPlatformWin} from "@/background/helpers"
 
 // const isDevelopment = process.env.NODE_ENV !== "production"
 // const TRY_ICON_GUID = isDevelopment ? "253441ab-b2c6-4ae7-9072-498358e1eb45" : "c5a55c57-fc93-49d4-9b45-277759866786"
@@ -16,16 +17,18 @@ export default class TrayMenu {
 	private layouts: ITrayMenuLayout[] = []
 
 	constructor() {
-		this.tray = new Tray(getAsses("icon.png"), /*TRY_ICON_GUID*/)
+		this.tray = new Tray(getAsses(isPlatformWin ? "icons/icon.ico" : "icons/icon.icns"), /*TRY_ICON_GUID*/)
 		this.tray.setToolTip("WhoIntel")
 
-		this.tray.on("click", () => {
-			mainWindow.switchVisibility()
-		})
+		if (isPlatformWin) {
+			this.tray.on("click", () => {
+				mainWindow.switchVisibility()
+			})
 
-		this.tray.on("right-click", () => {
-			this.tray.popUpContextMenu()
-		})
+			this.tray.on("right-click", () => {
+				this.tray.popUpContextMenu()
+			})
+		}
 
 		ipcMain.on("window:layouts", (event, layouts: ITrayMenuLayout[]) => {
 			this.layouts = layouts
