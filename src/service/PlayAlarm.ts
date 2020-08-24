@@ -1,6 +1,3 @@
-// const filePath = "c:\\Projects\\eintel\\dist_electron\\alarm.wav"
-// let yyy = "sound://" + btoa(filePath)
-
 import settingsService from "@/service/settings"
 
 function getMedia(): string {
@@ -16,4 +13,8 @@ export const PlayAlarm = () => {
 	player.src = "sound://" + btoa(getMedia())
 	player.volume = (settingsService.$.alarmVolume / 100)
 	player.play()
+}
+
+export const StopAlarm = () => {
+	player.pause()
 }

@@ -70,7 +70,16 @@
 			@click="testAlarmSound"
 		>
 			<v-icon left>mdi-play</v-icon>
-			Test volume
+			Проверить звук
+		</v-btn>
+
+		<v-btn
+			@click="stopTestAlarmSound"
+			class="ml-2"
+			v-if="isAlarmSoundTesting"
+		>
+			<v-icon left>mdi-stop</v-icon>
+			Остановить проверку
 		</v-btn>
 
 	</v-card-text>
@@ -78,7 +87,7 @@
 
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator"
-import {PlayAlarm} from "@/service/PlayAlarm"
+import {PlayAlarm, StopAlarm} from "@/service/PlayAlarm"
 import settingsService from "@/service/settings"
 
 const {dialog} = require('electron').remote
@@ -91,6 +100,13 @@ export default class ConfigWindow extends Vue {
 
 	testAlarmSound() {
 		PlayAlarm()
+		this.isAlarmSoundTesting = true
+	}
+
+	isAlarmSoundTesting = false
+	stopTestAlarmSound() {
+		StopAlarm()
+		this.isAlarmSoundTesting = false
 	}
 
 	isAlarmMediaDialogShow = false
