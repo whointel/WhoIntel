@@ -5,6 +5,8 @@ import db from "@/service/Database"
 import isAfter from "date-fns/isAfter"
 import {API_STRUCTURE} from "@/types/API"
 
+const ESI_API_TYPE_JUMP_GATE_ID = 35841
+
 export enum EVE_JUMP_BRIDE_STATUS {
 	NEW = "NEW",
 	API_FOUND = "API_FOUND",
@@ -105,7 +107,7 @@ export default class EVEJumpBride implements IEVEJumpBrideExport {
 
 		this.expires = new Date(expires)
 
-		if (structure.type_id !== 35841) {
+		if (structure.type_id !== ESI_API_TYPE_JUMP_GATE_ID) {
 			this.status = EVE_JUMP_BRIDE_STATUS.API_WRONG_STRUCTURE
 			await this.save()
 			return

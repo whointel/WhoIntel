@@ -42,7 +42,7 @@ if (!layoutService.isLayoutWindow) {
 	timeUsedService.init()
 	layoutService.init()
 
-	ipcRenderer.send("logReader:setChannels", settingsService.$.logChannels.map(val => val.name))
+	ipcRenderer.send("logReader:setChannels", settingsService.getFlatChannels())
 
 	setInterval(() => {
 		// @ts-ignore

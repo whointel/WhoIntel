@@ -143,13 +143,10 @@
 <script lang="ts">
 import {Component, Vue, Watch} from "vue-property-decorator"
 import api from "@/lib/EVEApi"
-// import find from "lodash/find"
 import EVEJumpBride, {EVE_JUMP_BRIDE_STATUS} from "@/lib/EVEJumpBride"
 // eslint-disable-next-line no-unused-vars
 import {DataTableHeader} from "vuetify"
 import systemManager from "@/service/SystemManager"
-// eslint-disable-next-line no-unused-vars
-import EVESystem from "@/lib/EVESystem"
 import Timeout from "await-timeout"
 import * as log from "electron-log"
 

@@ -49,6 +49,10 @@ class SettingsService {
 	private watcher() {
 		storageService.setObject("settings", this.$)
 	}
+
+	getFlatChannels(): string[] {
+		return this.$.logChannels.map((channel: { [name: string]: string }) => channel.name).filter(name => name && name.length)
+	}
 }
 
 const settingsService = new SettingsService()

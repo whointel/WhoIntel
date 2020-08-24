@@ -32,10 +32,14 @@ log.transports.file.maxSize = 1024 * 1024 * 20 // 20Mb
 // COMMENT LINES BELOW
 
 ipcMain.on("getSDE", async () => {
-	const StarGateDB = JSON.parse(await fs.promises.readFile(getAsses("StarGateDB.json"), "utf8"))
-	const RegionDB = JSON.parse(await fs.promises.readFile(getAsses("RegionDB.json"), "utf8"))
-	const SystemDB = JSON.parse(await fs.promises.readFile(getAsses("SystemDB.json"), "utf8"))
-	const ShipsDB = JSON.parse(await fs.promises.readFile(getAsses("ShipsDB.json"), "utf8"))
+	const stargatePromise = fs.promises.readFile(getAsses("db/StarGateDB.json"), "utf8")
+	const regionPromise = fs.promises.readFile(getAsses("db/RegionDB.json"), "utf8")
+	const systemPromise = fs.promises.readFile(getAsses("db/SystemDB.json"), "utf8")
+	const shipsPromise = fs.promises.readFile(getAsses("db/ShipsDB.json"), "utf8")
+	const StarGateDB = JSON.parse(await stargatePromise)
+	const RegionDB = JSON.parse(await regionPromise)
+	const SystemDB = JSON.parse(await systemPromise)
+	const ShipsDB = JSON.parse(await shipsPromise)
 	mainWindow.send("setSDE", {SystemDB, StarGateDB, RegionDB, ShipsDB})
 })
 

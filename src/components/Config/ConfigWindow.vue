@@ -154,7 +154,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue, Watch} from "vue-property-decorator"
+import {Component, Vue} from "vue-property-decorator"
 import events from "@/service/EventBus"
 import {ipcRenderer} from "electron"
 import settingsService from "@/service/settings"
@@ -230,11 +230,6 @@ export default class ConfigWindow extends Vue {
 
 	get settings() {
 		return settingsService.$
-	}
-
-	@Watch("settings.logChannels")
-	onLogChannelsChange(val: any[]) {
-		ipcRenderer.send("logReader:setChannels", val.map(val => val.name))
 	}
 
 	created() {

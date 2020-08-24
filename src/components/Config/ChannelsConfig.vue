@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from "vue-property-decorator"
+import {Component, Vue, Watch} from "vue-property-decorator"
 import settingsService from "@/service/settings"
 import findIndex from "lodash/findIndex"
 import {ipcRenderer} from "electron";
@@ -66,6 +66,11 @@ export default class ChannelsConfig extends Vue {
 
 	get settings() {
 		return settingsService.$
+	}
+
+	@Watch("settings.logChannels")
+	onLogChannelsChange() {
+		ipcRenderer.send("logReader:setChannels", settingsService.getFlatChannels())
 	}
 
 	addLogChannel() {
