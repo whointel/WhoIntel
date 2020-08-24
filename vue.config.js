@@ -16,11 +16,14 @@ module.exports = {
 				appId: 'space.whointel.app',
 				remoteBuild: false,
 				electronUpdaterCompatibility: '>= 2.16',
+				extraResources: ["build/alarm.wav", "build/db/*"],
 				win: {
 					artifactName: '${productName}-${version}-win64.${ext}',
+					extraResources: ["build/icons/icon.ico"],
 				},
 				mac: {
 					category: 'public.app-category.utilities',
+					extraResources: ["build/icons/icon.icns"],
 				},
 				dmg: {
 					sign: false,
