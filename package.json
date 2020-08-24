@@ -1,6 +1,6 @@
 {
 	"name": "whointel",
-	"version": "0.7.10",
+	"version": "0.7.11-dev",
 	"private": true,
 	"description": "WhoIntel - EVE Online secure tool",
 	"author": "WhoIntel",
@@ -10,7 +10,9 @@
 		"build": "vue-cli-service build",
 		"lint": "vue-cli-service lint",
 		"electron:build:win": "vue-cli-service electron:build --win --x64 -p never",
+		"electron:build:publish:win": "vue-cli-service electron:build --win --x64 -p always",
 		"electron:build:mac": "vue-cli-service electron:build --mac --x64 -p never",
+		"electron:build:publish:mac": "vue-cli-service electron:build --mac --x64 -p always",
 		"electron:serve": "vue-cli-service electron:serve",
 		"electron:serve:debug": "vue-cli-service electron:serve --debug",
 		"postinstall": "electron-builder install-app-deps",
