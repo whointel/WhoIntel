@@ -37,9 +37,6 @@ export default class LogListener {
 
 	constructor() {
 		ipcMain.on("logReader:setChannels", this.setChannels.bind(this))
-
-		// NOTE !!!!!!
-		setTimeout(this.setChannels.bind(this), 1000)
 	}
 
 	setChannels(event: IpcMainEvent, channels) {

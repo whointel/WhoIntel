@@ -74,10 +74,13 @@ export default class ChannelsConfig extends Vue {
 	}
 
 	addLogChannel() {
-		if (!this.newLogChannel || !this.newLogChannel.length) return
+		if (!this.newLogChannel) return
+
+		const newLogChannel = this.newLogChannel.trim()
+		if (!newLogChannel.length) return
 
 		this.settings.logChannels.push({
-			name: this.newLogChannel.trim(),
+			name: newLogChannel,
 		})
 		this.newLogChannel = ""
 	}
