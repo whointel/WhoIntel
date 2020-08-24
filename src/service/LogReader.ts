@@ -189,7 +189,7 @@ class LogReader {
 		}
 	}
 
-	private showNotification(
+	public showNotification(
 		systems: string,
 		logEntry: ILogEntry
 	) {

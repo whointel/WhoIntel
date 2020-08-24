@@ -53,8 +53,13 @@
 			</template>
 		</v-text-field>
 
-		<v-switch v-model="settings.alarmPopup" label="Визуальное оповещение (popup)"/>
-
+		<v-switch v-model="settings.alarmPopup" label="Визуальное оповещение (всплывающее окно popup)"/>
+		<v-btn
+			:disabled="!settings.alarmPopup"
+			@click="testAlarmPopup"
+		>
+			Проверить всплывающее окно
+		</v-btn>
 		<v-divider/>
 
 		<v-switch v-model="settings.alarmSound" label="Звуковое оповещение"/>
@@ -106,6 +111,8 @@
 import {Component, Vue} from "vue-property-decorator"
 import {PlayAlarm, StopAlarm} from "@/service/PlayAlarm"
 import settingsService from "@/service/settings"
+import logReader from "@/service/LogReader"
+import {LOG_ENTRY_TYPE} from "@/types/ILogEntry"
 
 const {dialog} = require('electron').remote
 
@@ -121,9 +128,23 @@ export default class ConfigWindow extends Vue {
 	}
 
 	isAlarmSoundTesting = false
+
 	stopTestAlarmSound() {
 		StopAlarm()
 		this.isAlarmSoundTesting = false
+	}
+
+	testAlarmPopup() {
+		logReader.showNotification("Jita / 2", {
+			ts: new Date,
+			sender: "TEST",
+			message: "TEST ALERT",
+			channel: "TEST",
+			systems: [],
+			hash: "TEST",
+			character: null,
+			type: LOG_ENTRY_TYPE.SECURE
+		})
 	}
 
 	isAlarmMediaDialogShow = false
