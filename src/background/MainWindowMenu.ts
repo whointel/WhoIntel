@@ -4,14 +4,14 @@ import {isPlatformMacOS} from "@/background/helpers"
 
 const fileSubMenu: MenuItemConstructorOptions[] = [
 	{
-		label: "Settings",
+		label: "Настройки",
 		click() {
 			mainWindow.send("open:config")
 		}
 	},
 	{type: "separator"},
 	{
-		label: "Quit",
+		label: "Закрыть программу",
 		click() {
 			mainWindow.closeExit()
 		},
@@ -44,15 +44,10 @@ const viewMenu: MenuItem = new MenuItem({
 });
 
 const helpMenu: MenuItem = new MenuItem({
-	label: "Help",
-	submenu: [
-		{
-			label: "About",
-			click() {
-				mainWindow.send("open:about")
-			}
-		}
-	]
+	label: "About",
+	click() {
+		mainWindow.send("open:about")
+	}
 })
 
 export const menuTemplate: MenuItem[] = [

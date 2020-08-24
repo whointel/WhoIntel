@@ -7,9 +7,26 @@
 			:max="5"
 			:step="1"
 			ticks
-			:label="'Alarm distance (' + settings.alarmDistance + ')'"
 			v-model="settings.alarmDistance"
-		/>
+		>
+			<template v-slot:label>
+				<v-tooltip bottom transition="fade-transition">
+					<template v-slot:activator="{ on, attrs }">
+						<div
+							v-bind="attrs"
+							v-on="on"
+						>
+							<v-icon> mdi-help-circle-outline</v-icon>
+							<span class="ml-2">Расстояние оповещения ({{ settings.alarmDistance }})</span>
+						</div>
+					</template>
+					<span>
+						Расстояние между текущим положением основного персонажа и системой, где произошло событие.<br>
+						<b>Если расстояние будет больше указанного - оповещение не будет выведено.</b>
+					</span>
+				</v-tooltip>
+			</template>
+		</v-slider>
 
 		<v-text-field
 			v-model="settings.alarmExpireMinutes"
@@ -36,15 +53,15 @@
 			</template>
 		</v-text-field>
 
-		<v-switch v-model="settings.alarmPopup" label="Alarm popup"/>
+		<v-switch v-model="settings.alarmPopup" label="Визуальное оповещение (popup)"/>
 
 		<v-divider/>
 
-		<v-switch v-model="settings.alarmSound" label="Alarm sound"/>
+		<v-switch v-model="settings.alarmSound" label="Звуковое оповещение"/>
 
 		<v-text-field
 			prepend-icon="mdi-paperclip"
-			label="Alarm Media, empty for default"
+			label="Звуковой файл для оповещения, пустое поле для встроенного звука"
 			clearable
 			@click:prepend="chooseAlarmMedia(true)"
 			:disabled="!settings.alarmSound"

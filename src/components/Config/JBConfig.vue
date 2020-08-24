@@ -19,7 +19,7 @@
 						Как искать
 					</v-expansion-panel-header>
 					<v-expansion-panel-content>
-						Поиск через ESI API структур типа бридж к которым игрок имеет доступ.
+						Поиск через ESI API структур типа "мост" (Ansiblex Jump Gate) к которым игрок имеет доступ.
 						<br>
 						Оставьте строку поиска по умолчанию или добавьте свой шаблон поиска (например, название системы).
 						<br>
@@ -37,18 +37,17 @@
 				/>
 				<v-btn
 					@click="refreshAPI"
-					class="mr-5" text
+					class="ml-5 mr-5"
 					:disabled="isLoading || !findPattern || findPattern.length < 3 || !findPattern.includes('»')"
 				>
 					<v-icon left>mdi-cloud-refresh</v-icon>
-					find
+					Искать
 				</v-btn>
 				<v-btn
 					color="red"
 					v-if="isLoading"
-					text
 					@click="refreshAPIStop = true"
-				>Stop JB finding
+				>Остановить поиск
 				</v-btn>
 				<v-spacer/>
 				<v-text-field
@@ -75,6 +74,10 @@
 
 					<template v-slot:no-data>
 						<h3 class="red--text">No jump bridges</h3>
+					</template>
+
+					<template v-slot:item.name="{ item }">
+						{{ item.status === EVE_JUMP_BRIDE_STATUS.NEW ? item.structure_id : item.name }}
 					</template>
 
 					<template v-slot:item.systemTo.name="{ item }">
@@ -122,6 +125,15 @@
 						</v-btn>
 					</template>
 				</v-data-table>
+
+				<v-alert
+					border="left"
+					colored-border
+					type="info"
+					elevation="2"
+				>
+					Не забывайте периодически перезапускать поиск - мосты могут появляться и исчезать!
+				</v-alert>
 
 			</v-card-text>
 		</v-card>

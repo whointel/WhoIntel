@@ -1,15 +1,15 @@
 <template>
 	<v-dialog v-model="dialog" persistent max-width="900px">
 		<v-card>
-			<v-card-title class="headline">Settings</v-card-title>
+			<v-card-title class="headline">Настройки</v-card-title>
 			<v-tabs v-model="tab" grow>
 
 				<v-tab href="#alarm" :disabled="windowLock">
-					Alarm
+					Alert
 				</v-tab>
 
 				<v-tab href="#other" :disabled="windowLock">
-					Other
+					Разное
 				</v-tab>
 
 				<v-tab href="#channels" :disabled="windowLock">
@@ -19,15 +19,15 @@
 						color="red"
 					>mdi-map-marker-path
 					</v-icon>
-					Channels
+					Каналы
 				</v-tab>
 
 				<v-tab href="#winLayouts" :disabled="windowLock">
-					Layouts
+					Слои
 				</v-tab>
 
 				<v-tab href="#extWindow" :disabled="windowLock">
-					External
+					Внешние
 				</v-tab>
 
 				<v-tab href="#favorites" :disabled="windowLock">

@@ -63,13 +63,13 @@ export default class TrayMenu {
 
 		layouts.push({type: "separator"})
 		layouts.push({
-			label: "Restore default",
+			label: "Восстановить начальные размер и положение",
 			click: () => {
 				this.sendLayoutSwitch(null)
 			},
 		})
 		layouts.push({
-			label: "Open settings",
+			label: "Открыть окно настроек расположения",
 			click: () => {
 				layoutsWindow.createWindow()
 			},
@@ -77,7 +77,7 @@ export default class TrayMenu {
 
 		return Menu.buildFromTemplate([
 			{
-				label: "Show App",
+				label: "Показать",
 				click() {
 					mainWindow.show()
 				},
@@ -90,7 +90,7 @@ export default class TrayMenu {
 			},
 			{type: "separator"},
 			{
-				label: "Quit",
+				label: "Закрыть программу",
 				click() {
 					mainWindow.closeExit()
 				},
