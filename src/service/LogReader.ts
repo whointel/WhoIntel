@@ -195,7 +195,7 @@ class LogReader {
 	) {
 		const notification = new Notification('Alert', {
 			body: systems + "\n\n" + logEntry.message,
-			icon: require("@/assets/icon.png"),
+			icon: "/icon.png",
 		})
 
 		notification.onclick = () => {
