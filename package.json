@@ -19,7 +19,7 @@
 	},
 	"main": "background.js",
 	"dependencies": {
-		"@vue/composition-api": "^1.0.0-beta.10",
+		"@vue/composition-api": "^1.0.0-beta.11",
 		"autolinker": "^3.14.1",
 		"await-timeout": "^1.1.1",
 		"axios": "^0.20.0",
@@ -71,7 +71,7 @@
 		"@vue/eslint-config-typescript": "^5.0.2",
 		"babel-eslint": "^10.1.0",
 		"devtron": "^1.4.0",
-		"electron": "10.0.0-beta.23",
+		"electron": "10.0.0-beta.25",
 		"electron-builder": "^22.8.0",
 		"electron-devtools-installer": "^3.1.1",
 		"electron-icon-builder": "^1.0.2",
