@@ -32,6 +32,7 @@
 			<history-btn class="titlebar--nodrag ml-4 d-none d-md-flex"/>
 			<v-spacer/>
 			<portal-target name="chrome-window-btn" class="titlebar--nodrag d-none d-sm-flex"/>
+			<portal-target name="chrome-window-info" class="d-none d-sm-flex"/>
 			<!--						<test-btn class="titlebar&#45;&#45;nodrag ml-4"/>-->
 			<v-spacer/>
 			<search class="titlebar--nodrag ml-4 d-none d-md-flex"/>
