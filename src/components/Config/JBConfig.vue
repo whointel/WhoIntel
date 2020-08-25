@@ -95,7 +95,7 @@
 												v-bind="attrs" v-on="on" small>mdi-new-box
 								</v-icon>
 								<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FOUND"
-												v-bind="attrs" v-on="on" small>mdi-check
+												v-bind="attrs" v-on="on" small color="grey lighten-1">mdi-check
 								</v-icon>
 								<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_UNAVAILABLE"
 												v-bind="attrs" v-on="on" small>mdi-lan-disconnect
