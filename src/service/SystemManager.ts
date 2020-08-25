@@ -132,6 +132,7 @@ class SystemManager {
 				await this.updateJB(jb, jbs[i])
 			}
 			log.debug("jb loaded", jbs.length, this.jb.length)
+			events.$emit("JB:ready")
 			// Vue.nextTick(() => this.refreshRegionMap())
 		}
 	}

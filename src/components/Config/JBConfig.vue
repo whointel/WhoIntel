@@ -149,6 +149,7 @@ import {DataTableHeader} from "vuetify"
 import systemManager from "@/service/SystemManager"
 import Timeout from "await-timeout"
 import * as log from "electron-log"
+import events from "@/service/EventBus"
 
 const INITIAL_FIND_PATTERN = " » "
 const ALPHABET_PATTERN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -268,6 +269,7 @@ export default class JBConfig extends Vue {
 			await jb.syncAPI()
 			await Timeout.set(50)
 		}
+		events.$emit("JB:ready")
 	}
 
 	clearFindPattern() {

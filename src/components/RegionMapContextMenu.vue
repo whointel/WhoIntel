@@ -212,6 +212,7 @@ import find from "lodash/find"
 import {IPATHPOINT} from "@/types/PathFinder"
 import {ipcRenderer} from "electron"
 import characterManager, {ICharacterManagerCharacter} from "@/service/CharacterManager"
+import pathService from "@/service/PathService";
 
 @Component
 export default class RegionMapContextMenu extends Vue {
@@ -251,51 +252,13 @@ export default class RegionMapContextMenu extends Vue {
 		return characterManager.activeCharacter?.system?.id !== this.system?.id
 	}
 
-	pathHopes(): any[] {
+	pathHopes(): number[] {
 		if (!this.system || !this.getCurrentSystemForAPICharacter()) return []
 
-		// console.time("graph")
-
-		let graph = createGraph()
-
-		for (const systemId in systemManager.systemsById) {
-			graph.addNode(systemId)
-		}
-
-		for (const systemId in systemManager.systemsById) {
-			const system = systemManager.systemsById[systemId]
-			system.neighbours.forEach(neighbour => graph.addLink(system.id, neighbour.id))
-		}
-
-		for (const jb of systemManager.jb) {
-			if (
-				!jb.systemFromId
-				|| !jb.systemToId
-			) continue
-
-			graph.addLink(jb.systemFromId, jb.systemToId)
-		}
-
-		// console.timeEnd("graph")
-		// console.time("path")
-
-		let pathFinder = aStar(graph, {
-			oriented: true,
-		})
 		const currentSystem = this.getCurrentSystemForAPICharacter()
-
 		if (!currentSystem) return []
 
-		let path = pathFinder.find(
-			currentSystem.id,
-			this.system.id,
-		)
-		// console.timeEnd("path")
-
-		let pathResult = path.reverse()
-		pathResult.shift()
-
-		return pathResult.map(node => node.id)
+		return pathService.find(currentSystem.id, this.system.id)
 	}
 
 	apiSetDestinationPath() {
@@ -304,12 +267,6 @@ export default class RegionMapContextMenu extends Vue {
 		const pathIds = this.pathHopes()
 		let currentSystem = this.getCurrentSystemForAPICharacter()
 		if (!pathIds.length || !currentSystem) return
-
-		// const debugSystems = {}
-		// pathIds.forEach(id => {
-		// 	debugSystems[id] = systemManager.systemsById[id].name
-		// })
-		// console.table(debugSystems)
 
 		const pathPoints: IPATHPOINT = {
 			path: [],

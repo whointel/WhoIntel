@@ -18,6 +18,7 @@ import settingsService from "@/service/settings"
 import layoutService from "@/service/LayoutService"
 import VueCompositionAPI from '@vue/composition-api'
 import characterManager from "@/service/CharacterManager"
+import pathService from "@/service/PathService"
 
 declare global {
 	interface Window {
@@ -33,6 +34,7 @@ events.init()
 
 if (!layoutService.isLayoutWindow) {
 	api.init()
+	pathService.init()
 	characterManager.init()
 	zkillboard.init()
 	eveStats.init()
