@@ -20,27 +20,27 @@
 				</button>
 			</div>
 
-			<div class="ml-1 mr-4 mt-1">
+			<div class="ml-1 mr-4 mt-1 d-none d-md-flex">
 				<span>WhoIntel</span>
 			</div>
-			<j-b-btn class="titlebar--nodrag"/>
-			<z-k-b-btn class="titlebar--nodrag ml-2"/>
-			<ext-win-btn class="titlebar--nodrag ml-2"/>
-			<fleet-btn class="titlebar--nodrag ml-2"/>
-			<overlay-btn class="titlebar--nodrag ml-2"/>
-			<regions-menu class="titlebar--nodrag ml-3"/>
-			<history-btn class="titlebar--nodrag ml-4"/>
+			<j-b-btn class="titlebar--nodrag d-none d-sm-flex"/>
+			<z-k-b-btn class="titlebar--nodrag ml-2 d-none d-sm-flex"/>
+			<ext-win-btn class="titlebar--nodrag ml-2 d-none d-sm-flex"/>
+			<fleet-btn class="titlebar--nodrag ml-2 d-none d-sm-flex"/>
+			<overlay-btn class="titlebar--nodrag ml-2 d-none d-sm-flex"/>
+			<regions-menu class="titlebar--nodrag ml-3 d-flex"/>
+			<history-btn class="titlebar--nodrag ml-4 d-none d-md-flex"/>
 			<v-spacer/>
-			<portal-target name="chrome-window-btn" class="titlebar--nodrag"/>
+			<portal-target name="chrome-window-btn" class="titlebar--nodrag d-none d-sm-flex"/>
 			<!--						<test-btn class="titlebar&#45;&#45;nodrag ml-4"/>-->
 			<v-spacer/>
-			<search class="titlebar--nodrag ml-4"/>
-			<no-log-channels-alarm class="titlebar--nodrag ml-4"/>
-			<show-l-d-btn class="titlebar--nodrag ml-4"/>
+			<search class="titlebar--nodrag ml-4 d-none d-md-flex"/>
+			<no-log-channels-alarm class="titlebar--nodrag ml-4 d-none d-sm-flex"/>
+			<show-l-d-btn class="titlebar--nodrag ml-4 d-none d-md-flex"/>
 			<v-tooltip eager bottom transition="fade-transition">
 				<template v-slot:activator="{ on, attrs }">
 					<v-icon
-						class="titlebar--nodrag ml-4 mt-1"
+						class="titlebar--nodrag ml-4 mt-1 d-none d-md-flex"
 						v-bind="attrs"
 						v-on="on"
 					>mdi-information-variant
@@ -53,8 +53,8 @@
 				<map-t-s/>
 			</v-tooltip>
 
-			<stats-server class="ml-4 mt-1"/>
-			<auth-btn class="titlebar--nodrag ml-4 mr-1"/>
+			<stats-server class="ml-4 mt-1 d-none d-md-flex"/>
+			<auth-btn class="titlebar--nodrag ml-4 mr-1 d-flex"/>
 
 			<div class="titlebar-controls titlebar--nodrag d-flex ml-1" v-if="isPlatformWindows">
 				<button
