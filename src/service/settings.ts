@@ -13,6 +13,7 @@ class SettingsService {
 		alarmVolume: 100,
 		alarmMedia: null,
 		logChannels: [],
+		logCleanOldInHours: 6,
 		favoriteRegions: [],
 		zkbEnable: false,
 		favoriteZKBRegions: [],

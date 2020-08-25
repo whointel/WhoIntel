@@ -12,7 +12,6 @@ const store = new Vuex.Store({
 		isJBShow: false,
 		isAuth: false,
 		EVEStatus: null,
-		logs: [],
 		ZKBStatus: ZKB_STATUS.DISCONNECTED,
 		overlay: OVERLAY_TYPE.ALERT,
 		error: "",
@@ -22,7 +21,6 @@ const store = new Vuex.Store({
 	},
 
 	getters: {
-		logs: state => state.logs,
 		isAppReady: state => state.isAppReady,
 		isLoading: state => state.isLoading,
 		isJBShow: state => state.isJBShow,
@@ -42,10 +40,6 @@ const store = new Vuex.Store({
 		},
 		setLoading: (state, loading) => {
 			state.isLoading = loading
-		},
-		addLog: (state, entry) => {
-			// @ts-ignore
-			state.logs.unshift(entry)
 		},
 		setJBShow: (state, show) => {
 			state.isJBShow = show

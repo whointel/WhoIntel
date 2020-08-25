@@ -5,33 +5,52 @@ import settingsService from "@/service/settings"
 import {PlayAlarm} from "@/service/PlayAlarm"
 import systemManager from "@/service/SystemManager"
 import {intersection} from "lodash"
-import store from "@/store"
 import {ipcRenderer} from "electron"
 import characterManager from "@/service/CharacterManager"
+import Vue from "vue"
+import * as log from "electron-log"
+import differenceInHours from "date-fns/differenceInHours"
 
 const LOCAL_CHANNEL_CHANGE_SYSTEM_SENDER_PREFIX = ["EVE System", "Система EVE"]
 const LOCAL_CHANNEL_CHANGE_SYSTEM_PREFIX = ["Channel changed to Local : ", "Канал изменен на Локальный: "]
 
 class LogReader {
+	logs: ILogEntry[] = []
 	logHashes: Set<string> = new Set<string>()
 
-	// logs: ILogEntry[] = []
-
-	constructor() {
+	public init() {
 		events.$on("electron:logReader:entry", this.logHandler.bind(this))
 		events.$on("zkillboard:event", this.logHandler.bind(this))
+		setInterval(this.cleanOldEntries.bind(this), 32 * 60 * 1000)
 	}
 
-	init() {
-		2 + 2;
-		// dummy init for force construct in main
+	private cleanOldEntries() {
+		const currentDate = new Date()
+		let cnt = 0
+
+		let logCleanOldInHours = settingsService.$.logCleanOldInHours
+		if (logCleanOldInHours <= 0) {
+			logCleanOldInHours = 6
+		}
+		if (logCleanOldInHours > 100) {
+			logCleanOldInHours = 48
+		}
+
+		log.debug("LogReader:start cleaning:old in hours:", logCleanOldInHours)
+		for (let i = this.logs.length - 1; i >= 0; i--) {
+			const logEntry = this.logs[i]
+			if (differenceInHours(logEntry.ts, currentDate) < logCleanOldInHours) {
+				// if we reach pretty new entry - stop scanning
+				break
+			}
+			cnt++
+			this.logHashes.delete(logEntry.hash)
+			this.logs.splice(i, 1)
+		}
+		log.debug("LogReader:stop cleaning:del cnt:", cnt)
 	}
 
-	public get logs(): ILogEntry[] {
-		return store.getters.logs
-	}
-
-	logHandler(event, logEntry: ILogEntry) {
+	private logHandler(event, logEntry: ILogEntry) {
 		if (this.logHashes.has(logEntry.hash)) {
 			return
 		}
@@ -52,11 +71,12 @@ class LogReader {
 		}
 	}
 
-	add(entry: ILogEntry) {
-		store.commit("addLog", Object.freeze(entry))
+	private storeEntry(entry: ILogEntry) {
+		Object.freeze(entry)
+		this.logs.unshift(entry)
 	}
 
-	localLogHandler(logEntry: ILogEntry) {
+	private localLogHandler(logEntry: ILogEntry) {
 		if (!LOCAL_CHANNEL_CHANGE_SYSTEM_SENDER_PREFIX.includes(logEntry.sender)) return
 
 		for (let i = 0; i < LOCAL_CHANNEL_CHANGE_SYSTEM_PREFIX.length; i++) {
@@ -74,12 +94,12 @@ class LogReader {
 				if (logEntry.character) characterManager.setLocation(logEntry.character, system)
 			}
 
-			this.add(logEntry)
+			this.storeEntry(logEntry)
 			break
 		}
 	}
 
-	secureLogHandler(logEntry: ILogEntry) {
+	private secureLogHandler(logEntry: ILogEntry) {
 		let words = new Set(logEntry.message.split(" "))
 
 		logEntry.secure = {
@@ -129,7 +149,7 @@ class LogReader {
 			logEntry.secure.clear = true
 		}
 
-		this.add(logEntry)
+		this.storeEntry(logEntry)
 
 		if (logEntry.secure.clear) {
 			logEntry.systems.forEach((system: EVESystem) => system.clearStatus())
@@ -143,8 +163,8 @@ class LogReader {
 		this.alert(logEntry)
 	}
 
-	zkillboardLogHandler(logEntry: ILogEntry) {
-		this.add(logEntry)
+	private zkillboardLogHandler(logEntry: ILogEntry) {
+		this.storeEntry(logEntry)
 
 		if (
 			logEntry.zk!.npcOnly
@@ -208,6 +228,6 @@ class LogReader {
 	}
 }
 
-const logReader = new LogReader()
+const logReader = Vue.observable(new LogReader())
 
 export default logReader

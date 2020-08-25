@@ -13,6 +13,33 @@
 			Не забудьте включить сохранение чатов на диск (меню -> настройки -> чаты -> записывать лог чата в файл,
 			<a @click.prevent.stop="openInternal('https://whointel.space/enable_file_log/')" href="https://whointel.space/enable_file_log/">смотреть с картинками</a>).
 		</v-alert>
+		<br>
+		<v-slider
+			append-icon="mdi-plus"
+			prepend-icon="mdi-minus"
+			:min="1"
+			:max="100"
+			:step="1"
+			v-model="settings.logCleanOldInHours"
+		>
+			<template v-slot:label>
+				<v-tooltip bottom transition="fade-transition">
+					<template v-slot:activator="{ on, attrs }">
+						<div
+							v-bind="attrs"
+							v-on="on"
+						>
+							<v-icon> mdi-help-circle-outline</v-icon>
+							<span class="ml-2">Сколько хранить логи ({{ settings.logCleanOldInHours }} ч.)</span>
+						</div>
+					</template>
+					<span>
+						После заданного числа часов лог записи будут удалены из истории.
+					</span>
+				</v-tooltip>
+			</template>
+		</v-slider>
+
 		<v-data-table
 			:items="settings.logChannels"
 			:headers="headers"
@@ -95,6 +122,5 @@ export default class ChannelsConfig extends Vue {
 	openInternal(link: string) {
 		ipcRenderer.send("openLink", link)
 	}
-
 }
 </script>

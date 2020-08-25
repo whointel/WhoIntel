@@ -35,11 +35,11 @@ events.init()
 if (!layoutService.isLayoutWindow) {
 	api.init()
 	pathService.init()
+	logReader.init()
 	characterManager.init()
 	zkillboard.init()
 	eveStats.init()
 	systemManager.init()
-	logReader.init()
 
 	timeUsedService.init()
 	layoutService.init()

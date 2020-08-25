@@ -96,14 +96,10 @@ export default class LogList extends Vue {
 		this.filterSystem = system
 	}
 
-	get logs(): ILogEntry[] {
-		return logReader.logs
-	}
-
 	get filteredLogs(): ILogEntry[] {
-		if (!this.filterSystem) return this.logs
+		if (!this.filterSystem) return logReader.logs
 
-		return this.logs.filter(log => {
+		return logReader.logs.filter(log => {
 			if (this.filterSystem instanceof EVESystem) {
 				return log.systems.includes(this.filterSystem)
 			}
