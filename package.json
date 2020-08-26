@@ -105,5 +105,9 @@
 	},
 	"browserslist": [
 		"chrome 85"
-	]
+	],
+	"engines": {
+		"node": "^14.8.0",
+		"yarn": "^1.22.4"
+	}
 }
