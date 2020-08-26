@@ -267,7 +267,7 @@ export default class JBConfig extends Vue {
 
 			const jb = systemManager.jb[i]
 			await jb.syncAPI()
-			await Timeout.set(50)
+			await Timeout.set(40)
 		}
 		events.$emit("JB:ready")
 	}

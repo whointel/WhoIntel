@@ -15,7 +15,7 @@
 			to="chrome-window-info"
 			v-if="version.app"
 		>
-			<span class="caption mt-1 d-flex grey--text text--darken-1">{{ version.app }}</span>
+			<span class="caption mt-1 d-flex grey--text text--darken-1">v{{ version.app }}</span>
 		</portal>
 
 		<v-dialog v-model="dialog" persistent max-width="900px">
