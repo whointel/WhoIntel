@@ -17,7 +17,7 @@ export default class TrayMenu {
 	private layouts: ITrayMenuLayout[] = []
 
 	constructor() {
-		this.tray = new Tray(getAsses(isPlatformWin ? "icons/icon.ico" : "icons/icon.icns"), /*TRY_ICON_GUID*/)
+		this.tray = new Tray(getAsses(isPlatformWin ? "icons/icon.ico" : "icons/16x16.png"), /*TRY_ICON_GUID*/)
 		this.tray.setToolTip("WhoIntel")
 
 		if (isPlatformWin) {

@@ -23,7 +23,7 @@ module.exports = {
 				},
 				mac: {
 					category: 'public.app-category.utilities',
-					extraResources: ["build/icons/icon.icns"],
+					extraResources: ["build/icons/16x16.png"],
 				},
 				dmg: {
 					sign: false,

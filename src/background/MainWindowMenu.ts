@@ -44,10 +44,15 @@ const viewMenu: MenuItem = new MenuItem({
 });
 
 const helpMenu: MenuItem = new MenuItem({
-	label: "About",
-	click() {
-		mainWindow.send("open:about")
-	}
+	label: "Help",
+	submenu: [
+		{
+			label: "About",
+			click() {
+				mainWindow.send("open:about")
+			}
+		}
+	]
 })
 
 export const menuTemplate: MenuItem[] = [
