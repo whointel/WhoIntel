@@ -1,24 +1,22 @@
-# eintel
+# WhoIntel
+EVE online secure tool
 
-## Project setup
+Замена устаревшего vintel.
+
+https://whointel.space/
+
+## Разработка
+Установите зависимости
 ```
 yarn install
 ```
 
-### Compiles and hot-reloads for development
+Запустите dev сервер
 ```
-yarn serve
-```
-
-### Compiles and minifies for production
-```
-yarn build
+yarn electron:serve
 ```
 
-### Lints and fixes files
+Сборка дистрибутива под Windows
 ```
-yarn lint
+yarn electron:build:win
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
