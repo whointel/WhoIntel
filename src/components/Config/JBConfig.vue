@@ -26,12 +26,45 @@
 						Шаблон должен содержать символ "»" и быть не менее 3 символов.
 					</v-expansion-panel-content>
 				</v-expansion-panel>
+				<v-expansion-panel>
+					<v-expansion-panel-header disable-icon-rotate>
+						Находит не все JB?
+					</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						Программа умеет искать JB, но CPP сломали свой API поиска - он отдает не все результаты.
+						<br>
+						Параллельно с этим CPP объявили запрет на использование вариантов обхода сломанного API
+						<a @click.prevent.stop="openExternal('https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it')" href="https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it">https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it</a>
+						<br>
+						<br>
+						Что можно сделать?
+						<br>
+						1. Если вы уверены что в системе есть JB, введите в строку поиска " » НАЗВАНИЕ СИСТЕМЫ", например " » Jita" - программа добавить новый JB к общему списку.
+						<br>
+						2. Спрашивать с CPP когда будет починен API тут
+						<a @click.prevent.stop="openExternal('https://github.com/esi/esi-issues/issues/108')" href="https://github.com/esi/esi-issues/issues/108">https://github.com/esi/esi-issues/issues/108</a>
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+				<v-expansion-panel>
+					<v-expansion-panel-header disable-icon-rotate>
+						Искать через ESI API разрешено CPP?
+					</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						CPP <a @click.prevent.stop="openExternal('https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it')" href="https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it">наложили жесткие ограничения</a> на API поиска,
+						однако давно существуют программы, аналогичные WhoIntel, которые используют поиск для поиска Мостов.
+						<br>
+						Пример -
+						<a @click.prevent.stop="openExternal('https://forums.eveonline.com/t/smt-eve-map-tool/3845/217')" href="https://forums.eveonline.com/t/smt-eve-map-tool/3845/217">SMT</a>.
+						<br>
+						<br>
+						Заметка для CPP - данная программа никак не автоматизирует использование ESI API поиска - пользователь самостоятельно инициализирует поиск нажатием на кнопку.
+					</v-expansion-panel-content>
+				</v-expansion-panel>
 			</v-expansion-panels>
-
 			<v-card-title>
 				<v-text-field
 					v-model="findPattern"
-					label="Find JB"
+					label="Введите шаблон для поиска мостов"
 					append-icon="mdi-close"
 					@click:append="clearFindPattern"
 				/>
@@ -150,6 +183,7 @@ import systemManager from "@/service/SystemManager"
 import Timeout from "await-timeout"
 import * as log from "electron-log"
 import events from "@/service/EventBus"
+import {shell} from "electron"
 
 const INITIAL_FIND_PATTERN = " » "
 const ALPHABET_PATTERN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -233,14 +267,21 @@ export default class JBConfig extends Vue {
 		this.$forceUpdate()
 
 		try {
-			if (this.findPattern === INITIAL_FIND_PATTERN) {
-				const alphabet = ALPHABET_PATTERN.split("")
-				for (let i = 0; i < alphabet.length; i++) {
-					await this.loadStructures(INITIAL_FIND_PATTERN + alphabet[i])
-				}
-			} else {
-				await this.loadStructures(this.findPattern)
-			}
+			// bug https://github.com/esi/esi-issues/issues/108
+			// same as done at https://forums.eveonline.com/t/smt-eve-map-tool/3845/217
+
+			// NOTE disable full JB search
+			// if (this.findPattern === INITIAL_FIND_PATTERN) {
+			// 	const alphabet = ALPHABET_PATTERN.split("")
+			// 	for (let i = 0; i < alphabet.length; i++) {
+			// 		await this.loadStructures(INITIAL_FIND_PATTERN + alphabet[i])
+			//    await Timeout.set(500)
+			// 	}
+			// } else {
+			// 	await this.loadStructures(this.findPattern)
+			// }
+
+			await this.loadStructures(this.findPattern)
 
 			if (this.refreshAPIStop) {
 				this.isLoading = false
@@ -267,7 +308,7 @@ export default class JBConfig extends Vue {
 
 			const jb = systemManager.jb[i]
 			await jb.syncAPI()
-			await Timeout.set(40)
+			await Timeout.set(100)
 		}
 		events.$emit("JB:ready")
 	}
@@ -296,6 +337,10 @@ export default class JBConfig extends Vue {
 
 	beforeDestroy() {
 		this.refreshAPIStop = true
+	}
+
+	openExternal(link: string) {
+		shell.openExternal(link)
 	}
 }
 </script>
