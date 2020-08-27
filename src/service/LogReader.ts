@@ -100,7 +100,7 @@ class LogReader {
 	}
 
 	private secureLogHandler(logEntry: ILogEntry) {
-		let words = new Set(logEntry.message.split(" "))
+		const words = logEntry.message.toUpperCase().split(" ")
 
 		logEntry.secure = {
 			question: false,
@@ -108,41 +108,38 @@ class LogReader {
 			boost: false,
 		}
 
-		words.forEach(word => {
+		words.forEach((word, index) => {
 			word = word.replace(/\*/g, '')
 
 			const system = systemManager.getSystemByName(word)
 			if (system) {
 				logEntry.systems.push(system)
-				words.delete(word)
+				words.splice(index, 1)
 			}
 		})
 
-		// UPPER case
-		words = new Set(logEntry.message.toUpperCase().split(" "))
-
 		if (
-			words.has("CLR?")
-			|| words.has("CLEAR?")
-			|| words.has("STATUS")
-			|| words.has("STATUS?")
-			|| words.has("STAT")
-			|| words.has("STAT?")
-			|| words.has("СТАТУС?")
-			|| words.has("СТАТУС")
+			words.includes("CLR?")
+			|| words.includes("CLEAR?")
+			|| words.includes("STATUS")
+			|| words.includes("STATUS?")
+			|| words.includes("STAT")
+			|| words.includes("STAT?")
+			|| words.includes("СТАТУС?")
+			|| words.includes("СТАТУС")
 		) {
 			logEntry.secure.question = true
 		}
 
-		if (words.has("BOOST")) {
+		if (words.includes("BOOST")) {
 			logEntry.secure.boost = true
 		}
 
 		if (
 			(
-				words.has("CLR")
-				|| words.has("CLEAR")
-				|| words.has("СДК")
+				words.includes("CLR")
+				|| words.includes("CLEAR")
+				|| words.includes("СДК")
 			)
 			&& !logEntry.message.endsWith("?")
 		) {
