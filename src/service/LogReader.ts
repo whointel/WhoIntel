@@ -150,14 +150,16 @@ class LogReader {
 
 		if (logEntry.secure.clear) {
 			logEntry.systems.forEach((system: EVESystem) => system.clearStatus())
+			if (settingsService.$.alarmPopupALL) this.alert(logEntry, false)
 			return
 		}
 
 		if (logEntry.secure.question) {
+			if (settingsService.$.alarmPopupALL) this.alert(logEntry, false)
 			return
 		}
 
-		this.alert(logEntry)
+		this.alert(logEntry, true)
 	}
 
 	private zkillboardLogHandler(logEntry: ILogEntry) {
@@ -170,49 +172,76 @@ class LogReader {
 			return
 		}
 
-		this.alert(logEntry)
+		this.alert(logEntry, true)
 	}
 
-	private alert(logEntry: ILogEntry) {
-		const alarmSystems = logEntry.systems.filter((system: EVESystem) => system.setAlarm(logEntry.ts))
-
+	private getNeighbourSystemDistance(alarmSystems: EVESystem[]): string[] {
 		const currentSystem = characterManager.getCurrentSystem()
-		if (
-			currentSystem
-			&& alarmSystems.length
-			&& (settingsService.$.alarmPopup || settingsService.$.alarmSound)
-		) {
-			const neighbours = currentSystem.getNeighbours(settingsService.$.alarmDistance)
-			const alertSystemIds = alarmSystems.map((system: EVESystem) => system.id)
-			const intersectionSystemIds = intersection(alertSystemIds, Object.keys(neighbours).map(Number))
-			const systemDistance: string[] = []
-			intersectionSystemIds.forEach(id => {
-				const system = systemManager.getSystemById(id)
-				if (!system) return
-				systemDistance.push(`${system.name} / ${neighbours[system.id].distance}`)
-			})
 
-			if (systemDistance.length) {
-				if (settingsService.$.alarmSound) {
-					PlayAlarm()
-				}
-				if (settingsService.$.alarmPopup) {
-					this.showNotification(
-						systemDistance.join("\n"),
-						logEntry
-					)
-				}
-			}
+		if (!currentSystem || !alarmSystems.length) return []
+
+		const systemDistance: string[] = []
+
+		const neighbours = currentSystem.getNeighbours(settingsService.$.alarmDistance)
+		const alertSystemIds = alarmSystems.map((system: EVESystem) => system.id)
+		const intersectionSystemIds = intersection(alertSystemIds, Object.keys(neighbours).map(Number))
+		intersectionSystemIds.forEach(id => {
+			const system = systemManager.getSystemById(id)
+			if (!system) return
+			systemDistance.push(`${system.name} / ${neighbours[system.id].distance}`)
+		})
+
+		return systemDistance
+	}
+
+	private alert(logEntry: ILogEntry, isAlertLogEntry: boolean) {
+		if (
+			!settingsService.$.alarmPopup || !settingsService.$.alarmSound
+		) return
+
+		let alarmSystems
+		if (isAlertLogEntry) {
+			alarmSystems = logEntry.systems.filter((system: EVESystem) => system.setAlarm(logEntry.ts))
+		} else {
+			alarmSystems = logEntry.systems
+		}
+
+		const systemDistance = this.getNeighbourSystemDistance(alarmSystems)
+
+		if (systemDistance.length && settingsService.$.alarmSound) {
+			PlayAlarm()
+		}
+
+		if (
+			settingsService.$.alarmPopupALL
+			|| (
+				systemDistance.length
+				&& settingsService.$.alarmPopup
+			)) {
+			this.showNotification(
+				systemDistance.join("\n"),
+				logEntry,
+				isAlertLogEntry && (systemDistance.length > 0)
+			)
 		}
 	}
 
 	public showNotification(
 		systems: string,
-		logEntry: ILogEntry
+		logEntry: ILogEntry,
+		isAlertLogEntry: boolean
 	) {
-		const notification = new Notification('Alert', {
-			body: systems + "\n\n" + logEntry.message,
-			icon: "/icon.png",
+		if (systems.length > 0) {
+			systems += "\n\n"
+		}
+
+		let message = logEntry.message
+		if (message.length === 0) {
+			message = `ZKB Kill in ${logEntry.systems[0].name}`
+		}
+		const notification = new Notification(isAlertLogEntry ? "Alert" : "Feed", {
+			body: systems + message,
+			...(settingsService.platform === "win32" ? {icon: "/icon.png"} : {}),
 		})
 
 		notification.onclick = () => {

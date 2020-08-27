@@ -9,6 +9,7 @@ class SettingsService {
 		alarmDistance: 3,
 		alarmExpireMinutes: 10,
 		alarmPopup: true,
+		alarmPopupALL: false,
 		alarmSound: true,
 		alarmVolume: 100,
 		alarmMedia: null,

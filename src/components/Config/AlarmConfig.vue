@@ -54,6 +54,8 @@
 		</v-text-field>
 
 		<v-switch v-model="settings.alarmPopup" label="Визуальное оповещение (всплывающее окно popup)"/>
+		<v-switch :disabled="!settings.alarmPopup" v-model="settings.alarmPopupALL" label="Дублировать в popup все сообщения (не только сообщения о присутствии врага)"/>
+
 		<v-btn
 			:disabled="!settings.alarmPopup"
 			@click="testAlarmPopup"
@@ -144,7 +146,7 @@ export default class ConfigWindow extends Vue {
 			hash: "TEST",
 			character: null,
 			type: LOG_ENTRY_TYPE.SECURE
-		})
+		}, false)
 	}
 
 	isAlarmMediaDialogShow = false
