@@ -1,6 +1,6 @@
 {
 	"name": "whointel",
-	"version": "0.7.13",
+	"version": "0.7.14-dev",
 	"private": true,
 	"description": "WhoIntel - EVE Online secure tool",
 	"author": "WhoIntel",
