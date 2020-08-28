@@ -7,7 +7,7 @@ import {API_STRUCTURE} from "@/types/API"
 
 const ESI_API_TYPE_JUMP_GATE_ID = 35841
 
-export enum EVE_JUMP_BRIDE_STATUS {
+export enum EVE_JUMP_BRIDGE_STATUS {
 	NEW = "NEW",
 	API_FOUND = "API_FOUND",
 	API_UNAVAILABLE = "API_UNAVAILABLE",
@@ -23,20 +23,20 @@ export const enum JB_DIRECTION_DIRECTION {
 	TO_BOTH,
 }
 
-export interface IEVEJumpBrideExport {
+export interface IEVEJumpBridgeExport {
 	structure_id: number
 	name: string
-	status: EVE_JUMP_BRIDE_STATUS
+	status: EVE_JUMP_BRIDGE_STATUS
 	expires: Date
 
 	systemFromId: number
 	systemToId: number
 }
 
-export default class EVEJumpBride implements IEVEJumpBrideExport {
+export default class EVEJumpBridge implements IEVEJumpBridgeExport {
 	structure_id: number
 	name = ""
-	status: EVE_JUMP_BRIDE_STATUS = EVE_JUMP_BRIDE_STATUS.NEW
+	status: EVE_JUMP_BRIDGE_STATUS = EVE_JUMP_BRIDGE_STATUS.NEW
 	systemFromId: number = 0
 	systemToId: number = 0
 	expires: Date
@@ -79,19 +79,19 @@ export default class EVEJumpBride implements IEVEJumpBrideExport {
 			const code = Number(error.response?.status)
 			switch (true) {
 				case code === 0:
-					this.status = EVE_JUMP_BRIDE_STATUS.API_ERROR
+					this.status = EVE_JUMP_BRIDGE_STATUS.API_ERROR
 					break
 				case code === 403:
-					this.status = EVE_JUMP_BRIDE_STATUS.API_FORBIDDEN
+					this.status = EVE_JUMP_BRIDGE_STATUS.API_FORBIDDEN
 					break
 				case code === 404:
-					this.status = EVE_JUMP_BRIDE_STATUS.API_NOT_FOUND
+					this.status = EVE_JUMP_BRIDGE_STATUS.API_NOT_FOUND
 					break
 				case code >= 500 && code <= 504:
-					this.status = EVE_JUMP_BRIDE_STATUS.API_UNAVAILABLE
+					this.status = EVE_JUMP_BRIDGE_STATUS.API_UNAVAILABLE
 					break
 				default:
-					this.status = EVE_JUMP_BRIDE_STATUS.API_NOT_FOUND
+					this.status = EVE_JUMP_BRIDGE_STATUS.API_NOT_FOUND
 			}
 
 			await this.save()
@@ -99,7 +99,7 @@ export default class EVEJumpBride implements IEVEJumpBrideExport {
 			return
 		}
 		// if (!structure) {
-		// 	this.status = EVE_JUMP_BRIDE_STATUS.API_NOT_FOUND
+		// 	this.status = EVE_JUMP_BRIDGE_STATUS.API_NOT_FOUND
 		// 	await this.save()
 		// 	systemManager.updateJB(this)
 		// 	return
@@ -108,7 +108,7 @@ export default class EVEJumpBride implements IEVEJumpBrideExport {
 		this.expires = new Date(expires)
 
 		if (structure.type_id !== ESI_API_TYPE_JUMP_GATE_ID) {
-			this.status = EVE_JUMP_BRIDE_STATUS.API_WRONG_STRUCTURE
+			this.status = EVE_JUMP_BRIDGE_STATUS.API_WRONG_STRUCTURE
 			await this.save()
 			return
 		}
@@ -124,7 +124,7 @@ export default class EVEJumpBride implements IEVEJumpBrideExport {
 		const systemTo = systemManager.getSystemByName(parts[2])
 		this.systemToId = systemTo?.id || 0
 
-		this.status = EVE_JUMP_BRIDE_STATUS.API_FOUND
+		this.status = EVE_JUMP_BRIDGE_STATUS.API_FOUND
 
 		await this.save()
 	}

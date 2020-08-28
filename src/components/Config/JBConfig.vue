@@ -110,7 +110,7 @@
 					</template>
 
 					<template v-slot:item.name="{ item }">
-						{{ item.status === EVE_JUMP_BRIDE_STATUS.NEW ? item.structure_id : item.name }}
+						{{ item.status === EVE_JUMP_BRIDGE_STATUS.NEW ? item.structure_id : item.name }}
 					</template>
 
 					<template v-slot:item.systemTo.name="{ item }">
@@ -124,26 +124,26 @@
 					<template v-slot:item.status="{ item }">
 						<v-tooltip bottom transition="fade-transition">
 							<template v-slot:activator="{ on, attrs }">
-								<v-icon v-if="item.status === EVE_JUMP_BRIDE_STATUS.NEW"
+								<v-icon v-if="item.status === EVE_JUMP_BRIDGE_STATUS.NEW"
 												v-bind="attrs" v-on="on" small>mdi-new-box
 								</v-icon>
-								<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FOUND"
+								<v-icon v-else-if="item.status === EVE_JUMP_BRIDGE_STATUS.API_FOUND"
 												v-bind="attrs" v-on="on" small color="grey lighten-1">mdi-check
 								</v-icon>
-								<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_UNAVAILABLE"
+								<v-icon v-else-if="item.status === EVE_JUMP_BRIDGE_STATUS.API_UNAVAILABLE"
 												v-bind="attrs" v-on="on" small>mdi-lan-disconnect
 								</v-icon>
-								<v-icon v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FORBIDDEN"
+								<v-icon v-else-if="item.status === EVE_JUMP_BRIDGE_STATUS.API_FORBIDDEN"
 												v-bind="attrs" v-on="on" small>mdi-alert-circle-outline
 								</v-icon>
 								<v-icon v-else
 												v-bind="attrs" v-on="on" small>mdi-alert-circle-outline
 								</v-icon>
 							</template>
-							<span v-if="item.status === EVE_JUMP_BRIDE_STATUS.NEW">Новый</span>
-							<span v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FOUND">OK</span>
-							<span v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_UNAVAILABLE">Ошибка API</span>
-							<span v-else-if="item.status === EVE_JUMP_BRIDE_STATUS.API_FORBIDDEN">Нет доступа к структуре</span>
+							<span v-if="item.status === EVE_JUMP_BRIDGE_STATUS.NEW">Новый</span>
+							<span v-else-if="item.status === EVE_JUMP_BRIDGE_STATUS.API_FOUND">OK</span>
+							<span v-else-if="item.status === EVE_JUMP_BRIDGE_STATUS.API_UNAVAILABLE">Ошибка API</span>
+							<span v-else-if="item.status === EVE_JUMP_BRIDGE_STATUS.API_FORBIDDEN">Нет доступа к структуре</span>
 							<span v-else>{{ item.status }}</span>
 						</v-tooltip>
 					</template>
@@ -176,7 +176,7 @@
 <script lang="ts">
 import {Component, Vue, Watch} from "vue-property-decorator"
 import api from "@/lib/EVEApi"
-import EVEJumpBride, {EVE_JUMP_BRIDE_STATUS} from "@/lib/EVEJumpBride"
+import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 // eslint-disable-next-line no-unused-vars
 import {DataTableHeader} from "vuetify"
 import systemManager from "@/service/SystemManager"
@@ -186,7 +186,7 @@ import events from "@/service/EventBus"
 import {shell} from "electron"
 
 const INITIAL_FIND_PATTERN = " » "
-const ALPHABET_PATTERN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+// const ALPHABET_PATTERN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 @Component
 export default class JBConfig extends Vue {
@@ -232,9 +232,9 @@ export default class JBConfig extends Vue {
 		return systemManager.jb
 	}
 
-	EVE_JUMP_BRIDE_STATUS = EVE_JUMP_BRIDE_STATUS
+	EVE_JUMP_BRIDGE_STATUS = EVE_JUMP_BRIDGE_STATUS
 
-	itemJBClass(jb: EVEJumpBride) {
+	itemJBClass(jb: EVEJumpBridge) {
 		return `JB_TABLE--${jb.status}`
 	}
 
@@ -317,7 +317,7 @@ export default class JBConfig extends Vue {
 		this.findPattern = INITIAL_FIND_PATTERN
 	}
 
-	async refreshJB(jb: EVEJumpBride) {
+	async refreshJB(jb: EVEJumpBridge) {
 		this.isLoading = true
 		try {
 			await jb.syncAPI()
@@ -328,7 +328,7 @@ export default class JBConfig extends Vue {
 		this.isLoading = false
 	}
 
-	async deleteJB(jb: EVEJumpBride) {
+	async deleteJB(jb: EVEJumpBridge) {
 		this.isLoading = true
 		await systemManager.deleteJB(jb)
 		this.isLoading = false

@@ -5,7 +5,7 @@ import store from "@/store"
 import * as log from "electron-log"
 import sortBy from "lodash/sortBy"
 import find from "lodash/find"
-import EVEJumpBride, {EVE_JUMP_BRIDE_STATUS} from "@/lib/EVEJumpBride"
+import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 import db, {IRegionMapExport} from "@/service/Database"
 import Vue from "vue"
 import Timeout from "await-timeout"
@@ -26,9 +26,9 @@ class SystemManager {
 	currentRegion: IREGION | null = null
 	// currentSystem: EVESystem | null = null
 
-	jb: EVEJumpBride[] = Vue.observable([])
-	jbByStructure: { [key: string]: EVEJumpBride } = {}
-	jbBySystemId: { [key: number]: EVEJumpBride } = {}
+	jb: EVEJumpBridge[] = Vue.observable([])
+	jbByStructure: { [key: string]: EVEJumpBridge } = {}
+	jbBySystemId: { [key: number]: EVEJumpBridge } = {}
 	private jbIDtoSystemID: { [key: number]: number } = {}
 
 	constructor() {
@@ -137,7 +137,7 @@ class SystemManager {
 		}
 	}
 
-	updateJB(jb: EVEJumpBride, value: any = null) {
+	updateJB(jb: EVEJumpBridge, value: any = null) {
 		const systemFromId = this.jbIDtoSystemID[jb.structure_id]
 		if (systemFromId) {
 			delete this.jbIDtoSystemID[jb.structure_id]
@@ -147,13 +147,13 @@ class SystemManager {
 		if (value) {
 			jb = Object.assign(jb, value)
 		}
-		if (jb.systemFromId && jb.status === EVE_JUMP_BRIDE_STATUS.API_FOUND) {
+		if (jb.systemFromId && jb.status === EVE_JUMP_BRIDGE_STATUS.API_FOUND) {
 			this.jbBySystemId[jb.systemFromId] = jb
 			this.jbIDtoSystemID[jb.structure_id] = jb.systemFromId
 		}
 	}
 
-	async deleteJB(jb: EVEJumpBride) {
+	async deleteJB(jb: EVEJumpBridge) {
 		await jb.delete()
 		const systemFromId = this.jbIDtoSystemID[jb.structure_id]
 		if (systemFromId) {
@@ -167,11 +167,11 @@ class SystemManager {
 		}
 	}
 
-	async addJB(structure_id: number): Promise<EVEJumpBride> {
+	async addJB(structure_id: number): Promise<EVEJumpBridge> {
 		const findJB = this.jbByStructure[structure_id]
 		if (findJB) return findJB
 
-		const jb = Vue.observable(new EVEJumpBride(structure_id))
+		const jb = Vue.observable(new EVEJumpBridge(structure_id))
 
 		// NOTE do not save empty jbs
 		// await jb.save()

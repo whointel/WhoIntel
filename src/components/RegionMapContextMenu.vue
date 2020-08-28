@@ -205,7 +205,7 @@ import systemManager from "@/service/SystemManager"
 // eslint-disable-next-line no-unused-vars
 import {I_CONTEXT_MENU, IREGION} from "@/types/MAP"
 import events from "@/service/EventBus"
-import EVEJumpBride from "@/lib/EVEJumpBride"
+import EVEJumpBridge from "@/lib/EVEJumpBridge"
 import {aStar} from "ngraph.path"
 import createGraph from "ngraph.graph"
 import find from "lodash/find"
@@ -341,7 +341,7 @@ export default class RegionMapContextMenu extends Vue {
 		systemManager.markSystem(this.jb!.systemTo!, true, true)
 	}
 
-	get jb(): EVEJumpBride | null {
+	get jb(): EVEJumpBridge | null {
 		if (!this.system) return null
 
 		const jb = systemManager.jbBySystemId[this.system.id]

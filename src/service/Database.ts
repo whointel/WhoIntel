@@ -1,5 +1,5 @@
 import {DBSchema, openDB} from "idb/with-async-ittr.js"
-import {IEVEJumpBrideExport} from "@/lib/EVEJumpBride"
+import {IEVEJumpBridgeExport} from "@/lib/EVEJumpBridge"
 
 export interface IRegionMapExport {
 	id: number
@@ -18,7 +18,7 @@ export interface ICharacterExport {
 
 interface IntelDB extends DBSchema {
 	jb: {
-		value: IEVEJumpBrideExport
+		value: IEVEJumpBridgeExport
 		key: number
 	},
 	regionMap: {

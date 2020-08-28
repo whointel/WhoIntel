@@ -1,7 +1,7 @@
 import {aStar, PathFinder} from "ngraph.path"
 import createGraph, {Graph} from "ngraph.graph"
 import systemManager from "@/service/SystemManager"
-import {EVE_JUMP_BRIDE_STATUS} from "@/lib/EVEJumpBride"
+import {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 import events from "@/service/EventBus"
 import * as log from "electron-log"
 
@@ -43,7 +43,7 @@ class PathService {
 			if (
 				!jb.systemFromId
 				|| !jb.systemToId
-				|| jb.status !== EVE_JUMP_BRIDE_STATUS.API_FOUND
+				|| jb.status !== EVE_JUMP_BRIDGE_STATUS.API_FOUND
 			) continue
 
 			this.graph.addLink(jb.systemFromId, jb.systemToId)

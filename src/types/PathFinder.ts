@@ -1,10 +1,10 @@
 import EVESystem from "@/lib/EVESystem"
-import EVEJumpBride from "@/lib/EVEJumpBride"
+import EVEJumpBridge from "@/lib/EVEJumpBridge"
 
 export interface IPATHPOINT {
 	path: Array<{
 		system: EVESystem
-		jb?: EVEJumpBride
+		jb?: EVEJumpBridge
 	}>
 	structures: number[]
 }

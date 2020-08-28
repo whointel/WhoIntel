@@ -37,7 +37,7 @@ import EVESystem, {MapCoordinates} from "@/lib/EVESystem"
 // eslint-disable-next-line no-unused-vars,no-undef
 import Timeout = NodeJS.Timeout
 import PerfectScrollbar from "perfect-scrollbar"
-import {JB_DIRECTION_DIRECTION} from "@/lib/EVEJumpBride"
+import {JB_DIRECTION_DIRECTION} from "@/lib/EVEJumpBridge"
 // eslint-disable-next-line no-unused-vars
 import {IRegionMapExport} from "@/service/Database"
 import * as log from "electron-log"
