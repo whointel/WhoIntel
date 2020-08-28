@@ -25,4 +25,4 @@ jobs:
         - yarn: true
           directories:
             - node_modules
-            - "%USERPROFILE%\.electron"
+            - '%USERPROFILE%\.electron'
