@@ -1,5 +1,3 @@
-const electronBuilderPublishOptions = require("./vue.electronBuilderPublish.config")
-
 module.exports = {
 	lintOnSave: false,
 	transpileDependencies: [
@@ -29,7 +27,16 @@ module.exports = {
 				dmg: {
 					sign: false,
 				},
-				publish: electronBuilderPublishOptions
+				publish: [
+					{
+						"provider": "github",
+					},
+					{
+						"provider": "s3",
+						"endpoint": "https://update.whointel.space",
+						"bucket": "eintel-update"
+					},
+				]
 			}
 		},
 

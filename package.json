@@ -9,10 +9,7 @@
 		"serve": "vue-cli-service serve",
 		"build": "vue-cli-service build",
 		"lint": "vue-cli-service lint",
-		"electron:build:win": "vue-cli-service electron:build --win --x64 -p never",
-		"electron:build:publish:win": "vue-cli-service electron:build --win --x64 -p always",
-		"electron:build:mac": "vue-cli-service electron:build --mac --x64 -p never",
-		"electron:build:publish:mac": "vue-cli-service electron:build --mac --x64 -p always",
+		"electron:build": "vue-cli-service electron:build",
 		"electron:serve": "vue-cli-service electron:serve",
 		"electron:serve:debug": "vue-cli-service electron:serve --debug",
 		"postinstall": "electron-builder install-app-deps",
@@ -111,7 +108,7 @@
 		"chrome 85"
 	],
 	"engines": {
-		"node": "^14.8.0",
+		"node": "^12.18.3",
 		"yarn": "^1.22.4"
 	}
 }

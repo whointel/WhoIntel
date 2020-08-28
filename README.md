@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/whointel/WhoIntel.svg?branch=master)](https://travis-ci.org/whointel/WhoIntel)
+
 # WhoIntel
 EVE online secure tool
 

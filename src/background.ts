@@ -1,7 +1,7 @@
 import {app, protocol, ipcMain, shell} from "electron"
 import eveMap from "@/background/EVEMap"
 import installExtension, {VUEJS_DEVTOOLS} from "electron-devtools-installer"
-import LogListener, {EVE_LOG_FOLDER} from "@/background/logReader"
+import LogListener, {EVE_LOG_FOLDER} from "@/background/LogReader"
 import OpenLink from "@/background/OpenLink"
 import AuthEVE from "@/background/AuthEVE"
 import createMenu from "@/background/MainWindowMenu"
