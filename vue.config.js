@@ -10,6 +10,7 @@ module.exports = {
 		target: 'electron-renderer'
 	},
 	pluginOptions: {
+
 		electronBuilder: {
 			mainProcessWatch: ['src/background/*'],
 			builderOptions: {
@@ -30,6 +31,13 @@ module.exports = {
 				},
 				publish: electronBuilderPublishOptions
 			}
+		},
+
+		i18n: {
+			locale: 'en',
+			fallbackLocale: 'ru',
+			localeDir: 'locales',
+			enableInSFC: true
 		}
 	},
 

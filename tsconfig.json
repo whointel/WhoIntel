@@ -13,6 +13,7 @@
 		"sourceMap": true,
 		"baseUrl": ".",
 		"types": [
+			"webpack",
 			"webpack-env",
 			"vuetify"
 		],

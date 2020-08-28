@@ -6,6 +6,7 @@ import App from "@/App.vue"
 import LayoutWindow from "@/LayoutWindow.vue"
 import store from "@/store"
 import vuetify from "@/plugins/vuetify"
+import i18n from "@/plugins/i18n"
 import PortalVue from "portal-vue"
 import api from "@/lib/EVEApi"
 import events from "@/service/EventBus"
@@ -55,6 +56,7 @@ if (!layoutService.isLayoutWindow) {
 	}, 60000);
 
 	new Vue({
+		i18n,
 		store,
 		vuetify,
 		render: h => h(App)
@@ -62,6 +64,7 @@ if (!layoutService.isLayoutWindow) {
 } else {
 
 	new Vue({
+		i18n,
 		store,
 		vuetify,
 		render: h => h(LayoutWindow)

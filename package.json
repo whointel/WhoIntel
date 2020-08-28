@@ -17,7 +17,8 @@
 		"electron:serve:debug": "vue-cli-service electron:serve --debug",
 		"postinstall": "electron-builder install-app-deps",
 		"postuninstall": "electron-builder install-app-deps",
-		"electron:generate-icons": "electron-icon-builder --input=./public/icon.png --output=build --flatten"
+		"electron:generate-icons": "electron-icon-builder --input=./public/icon.png --output=build --flatten",
+		"i18n:report": "vue-cli-service i18n:report --src './src/**/*.?(js|vue)' --locales './src/locales/**/*.json'"
 	},
 	"main": "background.js",
 	"dependencies": {
@@ -50,6 +51,7 @@
 		"vue": "^2.6.12",
 		"vue-class-component": "^7.2.5",
 		"vue-dragscroll": "^2.1.0",
+		"vue-i18n": "^8.21.0",
 		"vue-property-decorator": "^9.0.0",
 		"vuetify": "^2.3.10",
 		"vuex": "^3.5.1",
@@ -58,6 +60,7 @@
 	"devDependencies": {
 		"@babel/plugin-proposal-optional-chaining": "^7.11.0",
 		"@fortawesome/fontawesome-free": "^5.14.0",
+		"@intlify/vue-i18n-loader": "^1.0.0",
 		"@mdi/font": "^5.5.55",
 		"@types/cheerio": "^0.22.21",
 		"@types/lodash": "^4.14.160",
@@ -84,6 +87,7 @@
 		"sass-loader": "^8.0.2",
 		"typescript": "~4.0.2",
 		"vue-cli-plugin-electron-builder": "^2.0.0-rc.4",
+		"vue-cli-plugin-i18n": "^1.0.1",
 		"vue-cli-plugin-vuetify": "^2.0.7",
 		"vue-template-compiler": "^2.6.12",
 		"vuetify-loader": "^1.6.0"
