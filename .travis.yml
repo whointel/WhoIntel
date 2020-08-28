@@ -8,14 +8,21 @@ jobs:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
       script: yarn electron:build --mac
+      cache:
+        yarn: true
+        directories:
+          - node_modules
+          - $HOME/.cache/electron
+          - $HOME/.cache/electron-builder
 
     - os: windows
       language: node_js
       node_js: "12"
       script: yarn electron:build --win
-
-cache:
-  directories:
-    - node_modules
-    - $HOME/.cache/electron
-    - $HOME/.cache/electron-builder
+      env:
+        - YARN_GPG=no
+      cache:
+        yarn: true
+        directories:
+          - node_modules
+          - "%USERPROFILE%\.electron"
