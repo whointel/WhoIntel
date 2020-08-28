@@ -1,15 +1,15 @@
 <template>
 	<v-dialog v-model="dialog" persistent max-width="900px">
 		<v-card>
-			<v-card-title class="headline">Настройки</v-card-title>
+			<v-card-title class="headline">{{ $t("settings") }}</v-card-title>
 			<v-tabs v-model="tab" grow>
-
-				<v-tab href="#alarm" :disabled="windowLock">
-					Alert
-				</v-tab>
 
 				<v-tab href="#other" :disabled="windowLock">
 					Разное
+				</v-tab>
+
+				<v-tab href="#alarm" :disabled="windowLock">
+					Alert
 				</v-tab>
 
 				<v-tab href="#channels" :disabled="windowLock">
@@ -48,6 +48,15 @@
 					<v-tab-item value="other">
 						<v-card flat min-height="400px">
 							<v-card-text>
+								<v-select
+									v-model="settings.lang"
+									:items="APP_LANGUAGES"
+									item-text="name"
+									item-value="code"
+									prepend-icon="mdi-translate"
+									label="Language / Язык"
+								/>
+
 								<v-switch v-model="settings.showFleetBtn" label="Выводить переключатель панели флота"/>
 								<v-switch v-model="settings.showOverlayBtn" label="Выводить переключатель слоев (alerts, kills, jumps)"/>
 								<v-switch v-model="settings.followCharacterRegion" label="Автоматическая смена региона при перемещении персонажа">
@@ -157,7 +166,7 @@
 import {Component, Vue} from "vue-property-decorator"
 import events from "@/service/EventBus"
 import {ipcRenderer} from "electron"
-import settingsService from "@/service/settings"
+import settingsService, {APP_LANGUAGES} from "@/service/settings"
 import systemManager from "@/service/SystemManager"
 import JBConfig from "@/components/Config/JBConfig.vue"
 import zkillboard from "@/service/ZKillboard"
@@ -178,6 +187,8 @@ export default class ConfigWindow extends Vue {
 	tab: string | null = null
 
 	windowLock = false
+
+	APP_LANGUAGES = APP_LANGUAGES
 
 	closeConfigDialog() {
 		this.dialog = false
@@ -243,3 +254,14 @@ export default class ConfigWindow extends Vue {
 	}
 }
 </script>
+
+<i18n>
+{
+	"en": {
+		"settings": "Settings"
+	},
+	"ru": {
+		"settings": "Настройки"
+	}
+}
+</i18n>

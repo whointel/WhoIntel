@@ -3,6 +3,19 @@ import storageService from "@/service/storage"
 import debounce from "lodash/debounce"
 import Platform = NodeJS.Platform
 import {ipcRenderer} from "electron"
+import vuetify from "@/plugins/vuetify"
+import i18n from "@/plugins/i18n"
+
+export const APP_LANGUAGES = [
+	{
+		code: "en",
+		name: "English",
+	},
+	{
+		code: "ru",
+		name: "Русский",
+	},
+]
 
 class SettingsService {
 	private settingsDefault = {
@@ -21,6 +34,7 @@ class SettingsService {
 		externalURLs: [],
 		useNavigationBtn: true,
 		showFleetBtn: false,
+		lang: "en",
 		showOverlayBtn: true,
 		layoutsWindowAdvancedMode: false,
 		followCharacterRegion: true,
@@ -42,6 +56,8 @@ class SettingsService {
 		})
 
 		this.settings.$watch("settings", debounce(this.watcher.bind(this), 300), {deep: true})
+
+		this.setLanguage()
 	}
 
 	public get $() {
@@ -50,10 +66,16 @@ class SettingsService {
 
 	private watcher() {
 		storageService.setObject("settings", this.$)
+		this.setLanguage()
 	}
 
 	getFlatChannels(): string[] {
 		return this.$.logChannels.map((channel: { [name: string]: string }) => channel.name).filter(name => name && name.length)
+	}
+
+	private setLanguage() {
+		vuetify.framework.lang.current = this.$.lang
+		i18n.locale = this.$.lang
 	}
 }
 
