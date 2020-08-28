@@ -78,6 +78,7 @@ export default class AuthEVE {
 			)
 		} catch (e) {
 			this.sendAuthStatus(AUTH_STATUSES.ERROR, e)
+			log.error("AuthEVE:", e)
 			return
 		}
 	}
@@ -195,6 +196,7 @@ export default class AuthEVE {
 			)
 		} catch (e) {
 			this.sendAuthStatus(AUTH_STATUSES.ERROR, e)
+			log.error("AuthEVE:", e)
 			return
 		}
 	}

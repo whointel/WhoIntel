@@ -194,7 +194,8 @@ class EVEApi {
 					refresh_token: data.auth.refresh_token,
 					access_token: data.auth.access_token,
 					token: data.auth.token,
-					authStatus: AUTH_STATUSES.AUTH
+					authStatus: AUTH_STATUSES.AUTH,
+					authError: null,
 				})
 
 				this.startRefreshTimer()

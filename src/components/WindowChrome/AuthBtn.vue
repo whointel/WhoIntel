@@ -23,6 +23,18 @@
 					<auth-btn-character-list/>
 				</v-card-text>
 
+				<v-card-text v-if="api.auth.authError">
+					<v-alert
+						border="left"
+						colored-border
+						type="warning"
+						elevation="2"
+					>
+						Ошибка авторизации:<br>
+						{{ api.auth.authError }}
+					</v-alert>
+				</v-card-text>
+
 				<v-card-text>
 					Авторизация через игру позволит отправлять маршрут, получать информацию о пролинкованных игроках, искать актуальные мосты (Jump Bridge).
 				</v-card-text>
@@ -83,6 +95,18 @@
 							times login: {{ online.logins }}<br>
 						</v-col>
 					</v-row>
+
+					<v-alert
+						border="left"
+						colored-border
+						type="warning"
+						elevation="2"
+						v-if="api.auth.authError"
+					>
+						Ошибка авторизации:<br>
+						{{ api.auth.authError }}
+					</v-alert>
+
 				</v-card-text>
 
 				<v-card-actions>
