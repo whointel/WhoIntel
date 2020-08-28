@@ -24,7 +24,7 @@
 				<v-card-text>
 					<p>Reborn of vintel.</p>
 					<p>
-						All Eve Related Materials are Property Of CCP Games.
+						All EVE Online related materials are property of CCP Games.
 						<br>
 						Карты регионов скачиваются с сайта <a @click.prevent.stop="openExternal('https://evemaps.dotlan.net')" href="https://evemaps.dotlan.net">https://evemaps.dotlan.net</a>.
 					</p>
@@ -44,7 +44,8 @@
 
 					<p>app: {{ version.app }}<br>
 						electron: {{ version.electron }}<br>
-						website: <a @click.prevent.stop="openExternal('https://whointel.space/')" href="https://whointel.space/">whointel.space/</a>
+						website: <a @click.prevent.stop="openExternal('https://whointel.space/')" href="https://whointel.space/">whointel.space</a><br>
+						sources: <a @click.prevent.stop="openExternal('https://github.com/whointel/WhoIntel')" href="https://github.com/whointel/WhoIntel">GitHub</a><br>
 					</p>
 
 					<p v-if="status === UPDATE_STATUSES.CHECKING_FOR_UPDATE">
