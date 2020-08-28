@@ -100,6 +100,8 @@ export default class AuthEVE {
 			},
 		})
 
+		this.authWindow.setMenu(null)
+
 		this.authState = base64url(crypto.randomBytes(32))
 
 		this.authWindow.on("closed", () => {
