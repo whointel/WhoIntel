@@ -92,7 +92,7 @@ export default class LogWatcher extends EventEmitter {
 		this.filesWatched.forEach((stats, filepath) => {
 			try {
 				const stats_new = fs.statSync(filepath)
-				if (stats_new.mtimeMs !== stats.mtimeMs) {
+				if (stats_new.size !== stats.size) {
 					this.filesWatched.set(filepath, stats_new)
 					this.emit("change", filepath, stats_new)
 				}
