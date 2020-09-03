@@ -16,6 +16,9 @@ module.exports = {
 				remoteBuild: false,
 				electronUpdaterCompatibility: '>= 2.16',
 				extraResources: ["build/alarm.wav", "build/db/*"],
+				nsis: {
+					include: "installer.nsh",
+				},
 				win: {
 					artifactName: '${productName}-${version}-win64.${ext}',
 					extraResources: ["build/icons/icon.ico"],
