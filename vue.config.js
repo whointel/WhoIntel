@@ -30,12 +30,7 @@ module.exports = {
 				publish: [
 					{
 						"provider": "github",
-					},
-					{
-						"provider": "s3",
-						"endpoint": "https://update.whointel.space",
-						"bucket": "eintel-update"
-					},
+					}
 				]
 			}
 		},

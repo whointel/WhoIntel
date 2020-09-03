@@ -5,7 +5,7 @@
 	"description": "WhoIntel - EVE Online secure tool",
 	"repository": "github:whointel/WhoIntel",
 	"license": "MIT",
-	"author": "Dmitry Shulgachik",
+	"author": "WhoIntel",
 	"homepage": "https://whointel.space",
 	"scripts": {
 		"serve": "vue-cli-service serve",
