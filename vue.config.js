@@ -13,6 +13,7 @@ module.exports = {
 			mainProcessWatch: ['src/background/*'],
 			builderOptions: {
 				appId: 'space.whointel.app',
+				productName: "WhoIntel",
 				remoteBuild: false,
 				electronUpdaterCompatibility: '>= 2.16',
 				extraResources: ["build/alarm.wav", "build/db/*"],
