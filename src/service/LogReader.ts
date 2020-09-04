@@ -153,16 +153,20 @@ class LogReader {
 
 		if (logEntry.secure.clear) {
 			logEntry.systems.forEach((system: EVESystem) => system.clearStatus())
-			if (settingsService.$.alarmPopupALL) this.alert(logEntry, false)
+			if (settingsService.$.alarmPopup && settingsService.$.alarmPopupALL) {
+				this.alert(logEntry, false, logEntry.systems)
+			}
 			return
 		}
 
 		if (logEntry.secure.question) {
-			if (settingsService.$.alarmPopupALL) this.alert(logEntry, false)
+			if (settingsService.$.alarmPopup && settingsService.$.alarmPopupALL) {
+				this.alert(logEntry, false, logEntry.systems)
+			}
 			return
 		}
 
-		this.alert(logEntry, true)
+		this.alert(logEntry, true, logEntry.systems.filter((system: EVESystem) => system.setAlarm(logEntry.ts)))
 	}
 
 	private zkillboardLogHandler(logEntry: ILogEntry) {
@@ -175,7 +179,7 @@ class LogReader {
 			return
 		}
 
-		this.alert(logEntry, true)
+		this.alert(logEntry, true, logEntry.systems)
 	}
 
 	private getNeighbourSystemDistance(alarmSystems: EVESystem[]): string[] {
@@ -197,17 +201,11 @@ class LogReader {
 		return systemDistance
 	}
 
-	private alert(logEntry: ILogEntry, isAlertLogEntry: boolean) {
+	private alert(logEntry: ILogEntry, isAlertLogEntry: boolean, alarmSystems: EVESystem[]) {
 		if (
-			!settingsService.$.alarmPopup || !settingsService.$.alarmSound
+			!settingsService.$.alarmPopup
+			&& !settingsService.$.alarmSound
 		) return
-
-		let alarmSystems
-		if (isAlertLogEntry) {
-			alarmSystems = logEntry.systems.filter((system: EVESystem) => system.setAlarm(logEntry.ts))
-		} else {
-			alarmSystems = logEntry.systems
-		}
 
 		const systemDistance = this.getNeighbourSystemDistance(alarmSystems)
 		log.info("LogReader:alert:systemDistance:", systemDistance)
@@ -217,11 +215,12 @@ class LogReader {
 		}
 
 		if (
-			settingsService.$.alarmPopupALL
-			|| (
-				systemDistance.length
-				&& settingsService.$.alarmPopup
-			)) {
+			settingsService.$.alarmPopup
+			&& (
+				settingsService.$.alarmPopupALL
+				|| systemDistance.length
+			)
+		) {
 			this.showNotification(
 				systemDistance.join("\n"),
 				logEntry,
