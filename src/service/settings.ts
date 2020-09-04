@@ -5,6 +5,7 @@ import Platform = NodeJS.Platform
 import {ipcRenderer} from "electron"
 import vuetify from "@/plugins/vuetify"
 import i18n from "@/plugins/i18n"
+import * as log from "electron-log"
 
 export const APP_LANGUAGES = [
 	{
@@ -58,6 +59,7 @@ class SettingsService {
 		this.settings.$watch("settings", debounce(this.watcher.bind(this), 300), {deep: true})
 
 		this.setLanguage()
+		log.info("SettingsService:load settings:", JSON.parse(JSON.stringify(this.$)))
 	}
 
 	public get $() {
@@ -66,6 +68,7 @@ class SettingsService {
 
 	private watcher() {
 		storageService.setObject("settings", this.$)
+		log.info("SettingsService:save settings:", JSON.parse(JSON.stringify(this.$)))
 		this.setLanguage()
 	}
 

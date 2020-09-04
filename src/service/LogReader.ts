@@ -51,7 +51,10 @@ class LogReader {
 	}
 
 	private logHandler(event, logEntry: ILogEntry) {
+		log.info("LogReader:logHandler:", logEntry)
+
 		if (this.logHashes.has(logEntry.hash)) {
+			log.info("LogReader:logHandler:ignore due hash duplicate")
 			return
 		}
 		this.logHashes.add(logEntry.hash)
@@ -207,6 +210,7 @@ class LogReader {
 		}
 
 		const systemDistance = this.getNeighbourSystemDistance(alarmSystems)
+		log.info("LogReader:alert:systemDistance:", systemDistance)
 
 		if (systemDistance.length && settingsService.$.alarmSound) {
 			PlayAlarm()
