@@ -17,7 +17,7 @@ import layoutsWindow from "@/background/LayoutsWindow"
 import {dirname} from "path"
 import {isPlatformMacOS, isPlatformWin} from "@/background/helpers"
 
-log.transports.file.maxSize = 1024 * 1024 * 20 // 20Mb
+log.transports.file.maxSize = 1024 * 1024 * 20; // 20Mb
 
 // if (process.argv[2] === "--sdeparse") {
 // 	await SDEParser(process.argv[3])

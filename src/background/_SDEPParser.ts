@@ -3,21 +3,18 @@ import fs from "fs"
 import readline from "readline"
 import * as path from "path"
 
-// const {once} = require('events')
-
 async function readRegions(invUniqueNamesPath: string) {
-	const fileStream = fs.createReadStream(invUniqueNamesPath, "utf8")
+	let fileStream = fs.createReadStream(invUniqueNamesPath, "utf8")
 
-	const lineReader = readline.createInterface({
+	let lineReader = readline.createInterface({
 		input: fileStream,
 	})
 
-	const regions = {}
+	const regionNames = {}
 
 	let nLine = -1
 	let curId = 0
 
-	// lineReader.on('line', (line) => {
 	for await (const line of lineReader) {
 		if (
 			line !== "-   groupID: 3"
@@ -36,14 +33,42 @@ async function readRegions(invUniqueNamesPath: string) {
 		}
 
 		nLine = -1
-		regions[curId] = line.substr(14, line.length - 14)
+		regionNames[curId] = line.substr(14, line.length - 14)
 	}
 
-	// await once(lineReader, 'close')
-	return regions
+	fileStream = fs.createReadStream(invUniqueNamesPath, "utf8")
+
+	lineReader = readline.createInterface({
+		input: fileStream,
+	})
+	const systemNames = {}
+	nLine = -1
+	curId = 0
+	for await (const line of lineReader) {
+		if (
+			line !== "-   groupID: 5"
+			&& nLine === -1
+		) continue
+
+		if (nLine === -1) {
+			nLine = 0
+			continue
+		}
+
+		if (nLine === 0) {
+			nLine = 1
+			curId = Number(line.substr(12, 8))
+			continue
+		}
+
+		nLine = -1
+		systemNames[curId] = line.substr(14, line.length - 14)
+	}
+
+	return {regionNames, systemNames}
 }
 
-async function loopRegions(regionsPath: string, regionNames: any) {
+async function loopRegions(regionsPath: string, regionNames: any, systemNames: any) {
 	const SystemDB: any[] = []
 	const StarGateDB: any = {}
 	const RegionDB: any = {}
@@ -86,6 +111,7 @@ async function loopRegions(regionsPath: string, regionNames: any) {
 				const systemData = fs.readFileSync(systemDataFile).toString()
 				const systemYaml = YAML.parse(systemData)
 				const systemID = systemYaml.solarSystemID
+				console.log(`\t\t\t ${systemNames[systemID]}:`)
 
 				const stargates: any[] = []
 				for (const [sgID, sg] of Object.entries(systemYaml.stargates)) {
@@ -101,7 +127,7 @@ async function loopRegions(regionsPath: string, regionNames: any) {
 
 				SystemDB.push({
 					id: systemID,
-					name: system,
+					name: systemNames[systemID] || system,
 					regionId: regionID,
 					// regionName: regionName,
 					constellationName: constellation,
@@ -125,7 +151,6 @@ async function readShipNames(typesIdsPath: string) {
 	let groupId = 0
 	let name = ""
 
-	// lineReader.on('line', (line: string) => {
 	for await (const line of lineReader) {
 		if (!line.startsWith(" ")) {
 			typeId = Number(line)
@@ -163,29 +188,29 @@ async function readShipNames(typesIdsPath: string) {
 		}
 	}
 
-	// await once(lineReader, 'close')
 	return ids
 }
 
 export const SDEParser = async (/*base_path: string*/) => {
-	const base_path = "c:\\Users\\dmitry\\Downloads\\sde\\sde\\"
+	// const base_path = "d:\\Projects\\EVE\\sde\\"
 	// const invUniqueNamesPath = path.join(base_path, "bsd", "invUniqueNames.yaml")
-	// const regionNames = await readRegions(invUniqueNamesPath)
-	// const regionsPath = path.join(base_path, "fsd", "universe", "eve")
-	// // @ts-ignore
-	// const {SystemDB, StarGateDB, RegionDB} = await loopRegions(regionsPath, regionNames)
+	// const {regionNames, systemNames} = await readRegions(invUniqueNamesPath)
 	//
+	// const regionsPath = path.join(base_path, "fsd", "universe", "eve")
+	// // // @ts-ignore
+	// const {SystemDB, StarGateDB, RegionDB} = await loopRegions(regionsPath, regionNames, systemNames)
+	// //
 	// const SystemDBPath = path.join(base_path, "SystemDB.json")
 	// fs.writeFileSync(SystemDBPath, JSON.stringify(SystemDB))
-	//
+	// //
 	// const StarGateDBPath = path.join(base_path, "StarGateDB.json")
 	// fs.writeFileSync(StarGateDBPath, JSON.stringify(StarGateDB))
 	//
 	// const RegionDBPath = path.join(base_path, "RegionDB.json")
 	// fs.writeFileSync(RegionDBPath, JSON.stringify(RegionDB))
-
-	const shipNames = await readShipNames(path.join(base_path, "fsd", "typeIDs.yaml"))
-
-	const ShipsDBPath = path.join(base_path, "ShipsDB.json")
-	fs.writeFileSync(ShipsDBPath, JSON.stringify(shipNames))
+	//
+	// const shipNames = await readShipNames(path.join(base_path, "fsd", "typeIDs.yaml"))
+	//
+	// const ShipsDBPath = path.join(base_path, "ShipsDB.json")
+	// fs.writeFileSync(ShipsDBPath, JSON.stringify(shipNames))
 }
