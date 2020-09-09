@@ -10,6 +10,7 @@ import characterManager from "@/service/CharacterManager"
 import Vue from "vue"
 import * as log from "electron-log"
 import differenceInHours from "date-fns/differenceInHours"
+import clone from "lodash/clone"
 
 const LOCAL_CHANNEL_CHANGE_SYSTEM_SENDER_PREFIX = ["EVE System", "Система EVE"]
 const LOCAL_CHANNEL_CHANGE_SYSTEM_PREFIX = ["Channel changed to Local : ", "Канал изменен на Локальный: "]
@@ -50,8 +51,15 @@ class LogReader {
 		log.debug("LogReader:stop cleaning:del cnt:", cnt)
 	}
 
+	private doLogLogEntry(logEntry: ILogEntry) {
+		const logEntryClone = clone(logEntry)
+		// @ts-ignore
+		logEntryClone.systems = logEntryClone.systems.map((system: EVESystem) => `EVESystem [${system.name} #${system.id}]`)
+		log.info("LogReader:logHandler:", logEntryClone)
+	}
+
 	private logHandler(event, logEntry: ILogEntry) {
-		log.info("LogReader:logHandler:", logEntry)
+		this.doLogLogEntry(logEntry)
 
 		if (this.logHashes.has(logEntry.hash)) {
 			log.info("LogReader:logHandler:ignore due hash duplicate")
