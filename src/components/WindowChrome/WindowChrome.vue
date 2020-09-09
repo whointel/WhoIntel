@@ -47,7 +47,7 @@
 					>mdi-information-variant
 					</v-icon>
 				</template>
-				используется памяти:<br>
+				{{ $t("memory_usage") }}:<br>
 				<span>{{ usedJSHeapSize }}/{{ totalJSHeapSize }} Mb front</span>
 				<br>
 				<span>{{ heapTotal }}/{{ heapUsed }}/{{ externalMem }} Mb back</span>
@@ -261,3 +261,14 @@ export default class WindowChrome extends Vue {
 	}
 }
 </style>
+
+<i18n>
+{
+	"en": {
+		"memory_usage": "memory usage"
+	},
+	"ru": {
+		"memory_usage": "используется памяти"
+	}
+}
+</i18n>

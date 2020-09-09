@@ -19,15 +19,15 @@
 						color="red"
 					>mdi-map-marker-path
 					</v-icon>
-					Каналы
+					{{ $t("channels") }}
 				</v-tab>
 
 				<v-tab href="#winLayouts" :disabled="windowLock">
-					Слои
+					{{ $t("window") }}
 				</v-tab>
 
 				<v-tab href="#extWindow" :disabled="windowLock">
-					Внешние
+					{{ $t("ext") }}
 				</v-tab>
 
 				<v-tab href="#favorites" :disabled="windowLock">
@@ -258,10 +258,16 @@ export default class ConfigWindow extends Vue {
 <i18n>
 {
 	"en": {
-		"settings": "Settings"
+		"settings": "Settings",
+		"window": "Window",
+		"channels": "Channels",
+		"ext": "External"
 	},
 	"ru": {
-		"settings": "Настройки"
+		"settings": "Настройки",
+		"window": "Окно",
+		"channels": "Каналы",
+		"ext": "Внешние"
 	}
 }
 </i18n>

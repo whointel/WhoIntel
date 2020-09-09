@@ -12,7 +12,7 @@
 					v-bind="attrs"
 					v-on="on"
 				>
-					{{ overlay === OVERLAY_TYPE.ALERT ? "слои" : overlay }}
+					{{ overlay === OVERLAY_TYPE.ALERT ? $t("overlays") : overlay }}
 				</v-chip>
 			</template>
 
@@ -89,3 +89,14 @@ export default class OverlayBtn extends Vue {
 	}
 }
 </script>
+
+<i18n>
+{
+	"en": {
+		"overlays": "overlays"
+	},
+	"ru": {
+		"overlays": "слои"
+	}
+}
+</i18n>

@@ -68,17 +68,17 @@
 					</v-list-item-icon>
 					<v-list-item-content>
 						<v-list-item-title>
-							Found Path
+							{{ $t("find_path") }}
 						</v-list-item-title>
 
 						<v-list-item-subtitle v-if="!getCurrentSystemForAPICharacter()">
-							No current system
+							{{ $t("current_system_not_set") }}
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-else-if="pathHopes().length">
-							{{ pathHopes().length }} hops
+							{{ pathHopes().length }} {{ $tc("hops", pathHopes().length) }}
 						</v-list-item-subtitle>
 						<v-list-item-subtitle class="red--text text--lighten-3" v-if="!isAPIAuthed">
-							Вы не авторизованы
+							{{ $t("no_auth") }}
 						</v-list-item-subtitle>
 
 					</v-list-item-content>
@@ -91,7 +91,7 @@
 					</v-list-item-icon>
 					<v-list-item-content>
 						<v-list-item-title>
-							Лог системы
+							{{ $t("show_system_log") }}
 						</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
@@ -113,7 +113,7 @@
 							</v-list-item-icon>
 							<v-list-item-content>
 								<v-list-item-title>
-									Персонажи
+									{{ $t("character_list") }}
 								</v-list-item-title>
 							</v-list-item-content>
 							<v-list-item-action>
@@ -129,7 +129,8 @@
 							</v-list-item-icon>
 							<v-list-item-content>
 								<v-list-item-title>
-									Установить текущей для "{{ activeCharacter.name }}"
+									{{ $t("set_system_as_current_for_character") }}
+									"{{ activeCharacter.name }}"
 								</v-list-item-title>
 							</v-list-item-content>
 						</v-list-item>
@@ -153,7 +154,7 @@
 					</v-list-item-icon>
 					<v-list-item-content>
 						<v-list-item-title>
-							Регион "{{ neighbourRegion.name }}" / соседний
+							{{ $t("region") }} "{{ neighbourRegion.name }}" / {{ $t("adjacent") }}
 						</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
@@ -167,7 +168,7 @@
 					</v-list-item-icon>
 					<v-list-item-content>
 						<v-list-item-title>
-							Регион "{{ jbToNeighbourRegion.name }}" / jb
+							{{ $t("region") }} "{{ jbToNeighbourRegion.name }}" / jb
 						</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
@@ -452,3 +453,30 @@ export default class RegionMapContextMenu extends Vue {
 
 }
 </script>
+
+<i18n>
+{
+	"en": {
+		"find_path": "Find path",
+		"current_system_not_set": "Set current system first",
+		"hops": "hops|hop|hops",
+		"no_auth": "No authorization",
+		"show_system_log": "Show system log",
+		"set_system_as_current_for_character": "Set as current for",
+		"region": "Region",
+		"adjacent": "adjacent",
+		"character_list": "Characters"
+	},
+	"ru": {
+		"find_path": "Построить маршрут",
+		"current_system_not_set": "Задайте систему текущему персонажу",
+		"hops": "прыжков|прыжок|прыжка|прыжков|прыжков",
+		"no_auth": "Вы не авторизованы",
+		"show_system_log": "Лог системы",
+		"set_system_as_current_for_character": "Установить текущей для",
+		"region": "Регион",
+		"adjacent": "соседний",
+		"character_list": "Персонажи"
+	}
+}
+</i18n>

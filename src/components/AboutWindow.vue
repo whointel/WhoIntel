@@ -7,7 +7,7 @@
 			<v-chip
 				x-small color="green" outlined label
 				@click="dialog = true"
-			>New version found: {{ newVersion }}
+			>{{ $t("update.new_version_found") }}: {{ newVersion }}
 			</v-chip>
 		</portal>
 
@@ -20,7 +20,7 @@
 
 		<v-dialog v-model="dialog" persistent max-width="900px">
 			<v-card>
-				<v-card-title class="headline">About</v-card-title>
+				<v-card-title class="headline">{{ $t("about") }}</v-card-title>
 				<v-card-text>
 					<p>Reborn of vintel.</p>
 					<p>
@@ -49,31 +49,55 @@
 					</p>
 
 					<p v-if="status === UPDATE_STATUSES.CHECKING_FOR_UPDATE">
-						Checking for update
+						{{ $t("update.checking_for_update") }}
 						<v-progress-circular indeterminate/>
 					</p>
 					<p v-if="status === UPDATE_STATUSES.UPDATE_NOT_AVAILABLE">update not available</p>
 					<p v-if="status === UPDATE_STATUSES.UPDATE_AVAILABLE">
-						New version found: {{ newVersion }}, <a @click.prevent.stop="openExternal('https://whointel.space/changelog/')" href="https://whointel.space/changelog/">changelog</a>
+						{{ $t("update.new_version_found") }}
+						: {{ newVersion }},
+						<a @click.prevent.stop="openExternal('https://whointel.space/changelog/')" href="https://whointel.space/changelog/">
+							{{ $t("update.changelog") }}
+						</a>
 						<br>
-						<v-btn @click="downloadUpdate">Download</v-btn>
+						<v-btn @click="downloadUpdate">
+							{{ $t("update.download") }}
+						</v-btn>
 					</p>
 					<p v-if="status === UPDATE_STATUSES.UPDATE_DOWNLOADING">
-						New version found: {{ newVersion }}
+						{{ $t("update.new_version_found") }}
+						: {{ newVersion }},
 						<br>
-						Downloading the update
+						{{ $t("update.downloading") }}
 						<v-progress-circular indeterminate/>
 					</p>
 					<p v-if="status === UPDATE_STATUSES.UPDATE_DOWNLOADED">
 						<v-icon color="green">mdi-check</v-icon>
-						New version found: {{ newVersion }}
+						{{ $t("update.new_version_found") }}
+						: {{ newVersion }},
 						<br>
-						Update successfully downloaded
+						{{ $t("update.downloaded") }}
 						<br>
-						<v-btn @click="installUpdateAndQuit">Install now and relaunch</v-btn>
-						or install on App closing
+						<v-btn @click="installUpdateAndQuit">
+							{{ $t("update.install_and_relaunch") }}
+						</v-btn>
+						{{ $t("update.or_install_on_close") }}
 					</p>
-					<p v-if="status === UPDATE_STATUSES.ERROR">ERROR <br> {{ error }}</p>
+					<p v-if="status === UPDATE_STATUSES.ERROR">
+						<v-expansion-panels>
+							<v-expansion-panel>
+								<v-expansion-panel-header disable-icon-rotate>
+									<div><v-icon color="error">mdi-alert-circle</v-icon>
+										{{ $t("update.error") }}
+									</div>
+								</v-expansion-panel-header>
+								<v-expansion-panel-content>
+									{{ error }}
+								</v-expansion-panel-content>
+							</v-expansion-panel>
+						</v-expansion-panels>
+						<br>
+					</p>
 				</v-card-text>
 				<v-card-actions>
 					<v-text-field readonly hide-details value="WhoIntel" label="Donation ISK send to char"/>
@@ -150,3 +174,36 @@ export default class AboutWindow extends Vue {
 	}
 }
 </script>
+
+<i18n>
+{
+	"en": {
+		"about": "About",
+		"update": {
+			"checking_for_update": "Checking for update..",
+			"changelog": "changelog",
+			"download": "Download",
+			"downloading": "Downloading the update",
+			"downloaded": "Update successfully downloaded",
+			"install_and_relaunch": "Install now and relaunch",
+			"or_install_on_close": "or install on App closing",
+			"error": "Update error",
+			"new_version_found": "New version found"
+		}
+	},
+	"ru": {
+		"about": "О программе",
+		"update": {
+			"checking_for_update": "Проверяю наличие новой версии..",
+			"changelog": "список изменений",
+			"download": "Скачать",
+			"downloading": "Загрузка обновления",
+			"downloaded": "Обновление загружено",
+			"install_and_relaunch": "Установить и перезапустить",
+			"or_install_on_close": "или установить при закрытии программы",
+			"error": "Ошибка обновления",
+			"new_version_found": "Доступна новая версия"
+		}
+	}
+}
+</i18n>
