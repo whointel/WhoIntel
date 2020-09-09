@@ -60,9 +60,12 @@
 							{{ $t("update.changelog") }}
 						</a>
 						<br>
-						<v-btn @click="downloadUpdate">
+						<v-btn @click="downloadUpdate" v-if="isPlatformWindows">
 							{{ $t("update.download") }}
 						</v-btn>
+						<a v-else @click.prevent.stop="openExternal('https://github.com/whointel/WhoIntel/releases')" href="https://github.com/whointel/WhoIntel/releases">
+							{{ $t("update.download") }}
+						</a>
 					</p>
 					<p v-if="status === UPDATE_STATUSES.UPDATE_DOWNLOADING">
 						{{ $t("update.new_version_found") }}
@@ -78,16 +81,19 @@
 						<br>
 						{{ $t("update.downloaded") }}
 						<br>
-						<v-btn @click="installUpdateAndQuit">
-							{{ $t("update.install_and_relaunch") }}
-						</v-btn>
-						{{ $t("update.or_install_on_close") }}
+						<span v-if="isPlatformWindows">
+							<v-btn @click="installUpdateAndQuit">
+								{{ $t("update.install_and_relaunch") }}
+							</v-btn>
+							{{ $t("update.or_install_on_close") }}
+						</span>
 					</p>
 					<p v-if="status === UPDATE_STATUSES.ERROR">
 						<v-expansion-panels>
 							<v-expansion-panel>
 								<v-expansion-panel-header disable-icon-rotate>
-									<div><v-icon color="error">mdi-alert-circle</v-icon>
+									<div>
+										<v-icon color="error">mdi-alert-circle</v-icon>
 										{{ $t("update.error") }}
 									</div>
 								</v-expansion-panel-header>
@@ -116,6 +122,7 @@ import {ipcRenderer, shell} from "electron"
 // eslint-disable-next-line no-unused-vars
 import {IUpdateStatus, UPDATE_STATUSES} from "@/types/UpdateStatuses"
 import DonateText from "@/components/DonateText.vue"
+import settingsService from "@/service/settings"
 
 @Component({
 	components: {DonateText}
@@ -127,6 +134,7 @@ export default class AboutWindow extends Vue {
 	newVersion: any = null
 
 	UPDATE_STATUSES = UPDATE_STATUSES
+	isPlatformWindows = settingsService.platform === "win32"
 
 	version = {
 		app: null,
