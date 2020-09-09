@@ -206,13 +206,11 @@ import systemManager from "@/service/SystemManager"
 import {I_CONTEXT_MENU, IREGION} from "@/types/MAP"
 import events from "@/service/EventBus"
 import EVEJumpBridge from "@/lib/EVEJumpBridge"
-import {aStar} from "ngraph.path"
-import createGraph from "ngraph.graph"
 import find from "lodash/find"
 import {IPATHPOINT} from "@/types/PathFinder"
 import {ipcRenderer} from "electron"
 import characterManager, {ICharacterManagerCharacter} from "@/service/CharacterManager"
-import pathService from "@/service/PathService";
+import pathService from "@/service/PathService"
 
 @Component
 export default class RegionMapContextMenu extends Vue {
