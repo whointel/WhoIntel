@@ -44,7 +44,7 @@
 		"perfect-scrollbar": "^1.5.0",
 		"portal-vue": "^2.1.7",
 		"queueing-subject": "^0.3.4",
-		"rxjs": "^6.6.2",
+		"rxjs": "^6.6.3",
 		"rxjs-websockets": "^8.0.1",
 		"uuid": "^8.3.0",
 		"vue": "^2.6.12",
@@ -64,8 +64,8 @@
 		"@types/cheerio": "^0.22.21",
 		"@types/lodash": "^4.14.161",
 		"@types/node": "12",
-		"@typescript-eslint/eslint-plugin": "^4.0.1",
-		"@typescript-eslint/parser": "^4.0.1",
+		"@typescript-eslint/eslint-plugin": "^4.1.0",
+		"@typescript-eslint/parser": "^4.1.0",
 		"@vue/cli-plugin-babel": "~4.5.4",
 		"@vue/cli-plugin-eslint": "~4.5.4",
 		"@vue/cli-plugin-router": "~4.5.4",
@@ -111,6 +111,6 @@
 	],
 	"engines": {
 		"node": "^12.18.3",
-		"yarn": "^1.22.4"
+		"yarn": "^1.22.5"
 	}
 }
