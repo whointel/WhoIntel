@@ -96,14 +96,7 @@ export default class EVESystem {
 	private secondLine: SVGTextElement | null = null
 
 	lastAlarmTime: Date | null = null
-	// messages = []
-	// setStatus(states.UNKNOWN)
-	// __locatedCharacters = []
-	// backgroundColor = "#FFFFFF"
 	mapCoordinates: MapCoordinates | null = null
-	// systemId = systemId
-	// transform = transform
-	// cachedOffsetPoint = None
 	neighbours: EVESystem[] = []
 	neighbourRegions: number[] = []
 
