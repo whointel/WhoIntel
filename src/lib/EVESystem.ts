@@ -24,16 +24,9 @@ enum ALARM_COLORS_KEYS {
 }
 
 export enum EVESystemStatus {
-	// IGNORE,
 	UNKNOWN,
-	// NOT_CHANGE,
 	CLEAR,
 	ALARM,
-	// WAS_ALARMED,
-	// REQUEST,
-	// LOCATION,
-	// KOS_STATUS_REQUEST,
-	// SOUND_TEST,
 }
 
 const ALARM_COLORS: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } = {
