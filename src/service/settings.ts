@@ -40,7 +40,7 @@ class SettingsService {
 		showOverlayBtn: true,
 		layoutsWindowAdvancedMode: false,
 		followCharacterRegion: true,
-		darkTheme: true,
+		darkTheme: false,
 	}
 
 	settings: Vue
