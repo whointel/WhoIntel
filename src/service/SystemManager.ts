@@ -12,6 +12,7 @@ import Timeout from "await-timeout"
 import findIndex from "lodash/findIndex"
 import {IREGION, OVERLAY_TYPE} from "@/types/MAP"
 import {API_SYSTEM_JUMPS, API_SYSTEM_KILLS} from "@/types/API"
+import settingsService from "@/service/settings"
 
 const SPECIAL_REGIONS = {
 	NEW_EDEN: -1,
@@ -33,6 +34,7 @@ class SystemManager {
 
 	constructor() {
 		events.$on("electron:setSDE", this.loadSDE.bind(this))
+		events.$on("setDarkTheme", () => this.refreshRegionMap())
 	}
 
 	init() {
@@ -225,9 +227,9 @@ class SystemManager {
 		return true
 	}
 
-	private async downloadMap(region: IREGION): Promise<IRegionMapExport> {
+	private async downloadMap(region: IREGION, darkTheme: boolean): Promise<IRegionMapExport> {
 		const regionName = region.name.replaceAll(" ", "_")
-		const svg = await ipcRenderer.invoke("downloadMap", regionName)
+		const svg = await ipcRenderer.invoke("downloadMap", regionName + (darkTheme ? ".dark" : ""))
 		return {
 			id: region.id,
 			svg: svg,
@@ -237,15 +239,17 @@ class SystemManager {
 
 	async getMap(region: IREGION): Promise<IRegionMapExport> {
 		const database = await db()
-		let record = await database.get("regionMap", region.id)
+		const darkTheme = settingsService.$.darkTheme
+
+		let record = await database.get(darkTheme ? "regionMapDark" : "regionMap", region.id)
 		if (record) {
 			if (Number(new Date()) - Number(record.ts) > (6 * 60 * 60 * 1000)) {
-				record = await this.downloadMap(region)
-				await database.put("regionMap", record)
+				record = await this.downloadMap(region, darkTheme)
+				await database.put(darkTheme ? "regionMapDark" : "regionMap", record)
 			}
 		} else {
-			record = await this.downloadMap(region)
-			await database.put("regionMap", record)
+			record = await this.downloadMap(region, darkTheme)
+			await database.put(darkTheme ? "regionMapDark" : "regionMap", record)
 		}
 
 		return record

@@ -57,6 +57,8 @@
 									label="Language / Язык"
 								/>
 
+								<v-switch v-model="settings.darkTheme" label="Темная тема"/>
+
 								<v-switch v-model="settings.showFleetBtn" label="Выводить переключатель панели флота"/>
 								<v-switch v-model="settings.showOverlayBtn" label="Выводить переключатель слоев (alerts, kills, jumps)"/>
 								<v-switch v-model="settings.followCharacterRegion" label="Автоматическая смена региона при перемещении персонажа">

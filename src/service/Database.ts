@@ -25,6 +25,10 @@ interface IntelDB extends DBSchema {
 		value: IRegionMapExport
 		key: number
 	}
+	regionMapDark: {
+		value: IRegionMapExport
+		key: number
+	},
 	characters: {
 		value: ICharacterExport
 		key: number
@@ -33,7 +37,7 @@ interface IntelDB extends DBSchema {
 }
 
 function createDB() {
-	return openDB<IntelDB>("intel", 8, {
+	return openDB<IntelDB>("intel", 9, {
 		upgrade(db, oldVersion, newVersion, transaction) {
 			if (oldVersion < 1) {
 				// see version 3
@@ -115,6 +119,13 @@ function createDB() {
 				charactersStore.createIndex("name", "name")
 				charactersStore.createIndex("expires", "expires")
 				charactersStore.createIndex("id", "id")
+			}
+
+			if (oldVersion < 9) {
+				db.createObjectStore("regionMapDark", {
+					keyPath: "id",
+					autoIncrement: false,
+				})
 			}
 		},
 	})

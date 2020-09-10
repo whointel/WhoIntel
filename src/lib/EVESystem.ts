@@ -1,6 +1,8 @@
 import differenceInSeconds from "date-fns/differenceInSeconds"
 import systemManager from "@/service/SystemManager"
 import {IREGION} from "@/types/MAP"
+import settingsService from "@/service/settings"
+import events from "@/service/EventBus"
 
 interface ALARM_COLORS_INTERFACE {
 	seconds: number
@@ -29,7 +31,7 @@ export enum EVESystemStatus {
 	ALARM,
 }
 
-const ALARM_COLORS: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } = {
+const ALARM_COLORS_LIGHT: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } = {
 	[ALARM_COLORS_KEYS.S0]: {
 		seconds: 60 * 4,
 		bg: "#FF0000",
@@ -56,6 +58,38 @@ const ALARM_COLORS: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } = {
 		text: "#000000",
 	},
 }
+
+const ALARM_COLORS_DARK: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } = {
+	[ALARM_COLORS_KEYS.S0]: {
+		seconds: 60 * 4,
+		bg: "#FF0000",
+		text: "#000000",
+	},
+	[ALARM_COLORS_KEYS.S1]: {
+		seconds: 60 * 10,
+		bg: "#FF9B0F",
+		text: "#000000",
+	},
+	[ALARM_COLORS_KEYS.S2]: {
+		seconds: 60 * 15,
+		bg: "#FFFA0F",
+		text: "#FFFFFF",
+	},
+	[ALARM_COLORS_KEYS.S3]: {
+		seconds: 60 * 25,
+		bg: "#FFFDA2",
+		text: "#FFFFFF",
+	},
+	[ALARM_COLORS_KEYS.S4]: {
+		seconds: 60 * 60,
+		bg: "#000000",
+		text: "#FFFFFF",
+	},
+}
+
+let ALARM_COLORS = settingsService.$.darkTheme ? ALARM_COLORS_DARK : ALARM_COLORS_LIGHT
+
+events.$on("setDarkTheme", darkTheme => ALARM_COLORS = darkTheme ? ALARM_COLORS_DARK : ALARM_COLORS_LIGHT)
 
 export interface MapCoordinates {
 	x: number
@@ -120,30 +154,62 @@ export default class EVESystem {
 	showKillsOverlay(max: number) {
 		this.isShow = false
 		const system_kills = this.kills.ship + this.kills.pod
-		const system_color = 255 - (system_kills * 255 / max)
+
 		this.checkSVGBindings()
-		this.setTextColor(system_color > 127 ? "#000000" : "#FFFFFF")
-		this.setRectColor(`rgb(255,${system_color},${system_color})`)
+		let system_color
+
+		if (settingsService.$.darkTheme) {
+			this.setTextColor("#FFFFFF")
+			system_color = system_kills * 255 / max
+			this.setRectColor(`rgb(${system_color},0,0)`)
+		} else {
+			const system_color = 255 - (system_kills * 255 / max)
+			this.setTextColor(system_color > 127 ? "#FFFFFF" : "#000000")
+			this.setRectColor(`rgb(${system_color},255,255)`)
+		}
+
 		this.setText(`${this.kills.ship} / ${this.kills.pod}`)
 	}
 
 	showKillsNpcOverlay(max: number) {
 		this.isShow = false
 		const system_kills = this.kills.npc
-		const system_color = 255 - (system_kills * 255 / max)
+
 		this.checkSVGBindings()
-		this.setTextColor("#000000")
-		this.setRectColor(`rgb(${system_color},255,${system_color})`)
+		let system_color
+
+		if (settingsService.$.darkTheme) {
+			this.setTextColor("#FFFFFF")
+			system_color = system_kills * 255 / max
+			this.setRectColor(`rgb(0,${system_color},0)`)
+		} else {
+			this.setTextColor("#000000")
+			system_color = 255 - (system_kills * 255 / max)
+			this.setRectColor(`rgb(${system_color},255,${system_color})`)
+		}
+
 		this.setText(String(system_kills))
 	}
 
 	showJumpsOverlay(max: number) {
 		this.isShow = false
 		const system_jumps = this.jumps
-		const system_color = 255 - (system_jumps * 255 / max)
+
 		this.checkSVGBindings()
-		this.setTextColor(system_color > 127 ? "#000000" : "#FFFFFF")
-		this.setRectColor(`rgb(${system_color},${system_color},255)`)
+		let system_color
+
+		if (settingsService.$.darkTheme) {
+			system_color = system_jumps * 255 / max
+
+			this.setTextColor(system_color > 127 ? "#FFFFFF" : "#000000")
+			this.setRectColor(`rgb(0,0,${system_color})`)
+		} else {
+			system_color = 255 - (system_jumps * 255 / max)
+
+			this.setTextColor(system_color > 127 ? "#000000" : "#FFFFFF")
+			this.setRectColor(`rgb(${system_color},${system_color},255)`)
+		}
+
 		this.setText(String(system_jumps))
 	}
 
@@ -339,7 +405,7 @@ export default class EVESystem {
 				if (calcValue > 255) calcValue = 255
 
 				this.setTextColor("#008100")
-				this.setRectColor(`rgb(${calcValue},255,${calcValue})`)
+				this.setRectColor(`rgba(${calcValue},255,${calcValue},0.7)`)
 
 				break
 		}

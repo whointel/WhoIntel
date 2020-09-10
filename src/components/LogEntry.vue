@@ -1,5 +1,5 @@
 <template>
-	<v-list-item :style="`background-color: ${bgColor}`">
+	<v-list-item :style="`background-color: rgba(${bgColor})`">
 		<v-list-item-icon>
 			<v-icon>{{ icon }}</v-icon>
 		</v-list-item-icon>
@@ -19,6 +19,7 @@ import format from "date-fns/format"
 import Autolinker from "autolinker"
 import systemManager from "@/service/SystemManager"
 import characterResolveService from "@/service/CharacterResolveService"
+import settingsService from "@/service/settings"
 
 @Component
 export default class LogEntry extends Vue {
@@ -34,7 +35,9 @@ export default class LogEntry extends Vue {
 	}
 
 	get bgColor(): string {
-		return this.entry.zk?.old ? "#ececec" : "#ffffff"
+		return this.entry.zk?.old
+			? (settingsService.$.darkTheme ? "236,236,236,0.2" : "236,236,236")
+			: "0,0,0,0"
 	}
 
 	get icon(): string {

@@ -6,6 +6,7 @@ import {ipcRenderer} from "electron"
 import vuetify from "@/plugins/vuetify"
 import i18n from "@/plugins/i18n"
 import * as log from "electron-log"
+import events from "@/service/EventBus"
 
 export const APP_LANGUAGES = [
 	{
@@ -39,6 +40,7 @@ class SettingsService {
 		showOverlayBtn: true,
 		layoutsWindowAdvancedMode: false,
 		followCharacterRegion: true,
+		darkTheme: true,
 	}
 
 	settings: Vue
@@ -59,6 +61,8 @@ class SettingsService {
 		this.settings.$watch("settings", debounce(this.watcher.bind(this), 300), {deep: true})
 
 		this.setLanguage()
+		this.setTheme()
+
 		log.info("SettingsService:load settings:", JSON.parse(JSON.stringify(this.$)))
 	}
 
@@ -70,6 +74,7 @@ class SettingsService {
 		storageService.setObject("settings", this.$)
 		log.info("SettingsService:save settings:", JSON.parse(JSON.stringify(this.$)))
 		this.setLanguage()
+		this.setTheme()
 	}
 
 	getFlatChannels(): string[] {
@@ -79,6 +84,11 @@ class SettingsService {
 	private setLanguage() {
 		vuetify.framework.lang.current = this.$.lang
 		i18n.locale = this.$.lang
+	}
+
+	private setTheme() {
+		vuetify.framework.theme.dark = this.$.darkTheme
+		events.$emit("setDarkTheme", this.$.darkTheme)
 	}
 }
 
