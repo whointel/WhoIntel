@@ -17,7 +17,7 @@
 			transition="fade-transition"
 		>
 			<v-card tile>
-				<v-container class="pa-1">
+				<v-container class="pa-y px-2">
 					<v-autocomplete
 						@change="onFound"
 						v-model="select"
