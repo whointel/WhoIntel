@@ -5,7 +5,6 @@
 		:class="{'titlebar--blurred': !isFocus}"
 		:height="30"
 		app dark
-		color="#3B4252"
 	>
 		<v-row class="align-center mx-0">
 			<div class="titlebar-hamburger titlebar--nodrag mr-1 d-flex" v-if="isPlatformWindows">
@@ -211,17 +210,12 @@ export default class WindowChrome extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .titlebar {
 	-webkit-app-region: drag;
-	background: #3B4252;
 	color: #D8DEE9;
 	box-shadow: 0 1px 0 0 rgba(216, 222, 233, 0.1);
 	padding: 0;
-
-	&--blurred {
-		filter: contrast(.8) brightness(.8);
-	}
 
 	&-hamburger {
 		height: 30px;
@@ -260,6 +254,27 @@ export default class WindowChrome extends Vue {
 		}
 	}
 }
+</style>
+
+<style lang="sass">
+.theme--light .titlebar
+	background-color: #3B4252
+
+.theme--light
+	.titlebar
+		background-color: #3B4252
+
+	.titlebar--blurred
+		filter: contrast(.8) brightness(.8)
+
+.theme--dark
+	.titlebar
+		background-color: #221F22
+
+	.titlebar--blurred
+		background-color: $background-main-dark
+		box-shadow: none
+
 </style>
 
 <i18n>

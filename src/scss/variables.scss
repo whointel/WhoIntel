@@ -3,15 +3,25 @@ $list-item-action-icon-margin: 16px !default;
 $body-font-family: "Eve Sans Neue", sans-serif !default;
 //$body-font-family: 'Roboto Condensed', sans-serif !default;
 
-$font-weights: (
-	'thin': 300,
-	'light': 300,
-	'regular': 400,
-	'medium': 400,
-	'bold': 700,
-	'black': 700
+$background-main-dark: #2D2A2E;
+$divider-dark: #403E41;
+
+$material-dark: (
+	'background': $background-main-dark,
+	'navigation-drawer': $background-main-dark,
+	'cards': $background-main-dark,
+	'dividers': $divider-dark,
+	'app-bar': $divider-dark,
+
+	'alertS0': #FF0000,
+	'alertS1': #FF9B0F,
+	'alertS2': #FFFA0F,
+	'alertS3': #FFFDA2,
 );
 
-html {
-	overflow-y: hidden !important;
-}
+$material-light: (
+	'alertS0': #FF0000,
+	'alertS1': #FF9B0F,
+	'alertS2': #FFFA0F,
+	'alertS3': #FFFDA2,
+);

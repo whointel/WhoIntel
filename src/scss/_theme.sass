@@ -1,0 +1,7 @@
+@import "node_modules/vuetify/src/styles/styles"
+
+@mixin theme-glob ($component)
+	.theme--light .#{$component}
+		@content($material-light)
+	.theme--dark .#{$component}
+		@content($material-dark)

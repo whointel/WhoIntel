@@ -1,5 +1,7 @@
 <template>
-	<v-col cols="3" class="log-container">
+	<v-col cols="3" class="log-container" ref="logContainer">
+		<div class="log-container__border"/>
+
 		<v-footer inset padless tile v-if="filterSystem">
 			<div class="ml-4 red--text">{{ filterSystem.name }}</div>
 			<v-spacer/>
@@ -29,19 +31,26 @@ import {ILogEntry} from "@/types/ILogEntry"
 import EVESystem from "@/lib/EVESystem"
 import systemManager from "@/service/SystemManager"
 import {ipcRenderer} from "electron"
+import PerfectScrollbar from "perfect-scrollbar"
 
 @Component({
 	components: {LogEntry}
 })
 export default class LogList extends Vue {
 	filterSystem: EVESystem | null = null
+	ps: PerfectScrollbar | null = null
 
 	$refs!: {
 		messages: HTMLElement,
+		logContainer: HTMLElement,
 	}
 
 	created() {
 		events.$on("setLogFilterBySystem", this.applyLogFilter)
+	}
+
+	mounted() {
+		this.ps = Object.preventExtensions(new PerfectScrollbar(this.$refs.logContainer, {wheelPropagation: false}))
 	}
 
 	linkClicked(event: Event) {
@@ -110,7 +119,7 @@ export default class LogList extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .fade-enter-active {
 	transition: opacity .5s, background-color 2s;
 }
@@ -124,10 +133,27 @@ export default class LogList extends Vue {
 	opacity: 1;
 	background-color: white;
 }
+</style>
 
+<style lang="scss">
 .log-container {
-	/*height: calc(100vh - 30px);*/
 	height: 100%;
 	overflow-y: scroll;
+	position: relative;
 }
+
+.log-container__border {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	width: 1px;
+}
+</style>
+
+<style lang="sass">
+@import "src/scss/theme"
+
++theme-glob(log-container__border) using($material)
+	background-color: map-get($material, 'dividers')
 </style>

@@ -6,7 +6,7 @@ import events from "@/service/EventBus"
 
 interface ALARM_COLORS_INTERFACE {
 	seconds: number
-	bg: string
+	bgClass: string
 	text: string
 }
 
@@ -31,59 +31,62 @@ export enum EVESystemStatus {
 	ALARM,
 }
 
+const COLOR_WHITE = "rgb(255, 255, 255)"
+const COLOR_BLACK = "rgb(0, 0, 0)"
+
 const ALARM_COLORS_LIGHT: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } = {
 	[ALARM_COLORS_KEYS.S0]: {
 		seconds: 60 * 4,
-		bg: "#FF0000",
-		text: "#FFFFFF",
+		bgClass: "alertS0",
+		text: COLOR_WHITE,
 	},
 	[ALARM_COLORS_KEYS.S1]: {
 		seconds: 60 * 10,
-		bg: "#FF9B0F",
-		text: "#FFFFFF",
+		bgClass: "alertS1",
+		text: COLOR_WHITE,
 	},
 	[ALARM_COLORS_KEYS.S2]: {
 		seconds: 60 * 15,
-		bg: "#FFFA0F",
-		text: "#000000",
+		bgClass: "alertS2",
+		text:COLOR_BLACK,
 	},
 	[ALARM_COLORS_KEYS.S3]: {
 		seconds: 60 * 25,
-		bg: "#FFFDA2",
-		text: "#000000",
+		bgClass: "alertS3",
+		text: COLOR_BLACK,
 	},
 	[ALARM_COLORS_KEYS.S4]: {
 		seconds: 60 * 60,
-		bg: "#FFFFFF",
-		text: "#000000",
+		bgClass: "alertS4",
+		text: COLOR_BLACK,
 	},
 }
 
 const ALARM_COLORS_DARK: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } = {
 	[ALARM_COLORS_KEYS.S0]: {
 		seconds: 60 * 4,
-		bg: "#FF0000",
-		text: "#000000",
+		bgClass: "alertS0",
+		text: COLOR_BLACK,
 	},
 	[ALARM_COLORS_KEYS.S1]: {
 		seconds: 60 * 10,
-		bg: "#FF9B0F",
-		text: "#000000",
+		bgClass: "alertS1",
+		text: COLOR_BLACK,
 	},
 	[ALARM_COLORS_KEYS.S2]: {
 		seconds: 60 * 15,
-		bg: "#FFFA0F",
-		text: "#FFFFFF",
+		bgClass: "alertS2",
+		text: COLOR_WHITE,
 	},
 	[ALARM_COLORS_KEYS.S3]: {
 		seconds: 60 * 25,
-		bg: "#FFFDA2",
-		text: "#FFFFFF",
+		bgClass: "alertS3",
+		text: COLOR_WHITE,
 	},
 	[ALARM_COLORS_KEYS.S4]: {
 		seconds: 60 * 60,
-		bg: "#000000",
-		text: "#FFFFFF",
+		bgClass: "alertS4",
+		text: COLOR_WHITE,
 	},
 }
 
@@ -120,7 +123,8 @@ export default class EVESystem {
 	svgContainer: HTMLElement | null = null
 	private svgSymbol: SVGSymbolElement | undefined | null = null
 	private svgSRect: SVGRectElement | null = null
-	private secondLine: SVGTextElement | null = null
+	private systemNameLine: SVGTextElement | null = null
+	private dataLine: SVGTextElement | null = null
 
 	lastAlarmTime: Date | null = null
 	mapCoordinates: MapCoordinates | null = null
@@ -140,7 +144,7 @@ export default class EVESystem {
 		this.svgContainer = null
 		this.svgSymbol = null
 		this.svgSRect = null
-		this.secondLine = null
+		this.dataLine = null
 	}
 
 	show() {
@@ -159,13 +163,15 @@ export default class EVESystem {
 		let system_color
 
 		if (settingsService.$.darkTheme) {
-			this.setTextColor("#FFFFFF")
 			system_color = system_kills * 255 / max
+			this.setTextColor(COLOR_WHITE)
+			this.setTextSystemColor(COLOR_WHITE)
 			this.setRectColor(`rgb(${system_color},0,0)`)
 		} else {
 			const system_color = 255 - (system_kills * 255 / max)
-			this.setTextColor(system_color > 127 ? "#FFFFFF" : "#000000")
-			this.setRectColor(`rgb(${system_color},255,255)`)
+			this.setTextColor(system_color > 127 ? COLOR_WHITE : COLOR_BLACK)
+			this.setTextSystemColor(system_color > 127 ? COLOR_BLACK : COLOR_WHITE)
+			this.setRectColor(`rgb(255,${system_color},${system_color})`)
 		}
 
 		this.setText(`${this.kills.ship} / ${this.kills.pod}`)
@@ -179,12 +185,15 @@ export default class EVESystem {
 		let system_color
 
 		if (settingsService.$.darkTheme) {
-			this.setTextColor("#FFFFFF")
 			system_color = system_kills * 255 / max
+
+			this.setTextColor(system_color > 170 ? COLOR_BLACK : COLOR_WHITE)
+			this.setTextSystemColor(system_color > 170 ? COLOR_BLACK : COLOR_WHITE)
 			this.setRectColor(`rgb(0,${system_color},0)`)
 		} else {
-			this.setTextColor("#000000")
 			system_color = 255 - (system_kills * 255 / max)
+			this.setTextColor(COLOR_BLACK)
+			this.setTextSystemColor(COLOR_BLACK)
 			this.setRectColor(`rgb(${system_color},255,${system_color})`)
 		}
 
@@ -201,12 +210,14 @@ export default class EVESystem {
 		if (settingsService.$.darkTheme) {
 			system_color = system_jumps * 255 / max
 
-			this.setTextColor(system_color > 127 ? "#FFFFFF" : "#000000")
+			this.setTextColor(system_color > 127 ? COLOR_WHITE : COLOR_WHITE)
+			this.setTextSystemColor(system_color > 127 ? COLOR_WHITE : COLOR_WHITE)
 			this.setRectColor(`rgb(0,0,${system_color})`)
 		} else {
 			system_color = 255 - (system_jumps * 255 / max)
 
-			this.setTextColor(system_color > 127 ? "#000000" : "#FFFFFF")
+			this.setTextColor(system_color > 127 ? COLOR_BLACK : COLOR_WHITE)
+			this.setTextSystemColor(system_color > 127 ? COLOR_BLACK : COLOR_WHITE)
 			this.setRectColor(`rgb(${system_color},${system_color},255)`)
 		}
 
@@ -222,7 +233,9 @@ export default class EVESystem {
 		this.svgSymbol = this.svgContainer?.querySelector(`#def${this.id}`)
 		if (this.svgSymbol) {
 			this.svgSRect = this.svgSymbol.querySelector(`rect#rect${this.id}`)
-			this.secondLine = this.svgSymbol.querySelectorAll("text")[1]
+			const textNodes = this.svgSymbol.querySelectorAll("text")
+			this.systemNameLine = textNodes[0]
+			this.dataLine = textNodes[1]
 		}
 	}
 
@@ -309,26 +322,44 @@ export default class EVESystem {
 	}
 
 	private setAlarmColor(alarmStatus: ALARM_COLORS_INTERFACE) {
-		this.setRectColor(alarmStatus.bg)
+		this.setRectColorClass(alarmStatus.bgClass)
 		this.setTextColor(alarmStatus.text)
+		this.setTextSystemColor(alarmStatus.text)
+	}
+
+	private setRectColorClass(color_class: string) {
+		if (!this.svgSRect) return
+
+		this.svgSRect.removeAttribute("class")
+		this.svgSRect.removeAttribute("style")
+		this.svgSRect.classList.add("s")
+		this.svgSRect.classList.add(color_class)
 	}
 
 	private setRectColor(color: string) {
 		if (!this.svgSRect) return
 
+		this.svgSRect.removeAttribute("class")
+		this.svgSRect.classList.add("s")
 		this.svgSRect.style.fill = color
 	}
 
 	setText(text: string) {
-		if (!this.secondLine) return
+		if (!this.dataLine) return
 
-		this.secondLine.textContent = text
+		this.dataLine.textContent = text
+	}
+
+	setTextSystemColor(color: string) {
+		if (!this.systemNameLine) return
+
+		this.systemNameLine.style.fill = color
 	}
 
 	setTextColor(color: string) {
-		if (!this.secondLine) return
+		if (!this.dataLine) return
 
-		this.secondLine.style.fill = color
+		this.dataLine.style.fill = color
 	}
 
 	private static formatTime(seconds: number): string {
@@ -404,8 +435,11 @@ export default class EVESystem {
 				let calcValue = Number(secondsFromAlarm / (secondsUntilWhite / 255))
 				if (calcValue > 255) calcValue = 255
 
-				this.setTextColor("#008100")
-				this.setRectColor(`rgba(${calcValue},255,${calcValue},0.7)`)
+				if (calcValue < 300) {
+					this.setTextColor("#008100")
+					this.setTextSystemColor("#008100")
+					this.setRectColor(`rgba(${calcValue},255,${calcValue})`)
+				}
 
 				break
 		}

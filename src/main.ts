@@ -1,4 +1,4 @@
-import "@/scss/_fonts.scss"
+import "@/scss/main.scss"
 import {ipcRenderer} from "electron"
 import * as log from "electron-log"
 import Vue from "vue"

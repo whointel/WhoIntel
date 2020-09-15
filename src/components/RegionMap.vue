@@ -301,7 +301,7 @@ export default class RegionMap extends Vue {
 			`)
 
 		chee("#jumps > line").removeClass().addClass("j")
-		chee("defs > symbol rect").css("fill", "#FFFFFF")
+		chee("defs > symbol rect").removeAttr("style")
 		chee("defs > symbol text.st").removeClass("so")
 
 		chee("defs > symbol").each((index, symbol) => {
@@ -581,15 +581,10 @@ export default class RegionMap extends Vue {
 </script>
 
 
-<style lang="scss" scoped>
-@import '~perfect-scrollbar/css/perfect-scrollbar.css';
-
+<style lang="scss">
 .svg-container {
 	position: relative;
-	//height: calc(100vh - 30px);
 	height: 100%;
-	border-right: 1px solid rgba(0, 0, 0, 0.25);
-	border-left: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 .content-container {
@@ -599,4 +594,30 @@ export default class RegionMap extends Vue {
 .isMapDragging, .isMapDragging a {
 	cursor: grabbing !important;
 }
+</style>
+
+<style lang="sass">
+@import "src/scss/theme"
+
++theme-glob(svg-container) using($material)
+	#legend text
+		fill: rgba(map-deep-get($material, 'text', 'primary'), 0.7)
+
+	#legend rect
+		fill: map-get($material, 'background')
+
+	rect.alertS0
+		fill: map-get($material, 'alertS0')
+
+	rect.alertS1
+		fill: map-get($material, 'alertS1')
+
+	rect.alertS2
+		fill: map-get($material, 'alertS2')
+
+	rect.alertS3
+		fill: map-get($material, 'alertS3')
+
+	rect.alertS4
+		fill: map-get($material, 'background')
 </style>
