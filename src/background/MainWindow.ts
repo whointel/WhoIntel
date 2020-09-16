@@ -116,6 +116,7 @@ class MainWindow {
 			webPreferences: {
 				nodeIntegration: true,
 				enableRemoteModule: true,
+				autoplayPolicy: "no-user-gesture-required", // default, used for alarm sound play
 			}
 		})
 

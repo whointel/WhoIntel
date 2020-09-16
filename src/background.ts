@@ -53,8 +53,6 @@ let authEVE: AuthEVE
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{scheme: "app", privileges: {secure: true, standard: true}}])
 
-app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
-
 const contextMenu = require("electron-context-menu")
 contextMenu()
 
