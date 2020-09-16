@@ -589,6 +589,7 @@ export default class RegionMap extends Vue {
 
 .content-container {
 	height: 100%;
+	user-select: none;
 }
 
 .isMapDragging, .isMapDragging a {

@@ -216,6 +216,7 @@ export default class WindowChrome extends Vue {
 	color: #D8DEE9;
 	box-shadow: 0 1px 0 0 rgba(216, 222, 233, 0.1);
 	padding: 0;
+	user-select: none;
 
 	&-hamburger {
 		height: 30px;
