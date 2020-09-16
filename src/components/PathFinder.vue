@@ -1,9 +1,9 @@
 <template>
-	<v-navigation-drawer app :permanent="false" stateless :value="isShow">
+	<v-navigation-drawer class="path-finder" app :permanent="false" stateless :value="isShow">
 		<template v-slot:prepend>
-			<div class="ma-2">
+			<div class="path-finder--plate px-2 pt-1">
 				<div class="ml-4 subtitle-1">
-					{{ startSystemName }} -> {{ endSystemName }}
+					<span class="path-finder--title">{{ pathPoints.path.length - 1 }}j {{ startSystemName }} -> {{ endSystemName }}</span>
 					<v-tooltip bottom transition="fade-transition">
 						<template v-slot:activator="{ on, attrs }">
 							<v-btn icon v-bind="attrs" v-on="on" @click="copyPath">
@@ -13,41 +13,42 @@
 						<span>Скопировать путь в буфер обмена</span>
 					</v-tooltip>
 				</div>
-			<!--	TODO			<div class="ml-4 caption">для персонажа</div>-->
 			</div>
 		</template>
 
 		<v-list dense>
 			<v-list-item
+				class="px-2"
 				v-for="(pathPoint, index) in pathPoints.path" :key="index"
 				@click.prevent="setMarker(pathPoint.system)"
 			>
-				<v-list-item-icon>
-					<v-icon>mdi-map-marker-path</v-icon>
-				</v-list-item-icon>
+				<v-list-item-action class="mr-2 ml-0">
+					<span class="caption font-weight-black" :style="'color:'+pathPoint.system.securityColor" v-html="pathPoint.system.securityFormatted"></span>
+				</v-list-item-action>
 				<v-list-item-content>
 					<v-list-item-title>
-						<a href="#" @click.prevent="setMarker(pathPoint.system)">{{ pathPoint.system.name }}</a>
+						<span>{{ pathPoint.system.name }}</span>&nbsp;
+						<span class="grey--text">{{ pathPoint.system.region.name }}</span>
 					</v-list-item-title>
 					<v-list-item-subtitle v-if="pathPoint.jb">{{ pathPoint.jb.name }}</v-list-item-subtitle>
-					<v-list-item-subtitle>{{ pathPoint.system.region.name }}</v-list-item-subtitle>
 				</v-list-item-content>
 			</v-list-item>
 		</v-list>
 
 		<template v-slot:append>
-			<div class="pa-2">
-				<v-btn
-					block
-					color="orange"
-					:disabled="disableGoBtn"
-					@click="apiSetDestinationPathGo">в добрый путь
-				</v-btn>
-			</div>
-
-			<div class="pa-2">
-				<v-btn block @click="resetPathPoints">close</v-btn>
-			</div>
+			<v-row class="path-finder--plate">
+				<v-col>
+					<v-btn
+						class="ml-2"
+						color="orange"
+						:disabled="disableGoBtn"
+						@click="apiSetDestinationPathGo">в добрый путь
+					</v-btn>
+				</v-col>
+				<v-col>
+					<v-btn @click="resetPathPoints">close</v-btn>
+				</v-col>
+			</v-row>
 		</template>
 	</v-navigation-drawer>
 </template>
@@ -146,3 +147,17 @@ export default class PathFinder extends Vue {
 	}
 }
 </script>
+
+<style>
+.path-finder--title {
+	vertical-align: middle;
+}
+</style>
+
+<style lang="sass">
+@import "src/scss/theme"
+
++theme-glob(path-finder) using($material)
+	.path-finder--plate
+		background-color: map-get($material, 'plate')
+</style>

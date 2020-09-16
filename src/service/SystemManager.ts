@@ -92,7 +92,7 @@ class SystemManager {
 		this.regions = Object.preventExtensions(this.regions)
 
 		SystemDB.forEach((systemData => {
-			this.addSystem(systemData.id, systemData.name, systemData.regionId)
+			this.addSystem(systemData.name, systemData.id, systemData.regionId, systemData.security)
 		}))
 		const sgIDS = Object.keys(StarGateDB)
 		sgIDS.forEach((StarGateID => {
@@ -392,10 +392,10 @@ class SystemManager {
 		}
 	}
 
-	addSystem(id, name, region_id) {
+	addSystem(name: string, id: number, region_id: number, security: number) {
 		if (this.systemsById[id]) return
 
-		const system = Object.preventExtensions(new EVESystem(name, id, region_id))
+		const system = Object.preventExtensions(new EVESystem(name, id, region_id, security))
 		this.systemsByName[name] = system
 		this.systemsById[id] = system
 		this.regions[region_id].systems.push(system)

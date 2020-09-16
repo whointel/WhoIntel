@@ -1,3 +1,5 @@
+@import '~vuetify/src/styles/settings/_colors.scss';
+
 $list-item-child-min-width: 16px !default;
 $list-item-action-icon-margin: 16px !default;
 $body-font-family: "Eve Sans Neue", sans-serif !default;
@@ -17,6 +19,8 @@ $material-dark: (
 	'alertS1': #FF9B0F,
 	'alertS2': #FFFA0F,
 	'alertS3': #FFFDA2,
+
+	'plate': $background-main-dark,
 );
 
 $material-light: (
@@ -24,4 +28,9 @@ $material-light: (
 	'alertS1': #FF9B0F,
 	'alertS2': #FFFA0F,
 	'alertS3': #FFFDA2,
+
+	'plate': map-get($grey, 'lighten-3'),
 );
+
+$list-item-action-margin: 0px 0 !default;
+$list-dense-min-height: 30px !default;

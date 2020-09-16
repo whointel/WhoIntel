@@ -3,6 +3,7 @@ import systemManager from "@/service/SystemManager"
 import {IREGION} from "@/types/MAP"
 import settingsService from "@/service/settings"
 import events from "@/service/EventBus"
+import round from "lodash/round"
 
 interface ALARM_COLORS_INTERFACE {
 	seconds: number
@@ -48,7 +49,7 @@ const ALARM_COLORS_LIGHT: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE }
 	[ALARM_COLORS_KEYS.S2]: {
 		seconds: 60 * 15,
 		bgClass: "alertS2",
-		text:COLOR_BLACK,
+		text: COLOR_BLACK,
 	},
 	[ALARM_COLORS_KEYS.S3]: {
 		seconds: 60 * 25,
@@ -109,6 +110,7 @@ export default class EVESystem {
 	id: number
 	name: string
 	region_id: number
+	security: number
 	isShow = false
 	needRefresh = false
 
@@ -131,10 +133,57 @@ export default class EVESystem {
 	neighbours: EVESystem[] = []
 	neighbourRegions: number[] = []
 
-	constructor(name, id, region_id) {
+	constructor(name: string, id: number, region_id: number, security: number) {
 		this.name = name
 		this.id = id
 		this.region_id = region_id
+		this.security = security
+	}
+
+	get securityFormatted(): string {
+		const security = round(this.security, 1)
+		let result = String(security)
+		if (security === 1) result = "1.0"
+		if (security === 0) result = "0.0"
+		if (security === -1) result = "-1.0"
+		if (security >= 0) result = `&nbsp${result}`
+		return result
+	}
+
+	get securityColor(): string {
+		if (settingsService.$.darkTheme) {
+			if (this.security >= 1.0) {
+				return "#33FFFF"
+			} else if (this.security >= 0.9) {
+				return "#64FFFF"
+			} else if (this.security >= 0.8) {
+				return "#00F94B"
+			} else if (this.security >= 0.7) {
+				return "#00FF00"
+			} else if (this.security >= 0.6) {
+				return "#B2FF3B"
+			} else if (this.security >= 0.5) {
+				return "#FFFF00"
+			} else if (this.security >= 0.4) {
+				return "#FF9700"
+			} else if (this.security >= 0.3) {
+				return "#FF7E00"
+			} else if (this.security >= 0.2) {
+				return "#FF5500"
+			} else if (this.security >= 0.1) {
+				return "#F63300"
+			} else {
+				return "#FF0000"
+			}
+		}
+
+		if (this.security >= 0.5) {
+			return "#009900"
+		} else if (this.security >= 0.1) {
+			return "#FF8000"
+		} else {
+			return "#FF0000"
+		}
 	}
 
 	hide() {

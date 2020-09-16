@@ -78,7 +78,7 @@ async function loopRegions(regionsPath: string, regionNames: any, systemNames: a
 	for (const region of regions) {
 		const regionFolder = path.join(regionsPath, region)
 		const regionFolderStat = await fs.promises.stat(regionFolder)
-		if (!regionFolderStat.isDirectory()) return
+		if (!regionFolderStat.isDirectory()) throw new Error(`"${regionFolder}" is not a directory`)
 
 		const regionStaticDataPath = path.join(regionFolder, "region.staticdata")
 		const regionStaticData = fs.readFileSync(regionStaticDataPath).toString()
@@ -132,6 +132,7 @@ async function loopRegions(regionsPath: string, regionNames: any, systemNames: a
 					// regionName: regionName,
 					constellationName: constellation,
 					stargates: stargates,
+					security: systemYaml.security,
 				})
 			}
 		}
@@ -192,25 +193,25 @@ async function readShipNames(typesIdsPath: string) {
 }
 
 export const SDEParser = async (/*base_path: string*/) => {
-	// const base_path = "d:\\Projects\\EVE\\sde\\"
-	// const invUniqueNamesPath = path.join(base_path, "bsd", "invUniqueNames.yaml")
-	// const {regionNames, systemNames} = await readRegions(invUniqueNamesPath)
+	const base_path = "d:\\Projects\\EVE\\sde\\"
+	const invUniqueNamesPath = path.join(base_path, "bsd", "invUniqueNames.yaml")
+	const {regionNames, systemNames} = await readRegions(invUniqueNamesPath)
+
+	const regionsPath = path.join(base_path, "fsd", "universe", "eve")
+	// // @ts-ignore
+	const {SystemDB, StarGateDB, RegionDB} = await loopRegions(regionsPath, regionNames, systemNames)
+
+	const SystemDBPath = path.join(base_path, "SystemDB.json")
+	fs.writeFileSync(SystemDBPath, JSON.stringify(SystemDB))
 	//
-	// const regionsPath = path.join(base_path, "fsd", "universe", "eve")
-	// // // @ts-ignore
-	// const {SystemDB, StarGateDB, RegionDB} = await loopRegions(regionsPath, regionNames, systemNames)
-	// //
-	// const SystemDBPath = path.join(base_path, "SystemDB.json")
-	// fs.writeFileSync(SystemDBPath, JSON.stringify(SystemDB))
-	// //
-	// const StarGateDBPath = path.join(base_path, "StarGateDB.json")
-	// fs.writeFileSync(StarGateDBPath, JSON.stringify(StarGateDB))
-	//
-	// const RegionDBPath = path.join(base_path, "RegionDB.json")
-	// fs.writeFileSync(RegionDBPath, JSON.stringify(RegionDB))
-	//
-	// const shipNames = await readShipNames(path.join(base_path, "fsd", "typeIDs.yaml"))
-	//
-	// const ShipsDBPath = path.join(base_path, "ShipsDB.json")
-	// fs.writeFileSync(ShipsDBPath, JSON.stringify(shipNames))
+	const StarGateDBPath = path.join(base_path, "StarGateDB.json")
+	fs.writeFileSync(StarGateDBPath, JSON.stringify(StarGateDB))
+
+	const RegionDBPath = path.join(base_path, "RegionDB.json")
+	fs.writeFileSync(RegionDBPath, JSON.stringify(RegionDB))
+
+	const shipNames = await readShipNames(path.join(base_path, "fsd", "typeIDs.yaml"))
+
+	const ShipsDBPath = path.join(base_path, "ShipsDB.json")
+	fs.writeFileSync(ShipsDBPath, JSON.stringify(shipNames))
 }

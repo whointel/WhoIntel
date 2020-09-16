@@ -75,7 +75,7 @@
 							{{ $t("current_system_not_set") }}
 						</v-list-item-subtitle>
 						<v-list-item-subtitle v-else-if="pathHopes().length">
-							{{ pathHopes().length }} {{ $tc("hops", pathHopes().length) }}
+							{{ pathHopes().length }} {{ $tc("jumps", pathHopes().length) }}
 						</v-list-item-subtitle>
 						<v-list-item-subtitle class="red--text text--lighten-3" v-if="!isAPIAuthed">
 							{{ $t("no_auth") }}
@@ -459,7 +459,7 @@ export default class RegionMapContextMenu extends Vue {
 	"en": {
 		"find_path": "Find path",
 		"current_system_not_set": "Set current system first",
-		"hops": "hops|hop|hops",
+		"jumps": "jumps|jump|jumps",
 		"no_auth": "No authorization",
 		"show_system_log": "Show system log",
 		"set_system_as_current_for_character": "Set as current for",
@@ -470,7 +470,7 @@ export default class RegionMapContextMenu extends Vue {
 	"ru": {
 		"find_path": "Построить маршрут",
 		"current_system_not_set": "Задайте систему текущему персонажу",
-		"hops": "прыжков|прыжок|прыжка|прыжков|прыжков",
+		"jumps": "прыжков|прыжок|прыжка|прыжков|прыжков",
 		"no_auth": "Вы не авторизованы",
 		"show_system_log": "Лог системы",
 		"set_system_as_current_for_character": "Установить текущей для",
