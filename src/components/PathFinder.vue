@@ -4,14 +4,7 @@
 			<div class="path-finder--plate px-2 pt-1">
 				<div class="ml-4 subtitle-1">
 					<span class="path-finder--title">{{ pathPoints.path.length - 1 }}j {{ startSystemName }} -> {{ endSystemName }}</span>
-					<v-tooltip bottom transition="fade-transition">
-						<template v-slot:activator="{ on, attrs }">
-							<v-btn icon v-bind="attrs" v-on="on" @click="copyPath">
-								<v-icon small>{{ copyIcon }}</v-icon>
-							</v-btn>
-						</template>
-						<span>Скопировать путь в буфер обмена</span>
-					</v-tooltip>
+					<path-finder-copy-btn :pathPoints="pathPoints"/>
 				</div>
 			</div>
 		</template>
@@ -55,6 +48,7 @@
 
 <script lang="ts">
 import {Component, Vue, Watch} from "vue-property-decorator"
+import PathFinderCopyBtn from "@/components/PathFinderCopyBtn.vue"
 import api from "@/lib/EVEApi"
 // eslint-disable-next-line no-unused-vars
 import EVESystem from "@/lib/EVESystem"
@@ -64,7 +58,9 @@ import events from "@/service/EventBus"
 import {IPATHPOINT} from "@/types/PathFinder"
 import Timeout from "await-timeout"
 
-@Component
+@Component({
+	components: {PathFinderCopyBtn}
+})
 export default class PathFinder extends Vue {
 	isShow = false
 	disableGoBtn = false
@@ -104,35 +100,6 @@ export default class PathFinder extends Vue {
 			isFirst = false
 			await Timeout.set(50)
 		}
-	}
-
-	get copyIcon() {
-		return this.showCopied ? "mdi-check-bold" : "mdi-content-copy"
-	}
-
-	get pathString(): string {
-		let path = ""
-		for (let i = 0; i < this.pathPoints.path.length; i++) {
-			const pathPoint = this.pathPoints.path[i]
-			const isLastPathPoint = i >= (this.pathPoints.path.length - 1)
-
-			path = path + `${pathPoint.system.name} (${pathPoint.system.region.name})`
-			if (!isLastPathPoint) {
-				path = path + " " + (pathPoint.jb ? "»" : "-") + " "
-			}
-		}
-
-		return path
-	}
-
-	showCopied = false
-
-	async copyPath() {
-		this.showCopied = true
-
-		await navigator.clipboard.writeText(this.pathString)
-		await Timeout.set(1000)
-		this.showCopied = false
 	}
 
 	setMarker(system: EVESystem) {
