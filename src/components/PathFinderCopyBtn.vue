@@ -1,7 +1,7 @@
 <template>
 	<v-tooltip bottom transition="fade-transition">
 		<template v-slot:activator="{ on, attrs }">
-			<v-btn icon v-bind="attrs" v-on="on" @click="copyPath">
+			<v-btn icon small v-bind="attrs" v-on="on" @click="copyPath">
 				<v-icon small>{{ copyIcon }}</v-icon>
 			</v-btn>
 		</template>

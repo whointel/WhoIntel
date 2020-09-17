@@ -4,13 +4,22 @@ import systemManager from "@/service/SystemManager"
 import {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 import events from "@/service/EventBus"
 import * as log from "electron-log"
+import {IPATHPOINT} from "@/types/PathFinder"
+import {reactive} from "@vue/composition-api"
+import find from "lodash/find"
+import $store from "@/store"
+import characterManager from "@/service/CharacterManager"
 
-/**
- * TODO cache
- */
 class PathService {
 	private readonly graph: Graph<null>
 	private readonly pathFinder: PathFinder<null>
+	public pathPoints: IPATHPOINT = reactive({
+		path: [],
+		structures: [],
+		start: 0,
+		end: 0,
+		middle: [],
+	})
 
 	constructor() {
 		this.graph = createGraph<null>()
@@ -51,6 +60,84 @@ class PathService {
 		console.timeEnd("PathService: graph enrich")
 	}
 
+	public setStart(system_id: number) {
+		this.pathPoints.start = system_id
+		this.reCalc()
+	}
+
+	setStartFromCurrentSystem() {
+		const cur = characterManager.activeCharacter?.system?.id
+		if (cur) {
+			this.setStart(cur)
+		}
+	}
+
+	public setEnd(system_id: number) {
+		this.pathPoints.end = system_id
+		this.reCalc()
+	}
+
+	public setMiddle(system_id: number) {
+		// this.pathPoints.middle.push(system_id)
+		// this.recalc()
+	}
+
+	private reCalc() {
+		this.pathPoints.structures = []
+		this.pathPoints.path = []
+		$store.commit("setShowPathPanel", true)
+
+		if (
+			!this.pathPoints.start
+			|| !this.pathPoints.end
+		) {
+			return
+		}
+
+		const pathIds = this.find(this.pathPoints.start, this.pathPoints.end)
+		if (!pathIds.length) return
+
+		let currentSystem = systemManager.getSystemById(this.pathPoints.start)
+
+		for (const id of pathIds) {
+			let next = find(currentSystem!.neighbours, {id: id})
+			if (next) {
+
+				// console.debug(`${currentSystem?.name} / D / ${next?.name}`)
+				this.pathPoints.path.push({
+					system: currentSystem!,
+				})
+				currentSystem = next
+				continue
+			}
+
+			const jb = systemManager.jbBySystemId[currentSystem!.id]
+			if (
+				!jb
+				|| jb.systemTo?.id !== id
+			) throw "path found error"
+
+			next = jb.systemTo
+			if (!next) throw "path found error"
+
+			this.pathPoints.structures.push(jb.structure_id)
+
+			// console.debug(`${currentSystem?.name} / ${jb?.name} / ${next?.name}`)
+			this.pathPoints.path.push({
+				system: currentSystem!,
+				jb: jb,
+			})
+			currentSystem = next
+		}
+
+		this.pathPoints.path.push({
+			system: currentSystem!,
+		})
+
+		this.pathPoints.structures.push(currentSystem!.id)
+		// console.debug(pathPoints.structures)
+	}
+
 	public find(system_from_id: number, system_to_id: number): number[] {
 		const label = `PathService: path finding, ${system_from_id} -> ${system_to_id}`
 		console.time(label)
@@ -73,6 +160,6 @@ class PathService {
 
 }
 
-const pathService = new PathService()
+const pathService = Object.preventExtensions(new PathService())
 
 export default pathService

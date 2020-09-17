@@ -38,44 +38,68 @@
 					</v-list-item-content>
 				</v-list-item>
 
-				<v-divider/>
-
-				<v-list-item
-					@click="apiSetDestinationPath"
-					:disabled="!isAPIAuthed || !getCurrentSystemForAPICharacter() || !pathHopes().length"
+				<v-menu
+					offset-x
+					dense
+					:transition="false"
+					open-on-hover
 				>
-					<v-list-item-icon>
-						<v-icon>mdi-transfer-right</v-icon>
-					</v-list-item-icon>
-					<v-list-item-content>
-						<v-list-item-title>
-							{{ $t("find_path") }}
-						</v-list-item-title>
+					<template v-slot:activator="{ on, attrs }">
+						<v-list-item
+							v-bind="attrs"
+							v-on="on"
+						>
+							<v-list-item-icon>
+								<v-icon>mdi-transfer-right</v-icon>
+							</v-list-item-icon>
+							<v-list-item-content>
+								<v-list-item-title>
+									{{ $t("find_path") }}
+								</v-list-item-title>
+							</v-list-item-content>
+							<v-list-item-action>
+								<v-icon color="grey lighten-1">mdi-chevron-right</v-icon>
+							</v-list-item-action>
+						</v-list-item>
+					</template>
 
-						<v-list-item-subtitle v-if="!getCurrentSystemForAPICharacter()">
-							{{ $t("current_system_not_set") }}
-						</v-list-item-subtitle>
-						<v-list-item-subtitle v-else-if="pathHopes().length">
-							{{ pathHopes().length }} {{ $tc("jumps", pathHopes().length) }}
-						</v-list-item-subtitle>
-						<v-list-item-subtitle class="red--text text--lighten-3" v-if="!isAPIAuthed">
-							{{ $t("no_auth") }}
-						</v-list-item-subtitle>
+					<v-list dense>
+						<v-list-item @click="pathFinderSetEnd">
+							<v-list-item-icon>
+								<v-icon>mdi-arrow-bottom-right</v-icon>
+							</v-list-item-icon>
+							<v-list-item-content>
+								<v-list-item-title>
+									{{ $t("find_path_to") }}
+								</v-list-item-title>
+							</v-list-item-content>
+						</v-list-item>
 
-					</v-list-item-content>
-				</v-list-item>
+						<v-list-item @click="pathFinderSetStart">
+							<v-list-item-icon>
+								<v-icon>mdi-arrow-top-right</v-icon>
+							</v-list-item-icon>
+							<v-list-item-content>
+								<v-list-item-title>
+									{{ $t("find_path_from") }}
+								</v-list-item-title>
+							</v-list-item-content>
+						</v-list-item>
+
+						<!--						<v-list-item @click="pathFinderSetMiddle">-->
+						<!--							<v-list-item-icon>-->
+						<!--								<v-icon>mdi-arrow-left-right</v-icon>-->
+						<!--							</v-list-item-icon>-->
+						<!--							<v-list-item-content>-->
+						<!--								<v-list-item-title>-->
+						<!--									Добавить точку-->
+						<!--								</v-list-item-title>-->
+						<!--							</v-list-item-content>-->
+						<!--						</v-list-item>-->
+					</v-list>
+				</v-menu>
+
 				<v-divider/>
-
-				<v-list-item @click="applyLogFilter">
-					<v-list-item-icon>
-						<v-icon>mdi-map-marker-path</v-icon>
-					</v-list-item-icon>
-					<v-list-item-content>
-						<v-list-item-title>
-							{{ $t("show_system_log") }}
-						</v-list-item-title>
-					</v-list-item-content>
-				</v-list-item>
 
 				<v-menu
 					offset-x
@@ -129,6 +153,17 @@
 					</v-list>
 				</v-menu>
 
+				<v-list-item @click="applyLogFilter">
+					<v-list-item-icon>
+						<v-icon>mdi-map-marker-path</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>
+							{{ $t("show_system_log") }}
+						</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
+
 				<v-list-item v-if="neighbourRegion" @click="goToNeighbourRegion">
 					<v-list-item-icon>
 						<v-icon>mdi-map-marker-path</v-icon>
@@ -170,6 +205,9 @@
 					<v-list-item-content>
 						<v-list-item-title>
 							{{ menuSystemStat }}
+							<span v-if="pathJumps">
+								/ {{ pathJumps }} {{ $tc("jumps", pathJumps) }}
+							</span>
 						</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
@@ -188,8 +226,6 @@ import systemManager from "@/service/SystemManager"
 import {I_CONTEXT_MENU, IREGION} from "@/types/MAP"
 import events from "@/service/EventBus"
 import EVEJumpBridge from "@/lib/EVEJumpBridge"
-import find from "lodash/find"
-import {IPATHPOINT} from "@/types/PathFinder"
 import {ipcRenderer} from "electron"
 import characterManager, {ICharacterManagerCharacter} from "@/service/CharacterManager"
 import pathService from "@/service/PathService"
@@ -236,66 +272,37 @@ export default class RegionMapContextMenu extends Vue {
 		return characterManager.activeCharacter?.system?.id !== this.system?.id
 	}
 
-	pathHopes(): number[] {
-		if (!this.system || !this.getCurrentSystemForAPICharacter()) return []
+	get pathJumps(): number {
+		if (!this.system) return 0
 
 		const currentSystem = this.getCurrentSystemForAPICharacter()
-		if (!currentSystem) return []
+		if (!currentSystem) return 0
 
-		return pathService.find(currentSystem.id, this.system.id)
+		return pathService.find(currentSystem.id, this.system.id).length
 	}
 
-	apiSetDestinationPath() {
+	pathFinderSetStart() {
 		this.closeMenu()
+		if (!this.system) return
 
-		const pathIds = this.pathHopes()
-		let currentSystem = this.getCurrentSystemForAPICharacter()
-		if (!pathIds.length || !currentSystem) return
+		pathService.setStart(this.system.id)
+	}
 
-		const pathPoints: IPATHPOINT = {
-			path: [],
-			structures: [],
+	pathFinderSetMiddle() {
+		this.closeMenu()
+		if (!this.system) return
+
+		pathService.setMiddle(this.system.id)
+	}
+
+	pathFinderSetEnd() {
+		this.closeMenu()
+		if (!this.system) return
+
+		pathService.setEnd(this.system.id)
+		if (!pathService.pathPoints.start) {
+			pathService.setStartFromCurrentSystem()
 		}
-
-		for (const id of pathIds) {
-			let next = find(currentSystem!.neighbours, {id: id})
-			if (next) {
-
-				// console.debug(`${currentSystem?.name} / D / ${next?.name}`)
-				pathPoints.path.push({
-					system: currentSystem!,
-				})
-				currentSystem = next
-				continue
-			}
-
-			const jb = systemManager.jbBySystemId[currentSystem!.id]
-			if (
-				!jb
-				|| jb.systemTo?.id !== id
-			) throw "path found error"
-
-			next = jb.systemTo
-			if (!next) throw "path found error"
-
-			pathPoints.structures.push(jb.structure_id)
-
-			// console.debug(`${currentSystem?.name} / ${jb?.name} / ${next?.name}`)
-			pathPoints.path.push({
-				system: currentSystem!,
-				jb: jb,
-			})
-			currentSystem = next
-		}
-
-		pathPoints.path.push({
-			system: currentSystem!,
-		})
-
-		pathPoints.structures.push(currentSystem!.id)
-		// console.debug(pathPoints.structures)
-
-		events.$emit("setPathPoints", pathPoints)
 	}
 
 	setMarker(system: EVESystem) {
@@ -443,7 +450,8 @@ export default class RegionMapContextMenu extends Vue {
 {
 	"en": {
 		"find_path": "Find path",
-		"current_system_not_set": "Set current system first",
+		"find_path_from": "From",
+		"find_path_to": "To",
 		"jumps": "jumps|jump|jumps",
 		"no_auth": "No authorization",
 		"show_system_log": "Show system log",
@@ -454,7 +462,8 @@ export default class RegionMapContextMenu extends Vue {
 	},
 	"ru": {
 		"find_path": "Построить маршрут",
-		"current_system_not_set": "Задайте систему текущему персонажу",
+		"find_path_from": "Откуда",
+		"find_path_to": "Куда",
 		"jumps": "прыжков|прыжок|прыжка|прыжков|прыжков",
 		"no_auth": "Вы не авторизованы",
 		"show_system_log": "Лог системы",

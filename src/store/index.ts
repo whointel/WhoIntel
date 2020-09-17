@@ -18,6 +18,7 @@ const store = new Vuex.Store({
 		showFleetPanel: false,
 		showLogsPanel: true,
 		showTopPanel: true,
+		showPathPanel: false,
 	},
 
 	getters: {
@@ -32,6 +33,7 @@ const store = new Vuex.Store({
 		showFleetPanel: state => state.showFleetPanel,
 		showLogsPanel: state => state.showLogsPanel,
 		showTopPanel: state => state.showTopPanel,
+		showPathPanel: state => state.showPathPanel,
 	},
 
 	mutations: {
@@ -64,6 +66,9 @@ const store = new Vuex.Store({
 		},
 		setShowTopPanel: (state, showTopPanel) => {
 			state.showTopPanel = showTopPanel
+		},
+		setShowPathPanel: (state, showPathPanel) => {
+			state.showPathPanel = showPathPanel
 		},
 	},
 

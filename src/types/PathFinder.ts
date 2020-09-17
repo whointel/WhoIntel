@@ -7,4 +7,7 @@ export interface IPATHPOINT {
 		jb?: EVEJumpBridge
 	}>
 	structures: number[]
+	start: number
+	end: number
+	middle: number[]
 }

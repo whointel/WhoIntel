@@ -1,15 +1,44 @@
 <template>
-	<v-navigation-drawer class="path-finder" app :permanent="false" stateless :value="isShow">
+	<v-navigation-drawer :width="300" class="path-finder" app :permanent="false" stateless :value="isShow">
 		<template v-slot:prepend>
 			<div class="path-finder--plate px-2 pt-1">
-				<div class="ml-4 subtitle-1">
-					<span class="path-finder--title">{{ pathPoints.path.length - 1 }}j {{ startSystemName }} -> {{ endSystemName }}</span>
-					<path-finder-copy-btn :pathPoints="pathPoints"/>
-				</div>
+				<v-row>
+					<v-col class="py-0 pl-1 pr-0" :cols="1">
+						<v-btn icon small @click="setStartCurrentSystem">
+							<v-icon small>mdi-map-marker</v-icon>
+						</v-btn>
+					</v-col>
+					<v-col class="py-0 pl-1 pr-0">
+						<v-autocomplete
+							item-text="name"
+							v-model="startSystem"
+							:items="allSystems"
+							hide-no-data dense hide-details
+							placeholder="Откуда"
+							return-object
+						/>
+					</v-col>
+					<v-col class="py-0 pl-1 pr-0">
+						<v-autocomplete
+							item-text="name"
+							v-model="endSystem"
+							:items="allSystems"
+							hide-no-data dense hide-details
+							placeholder="Куда"
+							return-object
+						/>
+					</v-col>
+					<v-col class="py-0 pl-1 pr-0" :cols="2">
+						<path-finder-copy-btn :pathPoints="pathPoints"/>
+					</v-col>
+				</v-row>
 			</div>
 		</template>
 
 		<v-list dense>
+			<v-subheader v-if="pathPoints.path.length > 0" class="subtitle-2">
+				{{ pathPoints.path.length - 1 }}j:
+			</v-subheader>
 			<v-list-item
 				class="px-2"
 				v-for="(pathPoint, index) in pathPoints.path" :key="index"
@@ -34,12 +63,14 @@
 					<v-btn
 						class="ml-2"
 						color="orange"
-						:disabled="disableGoBtn"
-						@click="apiSetDestinationPathGo">в добрый путь
+						:disabled="disableGoBtn || !isAPIAuthed"
+						@click="apiSetDestinationPathGo"
+					>
+						в добрый путь
 					</v-btn>
 				</v-col>
-				<v-col>
-					<v-btn @click="resetPathPoints">close</v-btn>
+				<v-col :cols="5">
+					<v-btn @click="close">close</v-btn>
 				</v-col>
 			</v-row>
 		</template>
@@ -53,42 +84,58 @@ import api from "@/lib/EVEApi"
 // eslint-disable-next-line no-unused-vars
 import EVESystem from "@/lib/EVESystem"
 import systemManager from "@/service/SystemManager"
-import events from "@/service/EventBus"
 // eslint-disable-next-line no-unused-vars
 import {IPATHPOINT} from "@/types/PathFinder"
 import Timeout from "await-timeout"
+import pathService from "@/service/PathService"
 
 @Component({
 	components: {PathFinderCopyBtn}
 })
 export default class PathFinder extends Vue {
-	isShow = false
+	get allSystems(): EVESystem[] {
+		if (!this.$store.getters.isAppReady) return []
+
+		return Object.values(systemManager.systemsById)
+	}
+
 	disableGoBtn = false
 
-	pathPoints: IPATHPOINT = {
-		path: [],
-		structures: [],
-	}
-
 	@Watch("pathPoints.path")
-	showSwitcher(val) {
-		this.isShow = val.length > 0
+	reActivateGoBtn(value: any[]) {
+		this.disableGoBtn = value.length <= 0
 	}
 
-	get startSystemName() {
-		return this.pathPoints.path[0]?.system.name
+	get isAPIAuthed() {
+		return api.auth.isAuth
 	}
 
-	get endSystemName() {
-		return this.pathPoints.path[this.pathPoints.path.length - 1]?.system.name
+	get isShow() {
+		return this.$store.getters.showPathPanel
 	}
 
-	created() {
-		events.$on("setPathPoints", pathPoints => {
-				this.pathPoints = pathPoints
-				this.disableGoBtn = false
-			}
-		)
+	get pathPoints(): IPATHPOINT {
+		return pathService.pathPoints
+	}
+
+	get startSystem(): EVESystem {
+		return systemManager.getSystemById(this.pathPoints.start)!
+	}
+
+	set startSystem(system: EVESystem) {
+		pathService.setStart(system.id)
+	}
+
+	get endSystem(): EVESystem {
+		return systemManager.getSystemById(this.pathPoints.end)!
+	}
+
+	set endSystem(system: EVESystem) {
+		pathService.setEnd(system.id)
+	}
+
+	setStartCurrentSystem() {
+		pathService.setStartFromCurrentSystem()
 	}
 
 	async apiSetDestinationPathGo() {
@@ -106,23 +153,20 @@ export default class PathFinder extends Vue {
 		systemManager.markSystem(system, true)
 	}
 
-	resetPathPoints() {
-		this.pathPoints = {
-			path: [],
-			structures: [],
-		}
+	close() {
+		pathService.setStart(0)
+		pathService.setEnd(0)
+		this.$store.commit("setShowPathPanel", false)
 	}
 }
 </script>
 
-<style>
-.path-finder--title {
-	vertical-align: middle;
-}
-</style>
-
 <style lang="sass">
 @import "src/scss/theme"
+.path-finder--plate
+	.v-input
+		font-size: 14px
+
 
 +theme-glob(path-finder) using($material)
 	.path-finder--plate
