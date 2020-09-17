@@ -217,6 +217,10 @@ export default class RegionMapContextMenu extends Vue {
 		})
 	}
 
+	beforeDestroy() {
+		this.showWatcher(false)
+	}
+
 	get charactersInSystem(): string[] {
 		if (!this.system) return []
 		const characterNameSet = characterManager.regionSystemToChars[this.system.region_id]?.[this.system.id] || new Set()
