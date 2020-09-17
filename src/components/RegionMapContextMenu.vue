@@ -38,31 +38,12 @@
 					</v-list-item-content>
 				</v-list-item>
 
-<!--				<v-list-item-->
-<!--					@click="apiAddWaypointJB"-->
-<!--					v-if="jb"-->
-<!--					:disabled="!isAPIAuthed || !jb.structure_id">-->
-<!--					<v-list-item-icon>-->
-<!--						<v-icon>mdi-transfer-right</v-icon>-->
-<!--					</v-list-item-icon>-->
-<!--					<v-list-item-content>-->
-<!--						<v-list-item-title>-->
-<!--							Add Waypoint to <b>JB</b> {{ jb.systemTo.name }}-->
-<!--						</v-list-item-title>-->
-<!--						<v-list-item-subtitle>-->
-<!--							{{ jb.name }} <b v-if="jbToNeighbourRegion">/ {{ jbToNeighbourRegion.name }}</b>-->
-<!--						</v-list-item-subtitle>-->
-<!--						<v-list-item-subtitle class="red&#45;&#45;text text&#45;&#45;lighten-3" v-if="!isAPIAuthed">-->
-<!--							Вы не авторизованы-->
-<!--						</v-list-item-subtitle>-->
-<!--					</v-list-item-content>-->
-<!--				</v-list-item>-->
-
 				<v-divider/>
 
 				<v-list-item
 					@click="apiSetDestinationPath"
-					:disabled="!isAPIAuthed || !getCurrentSystemForAPICharacter() || !pathHopes().length">
+					:disabled="!isAPIAuthed || !getCurrentSystemForAPICharacter() || !pathHopes().length"
+				>
 					<v-list-item-icon>
 						<v-icon>mdi-transfer-right</v-icon>
 					</v-list-item-icon>
