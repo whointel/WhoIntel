@@ -15,7 +15,7 @@ import settingsService from "@/service/settings"
 @Component
 export default class FleetBtn extends Vue {
 	get isShow() {
-		return this.$store.getters.showFleet
+		return this.$store.getters.showFleetPanel
 	}
 
 	get settings() {
@@ -23,7 +23,7 @@ export default class FleetBtn extends Vue {
 	}
 
 	async switchShow() {
-		await this.$store.commit("setFleetShow", !this.isShow)
+		await this.$store.commit("setShowFleetPanel", !this.isShow)
 	}
 }
 </script>

@@ -15,7 +15,7 @@ const store = new Vuex.Store({
 		ZKBStatus: ZKB_STATUS.DISCONNECTED,
 		overlay: OVERLAY_TYPE.ALERT,
 		error: "",
-		showFleet: false,
+		showFleetPanel: false,
 		showLogsPanel: true,
 		showTopPanel: true,
 	},
@@ -29,7 +29,7 @@ const store = new Vuex.Store({
 		ZKBStatus: state => state.ZKBStatus,
 		overlay: state => state.overlay,
 		error: state => state.error,
-		showFleet: state => state.showFleet,
+		showFleetPanel: state => state.showFleetPanel,
 		showLogsPanel: state => state.showLogsPanel,
 		showTopPanel: state => state.showTopPanel,
 	},
@@ -56,8 +56,8 @@ const store = new Vuex.Store({
 		setError: (state, error) => {
 			state.error = error
 		},
-		setFleetShow: (state, showFleet) => {
-			state.showFleet = showFleet
+		setShowFleetPanel: (state, showFleetPanel) => {
+			state.showFleetPanel = showFleetPanel
 		},
 		setShowLogsPanel: (state, showLogsPanel) => {
 			state.showLogsPanel = showLogsPanel

@@ -86,7 +86,7 @@ export default class App extends Vue {
 	}
 
 	get isFleetShow() {
-		return this.$store.getters.showFleet
+		return this.$store.getters.showFleetPanel
 	}
 
 	get isLogsShow() {
