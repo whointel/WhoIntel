@@ -2,11 +2,16 @@ import "@/scss/main.scss"
 import {ipcRenderer} from "electron"
 import * as log from "electron-log"
 import Vue from "vue"
-import App from "@/App.vue"
-import LayoutWindow from "@/LayoutWindow.vue"
+import compositionAPI from "@/plugins/compositionAPI"
+const dummyConst = compositionAPI
+
 import store from "@/store"
 import vuetify from "@/plugins/vuetify"
 import i18n from "@/plugins/i18n"
+
+import App from "@/App.vue"
+import LayoutWindow from "@/LayoutWindow.vue"
+
 import PortalVue from "portal-vue"
 import api from "@/lib/EVEApi"
 import events from "@/service/EventBus"
@@ -17,7 +22,6 @@ import systemManager from "@/service/SystemManager"
 import timeUsedService from "@/service/TimeUsed"
 import settingsService from "@/service/settings"
 import layoutService from "@/service/LayoutService"
-import VueCompositionAPI from '@vue/composition-api'
 import characterManager from "@/service/CharacterManager"
 import pathService from "@/service/PathService"
 
@@ -26,9 +30,9 @@ declare global {
 		require: any;
 	}
 }
+
 Vue.config.productionTip = false
 
-Vue.use(VueCompositionAPI)
 Vue.use(PortalVue)
 
 events.init()
