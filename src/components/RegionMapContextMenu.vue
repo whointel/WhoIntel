@@ -140,13 +140,13 @@
 							</v-list-item-content>
 						</v-list-item>
 
-						<v-list-item disabled v-for="character in charactersInSystem" :key="character">
+						<v-list-item disabled v-for="character in charactersInSystem" :key="character.name">
 							<v-list-item-icon>
 								<v-icon>mdi-account</v-icon>
 							</v-list-item-icon>
 							<v-list-item-content>
 								<v-list-item-title>
-									{{ character }}
+									{{ character.name }}
 								</v-list-item-title>
 							</v-list-item-content>
 						</v-list-item>
@@ -255,10 +255,12 @@ export default class RegionMapContextMenu extends Vue {
 		this.showWatcher(false)
 	}
 
-	get charactersInSystem(): string[] {
+	get charactersInSystem(): ICharacterManagerCharacter[] {
 		if (!this.system) return []
-		const characterNameSet = characterManager.regionSystemToChars[this.system.region_id]?.[this.system.id] || new Set()
-		return Array.from(characterNameSet)
+		const characters = characterManager.regionSystemToChars[this.system.region_id]?.[this.system.id]
+		if (!characters) return []
+
+		return characters as ICharacterManagerCharacter[]
 	}
 
 	getCurrentSystemForAPICharacter() {

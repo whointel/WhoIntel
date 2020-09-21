@@ -1,7 +1,6 @@
 <template>
 	<v-col
 		:cols="cols"
-		ref="contentContainer"
 		class="content-container"
 	>
 		<div
@@ -11,9 +10,76 @@
 			@mousedown="mousedown"
 			@dragscrollend="mouseup"
 			@mouseup="mouseup"
-			v-html="svgContent"
 			v-dragscroll.noback.noforward="true"
-		/>
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				xmlns:xlink="http://www.w3.org/1999/xlink"
+				viewBox="0 0 1024 768"
+				:style="`width:${this.svgScale}%;height:${this.svgScale}%`"
+				class="pa-3"
+			>
+
+				<!-- selected system marker -->
+				<g
+					v-if="selectSystemMarker && isDrawCurrentRegion"
+					:opacity="selectSystemMarker.opacity"
+					:transform="`translate(${selectSystemMarker.x}, ${selectSystemMarker.y})`"
+				>
+					<ellipse cx="0" cy="0" rx="56" ry="28" fill="#462CFF"></ellipse>
+					<line x1="0" y1="-10000" x2="0" y2="0" stroke="#462CFF"></line>
+					<line x1="-10000" y1="0" x2="0" y2="0" stroke="#462CFF"></line>
+					<line x1="10000" y1="0" x2="0" y2="0" stroke="#462CFF"></line>
+					<line x1="0" y1="10000" x2="0" y2="0" stroke="#462CFF"></line>
+				</g>
+				<!-- / selected system marker -->
+
+				<!-- character markers -->
+				<g v-for="marker in characterMarkers" :key="marker.name">
+					<ellipse
+						:cx="marker.cx" :cy="marker.cy"
+						:rx="marker.rx" :ry="marker.ry"
+						:fill="marker.color"
+					/>
+				</g>
+				<!-- / character markers -->
+
+				<!-- Jump Bridges -->
+				<g v-for="jb in jumpBridges" :key="jb.id">
+					<line
+						:x1="jb.x1" :y1="jb.y1"
+						:x2="jb.x2" :y2="jb.y2"
+						:stroke="'#' + jb.color"
+						stroke-width="2"
+						stroke-dasharray="2"
+						:marker-start="jb.markerStart"
+						:marker-end="jb.markerEnd"
+					/>
+					<rect
+						:x="jb.rectLeft.x" :y="jb.rectLeft.y"
+						:stroke="'#' + jb.color"
+						stroke-width="1.5"
+						:fill="'#' + jb.color"
+						fill-opacity="0.4"
+						:width="jb.rectLeft.width"
+						:height="jb.rectLeft.height"
+					/>
+					<rect
+						v-if="jb.rectRight"
+						:x="jb.rectRight.x" :y="jb.rectRight.y"
+						:stroke="'#' + jb.color"
+						stroke-width="1.5"
+						:fill="'#' + jb.color"
+						fill-opacity="0.4"
+						:width="jb.rectRight.width"
+						:height="jb.rectRight.height"
+					/>
+				</g>
+				<!-- / Jump Bridges -->
+
+				<svg v-html="svgContent"/>
+			</svg>
+		</div>
 		<region-map-context-menu
 			v-model="contextMenuOptions.show"
 			:options="contextMenuOptions"
@@ -30,18 +96,14 @@ import cheerio from "cheerio"
 import systemManager from "@/service/SystemManager"
 import {dragscroll} from "vue-dragscroll"
 import RegionMapContextMenu from "@/components/RegionMapContextMenu.vue"
-// eslint-disable-next-line no-unused-vars
 import {I_CONTEXT_MENU} from "@/types/MAP"
-// eslint-disable-next-line no-unused-vars
 import EVESystem, {MapCoordinates} from "@/lib/EVESystem"
 // eslint-disable-next-line no-unused-vars,no-undef
 import Timeout = NodeJS.Timeout
 import PerfectScrollbar from "perfect-scrollbar"
 import {JB_DIRECTION_DIRECTION} from "@/lib/EVEJumpBridge"
-// eslint-disable-next-line no-unused-vars
 import {IRegionMapExport} from "@/service/Database"
 import * as log from "electron-log"
-// eslint-disable-next-line no-unused-vars
 import {IWindowLayoutScroll} from "@/types/WidnowLayout"
 import characterManager from "@/service/CharacterManager"
 
@@ -77,6 +139,7 @@ export default class RegionMap extends Vue {
 	markTime: number | null = null
 	markTimer: Timeout | null = null
 	markedSystem: EVESystem | null = null
+	selectSystemMarker: any = null
 
 	ps: PerfectScrollbar | null = null
 
@@ -86,15 +149,10 @@ export default class RegionMap extends Vue {
 
 	$refs!: {
 		svgContainer: HTMLElement,
-		contentContainer: Vue,
 	}
 
 	get isAppReady() {
 		return this.$store.getters.isAppReady
-	}
-
-	get contentContainer(): HTMLElement {
-		return this.$refs.contentContainer.$el as HTMLElement
 	}
 
 	get svgContainer(): HTMLElement {
@@ -118,7 +176,6 @@ export default class RegionMap extends Vue {
 
 	created() {
 		events.$on("setRegionMap", this.setMap)
-		events.$on("updateLocationMarker", this.updateLocationMarker)
 		events.$on("markSystem", this.markSystem)
 		events.$on("regionMap:set:scroll", this.setScroll)
 	}
@@ -235,17 +292,12 @@ export default class RegionMap extends Vue {
 		return this.$store.getters.isJBShow
 	}
 
-	@Watch("isJBShow")
-	switchJB(isJBShow) {
-		this.svgContainer
-			.querySelectorAll(".jumpbridge")
-			.forEach(node => node.setAttribute("visibility", isJBShow ? "visible" : "hidden"))
-	}
-
 	setMap(map: IRegionMapExport) {
 		this.initMapData = map
 		this.loadMap()
 	}
+
+	drawRegionId = 0
 
 	async loadMap() {
 		if (!this.isAppReady || !this.initMapData) return
@@ -257,11 +309,6 @@ export default class RegionMap extends Vue {
 		chee("script").remove()
 		chee("#controls").remove()
 		const svg = chee("svg")
-		svg.addClass("pa-3")
-		svg.removeAttr("onload")
-		svg.attr("style", `width:${this.svgScale}%;height:${this.svgScale}%`)
-		svg.removeAttr("height")
-		svg.removeAttr("width")
 
 		JB_COLORS.forEach(jbColor => {
 			svg.prepend(`
@@ -289,16 +336,6 @@ export default class RegionMap extends Vue {
 		})
 
 		// this.loadPercent = 20
-
-		svg.prepend(`
-        <g id="select_marker" opacity="0" transform="translate(0, 0)">
-					<ellipse cx="0" cy="0" rx="56" ry="28" style="fill:#462CFF"></ellipse>
-					<line x1="0" y1="-10000" x2="0" y2="0" style="stroke:#462CFF"></line>
-					<line x1="-10000" y1="0" x2="0" y2="0" style="stroke:#462CFF"></line>
-					<line x1="10000" y1="0" x2="0" y2="0" style="stroke:#462CFF"></line>
-					<line x1="0" y1="10000" x2="0" y2="0" style="stroke:#462CFF"></line>
-        </g>
-			`)
 
 		chee("#jumps > line").removeClass().addClass("j")
 		chee("defs > symbol rect").removeAttr("style")
@@ -337,18 +374,20 @@ export default class RegionMap extends Vue {
 			systemManager.systemSetMap(id, uses[id], this.svgContainer)
 		})
 
-		await this.parseJB(chee("#jumps"))
+		this.svgContent = svg.html() + ""
 
-		this.svgContent = cheerio.html(svg)
-
-		this.$nextTick(() => {
-			systemManager.showRegion()
-			this.updateLocationMarker()
-			this.switchJB(this.isJBShow)
-		})
+		systemManager.showRegion()
+		this.drawRegionId = this.initMapData.id
 	}
 
-	async parseJB(jumps: any) {
+	get isDrawCurrentRegion(): boolean {
+		return this.drawRegionId === systemManager.currentRegion?.id
+	}
+
+	get jumpBridges(): any[] {
+		if (!this.isJBShow) return []
+		if (!this.isDrawCurrentRegion) return []
+
 		const jbData: JB_DATA[] = []
 
 		let jbs = new Set<number>()
@@ -362,10 +401,13 @@ export default class RegionMap extends Vue {
 			if (
 				!systemFrom
 				|| !systemTo
-				|| (
-					!systemManager.currentRegion.systems.includes(systemFrom)
-					&& !systemManager.currentRegion.neighbourSystems.includes(systemFrom)
-				)
+			) {
+				return
+			}
+
+			if (
+				!systemManager.currentRegion.systems.includes(systemFrom)
+				&& !systemManager.currentRegion.neighbourSystems.includes(systemFrom)
 			) {
 				return
 			}
@@ -380,14 +422,16 @@ export default class RegionMap extends Vue {
 			// JB_DIRECTION_DIRECTION.TO_RIGHT
 
 			jbData.push({
-				left: systemFrom,
+				left: systemFrom as EVESystem,
 				direction: direction,
-				right: systemTo,
+				right: systemTo as EVESystem,
 				out_region: systemTo.region_id !== systemManager.currentRegion?.id,
 			})
 		})
 
 		log.info("RegionMap %d, JB found", systemManager.currentRegion?.id, jbData.length)
+
+		const result: any[] = []
 
 		let colorCount = 0
 		jbData.forEach(jb => {
@@ -395,141 +439,78 @@ export default class RegionMap extends Vue {
 			const jbColor = JB_COLORS[colorCount]
 			colorCount += 1
 
-			let direction = ""
+			let markerStart = ""
+			let markerEnd = ""
 
 			if (jb.direction === JB_DIRECTION_DIRECTION.TO_RIGHT) {
-				direction += ` marker-start="url(#arrowstart_${jbColor})"`
+				markerStart = `url(#arrowstart_${jbColor})`
 
 				if (!jb.out_region) {
-					direction += ` marker-end="url(#arrowend_${jbColor})"`
+					markerEnd = `url(#arrowend_${jbColor})`
 				}
 			}
 
 			if (jb.out_region) {
-				direction += ` marker-end="url(#arrowout_${jbColor})"`
+				markerEnd = `url(#arrowout_${jbColor})`
 			}
 
-			let jump_svg = `
-				<line
-				  x1="${jb.left.mapCoordinates!.center_x + 2}"
-					y1="${jb.left.mapCoordinates!.center_y + 2}"
-					x2="${jb.out_region ? (jb.left.mapCoordinates!.center_x - 40) : (jb.right.mapCoordinates!.center_x - 2)}"
-					y2="${jb.out_region ? (jb.left.mapCoordinates!.center_y - 30) : (jb.right.mapCoordinates!.center_y - 2)}"
-					style="stroke:#${jbColor}"
-					visibility="hidden"
-					stroke-width="2" class="jumpbridge"
-					stroke-dasharray="2"
-					${direction}
-				></line>
-				<rect
-					x="${jb.left.mapCoordinates!.x - 3}"
-					y="${jb.left.mapCoordinates!.y - 1}"
-					width="${jb.left.mapCoordinates!.width + 1.5}"
-					height="${jb.left.mapCoordinates!.height + 1.5}"
-					style="fill:#${jbColor};stroke:#${jbColor};stroke-width:1.5;fill-opacity:0.4"
-					visibility="hidden"
-					class="jumpbridge"></rect>
-			`
-			if (!jb.out_region) {
-				jump_svg +=
-					`
-					<rect
-					x="${jb.right.mapCoordinates!.x - 3}"
-					y="${jb.right.mapCoordinates!.y - 1}"
-					width="${jb.right.mapCoordinates!.width + 1.5}"
-					height="${jb.right.mapCoordinates!.height + 1.5}"
-					style="fill:#${jbColor};stroke:#${jbColor};stroke-width:1.5;fill-opacity:0.4"
-					visibility="hidden"
-					class="jumpbridge"></rect>
-				`
-			}
-			jumps.prepend(jump_svg)
+			result.push({
+				id: `${jb.left.id}_${jb.right.id}`,
+				x1: jb.left.mapCoordinates!.center_x + 2,
+				y1: jb.left.mapCoordinates!.center_y + 2,
+				x2: jb.out_region ? (jb.left.mapCoordinates!.center_x - 40) : (jb.right.mapCoordinates!.center_x + 2),
+				y2: jb.out_region ? (jb.left.mapCoordinates!.center_y - 30) : (jb.right.mapCoordinates!.center_y + 2),
+				color: jbColor,
+				markerStart: markerStart,
+				markerEnd: markerEnd,
+
+				rectLeft: {
+					x: jb.left.mapCoordinates!.x - 3,
+					y: jb.left.mapCoordinates!.y - 1,
+					width: jb.left.mapCoordinates!.width + 1.5,
+					height: jb.left.mapCoordinates!.height + 1.5,
+				},
+				rectRight: jb.out_region ? null : {
+					x: jb.right.mapCoordinates!.x - 3,
+					y: jb.right.mapCoordinates!.y - 1,
+					width: jb.right.mapCoordinates!.width + 1.5,
+					height: jb.right.mapCoordinates!.height + 1.5,
+				},
+			})
 		})
+
+		return result
 	}
 
-	updateLocationMarker() {
-		if (!systemManager.currentRegion) return
+	get characterMarkers(): any[] {
+		if (!systemManager.currentRegion) return []
 
 		const systemsToCharacters = characterManager.regionSystemToChars[systemManager.currentRegion.id]
-		const markers = this.svgContainer.querySelectorAll(".char_marker")
 
-		const characterToAdd = new Set<string>()
+		if (!systemsToCharacters) return []
 
-		if (systemsToCharacters) {
-			for (const [, characterNames] of Object.entries(systemsToCharacters)) {
-				characterNames.forEach((characterName) => characterToAdd.add(characterName))
-			}
+		let result: any[] = []
+
+		for (const [, characters] of Object.entries(systemsToCharacters)) {
+			characters.forEach(character => {
+				const system = character.system as EVESystem
+
+				if (!system || !system.mapCoordinates) {
+					return
+				}
+
+				result.push({
+					cx: system.mapCoordinates.center_x - 2.5,
+					cy: system.mapCoordinates.center_y,
+					rx: (system.mapCoordinates.width / 2) + 4,
+					ry: (system.mapCoordinates.height / 2) + 4,
+					color: character.name === characterManager.activeCharacter?.name ? "#8B008D" : "#FB00FF",
+					name: character.name
+				})
+			})
 		}
 
-		markers.forEach(marker => {
-			const systemID = marker.getAttribute("data-system-id")
-			const characterName = marker.getAttribute("data-character-name")
-
-			// broken marked, delete
-			if (!systemID || !characterName) {
-				marker.remove()
-				return
-			}
-
-			// char in correct system but we may need to refresh color
-			// if (systemsToCharacters[systemID!]?.has(characterName)) {
-			// 	characterToAdd.delete(characterName)
-			// 	return
-			// }
-
-			// no system for char found
-			const systemNew = characterManager.characters[characterName]?.system
-			if (!systemNew || !systemNew.mapCoordinates) {
-				marker.remove()
-				return
-			}
-
-			marker.setAttribute("data-system-id", systemNew.id as unknown as string)
-
-			const markerEclipse = marker.firstElementChild // .querySelector("ellipse")
-
-			if (!markerEclipse) {
-				marker.remove()
-				return
-			}
-
-			markerEclipse.setAttribute("cx", systemNew.mapCoordinates.center_x - 2.5 as unknown as string)
-			markerEclipse.setAttribute("cy", systemNew.mapCoordinates.center_y as unknown as string)
-			markerEclipse.setAttribute("rx", (systemNew.mapCoordinates.width / 2) + 4 as unknown as string)
-			markerEclipse.setAttribute("ry", (systemNew.mapCoordinates.height / 2) + 4 as unknown as string)
-
-			markerEclipse.setAttribute("style",
-				characterName === characterManager.activeCharacter?.name ? "fill:#8B008D" : "fill:#FB00FF"
-			)
-
-			characterToAdd.delete(characterName)
-		})
-
-		characterToAdd.forEach(characterName => {
-			const system = characterManager.characters[characterName].system
-
-			if (!system || !system.mapCoordinates) {
-				return
-			}
-
-			const marker = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-			marker.setAttribute("data-system-id", system.id as unknown as string)
-			marker.setAttribute("data-character-name", characterName)
-			marker.classList.add("char_marker")
-
-			const markerEclipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse')
-			marker.appendChild(markerEclipse)
-
-			markerEclipse.setAttribute("cx", system.mapCoordinates.center_x - 2.5 as unknown as string)
-			markerEclipse.setAttribute("cy", system.mapCoordinates.center_y as unknown as string)
-			markerEclipse.setAttribute("rx", (system.mapCoordinates.width / 2) + 4 as unknown as string)
-			markerEclipse.setAttribute("ry", (system.mapCoordinates.height / 2) + 4 as unknown as string)
-			markerEclipse.setAttribute("style",
-				characterName === characterManager.activeCharacter?.name ? "fill:#8B008D" : "fill:#fb00ff"
-			)
-
-			this.svgContainer.querySelector("svg")?.prepend(marker)
-		})
+		return result
 	}
 
 	markSystem(system: EVESystem) {
@@ -547,12 +528,9 @@ export default class RegionMap extends Vue {
 			if (this.markTimer) {
 				clearInterval(this.markTimer)
 			}
-			return;
+			this.selectSystemMarker = null
+			return
 		}
-
-		const marker = this.svgContainer.querySelector("#select_marker")
-
-		if (!marker) return
 
 		if (this.markTime) {
 			const diffMs = new Date().getTime() - this.markTime
@@ -562,17 +540,36 @@ export default class RegionMap extends Vue {
 				diff = 0
 				if (this.markTimer) {
 					clearInterval(this.markTimer)
+					this.selectSystemMarker = null
 				}
 			}
-			marker.setAttribute("opacity", diff.toString())
-		} else {
-			if (!this.markedSystem.mapCoordinates) return
+
+			if (!this.markedSystem.mapCoordinates) {
+				this.selectSystemMarker = null
+				return
+			}
 
 			const x = this.markedSystem.mapCoordinates.center_x
 			const y = this.markedSystem.mapCoordinates.center_y + 1
 
-			marker.setAttribute("opacity", "1")
-			marker.setAttribute("transform", `translate(${x},${y})`)
+			this.selectSystemMarker = {
+				opacity: diff,
+				x, y,
+			}
+		} else {
+			if (!this.markedSystem.mapCoordinates) {
+				this.selectSystemMarker = null
+				return
+			}
+
+			const x = this.markedSystem.mapCoordinates.center_x
+			const y = this.markedSystem.mapCoordinates.center_y + 1
+
+			this.selectSystemMarker = {
+				opacity: 1,
+				x, y,
+			}
+
 			this.markTime = new Date().getTime()
 			this.markTimer = setInterval(this.markSystemInternal.bind(this), 100)
 		}

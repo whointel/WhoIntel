@@ -1,8 +1,7 @@
 import EVESystem from "@/lib/EVESystem"
-import events from "@/service/EventBus"
 import settingsService from "@/service/settings"
 import systemManager from "@/service/SystemManager"
-import {watch} from "@vue/composition-api"
+import {reactive, watch} from "@vue/composition-api"
 import api from "@/lib/EVEApi"
 import Vue from "vue"
 
@@ -19,7 +18,7 @@ class CharacterManager {
 
 	regionSystemToChars: {
 		[regionID: number]: {
-			[systemID: number]: Set<string>
+			[systemID: number]: ICharacterManagerCharacter[]
 		}
 	} = {}
 
@@ -39,10 +38,13 @@ class CharacterManager {
 			if (isAuth && !isAuthedCharacterFound) {
 				const name = api.auth.token?.name
 				if (!name) return
-				Vue.set(this.characters, name, {
+
+				const character: ICharacterManagerCharacter = {
 					name: name,
 					isAuthed: true,
-				})
+					system: null,
+				}
+				Vue.set(this.characters, name, character)
 				if (!this.activeCharacter) this.setActiveCharacter(name)
 			}
 		}, {immediate: true})
@@ -61,8 +63,6 @@ class CharacterManager {
 			)
 		) {
 			await systemManager.setCurrentRegion(system.region_id)
-		} else {
-			this.sendUpdateNotification()
 		}
 	}
 
@@ -90,39 +90,43 @@ class CharacterManager {
 		const character = this.findCreateCharacter(characterName)
 
 		if (character.system) {
-			this.regionSystemToChars[
-				character.system.region_id
-				]?.[character.system.id]?.delete(characterName)
+			const regionToCharacter = this.regionSystemToChars[character.system.region_id]
+			if (regionToCharacter) {
+				const systemToCharacter = regionToCharacter[character.system.id]
+				if (systemToCharacter && systemToCharacter.length) {
+					const index = systemToCharacter.findIndex(char => char === character)
+					if (index >= 0) {
+						systemToCharacter.splice(index, 1)
+					}
+				}
+			}
 		}
+
 		character.system = system
 
 		if (!this.regionSystemToChars[system.region_id]) {
-			this.regionSystemToChars[system.region_id] = {}
+			Vue.set(this.regionSystemToChars, system.region_id, {})
 		}
 		if (!this.regionSystemToChars[system.region_id][system.id]) {
-			this.regionSystemToChars[system.region_id][system.id] = new Set<string>()
+			Vue.set(this.regionSystemToChars[system.region_id], system.id, [])
 		}
-		this.regionSystemToChars[system.region_id][system.id].add(characterName)
+		this.regionSystemToChars[system.region_id][system.id].push(character)
 
-		if (this.activeCharacter!.name === characterName) {
-			if (
-				systemManager.currentRegion
-				&&
-				(
-					system.region_id === systemManager.currentRegion.id
-					|| system.neighbourRegions.includes(systemManager.currentRegion.id)
-				)
-			) {
-				this.sendUpdateNotification()
-			} else if (
-				settingsService.$.followCharacterRegion
-			) {
-				await systemManager.setCurrentRegion(system.region_id)
-			} else {
-				this.sendUpdateNotification()
-			}
-		} else {
-			this.sendUpdateNotification()
+		if (this.activeCharacter!.name !== characterName) return
+
+		if (
+			systemManager.currentRegion
+			&&
+			(
+				system.region_id === systemManager.currentRegion.id
+				|| system.neighbourRegions.includes(systemManager.currentRegion.id)
+			)
+		) {
+			// nothing to do
+		} else if (
+			settingsService.$.followCharacterRegion
+		) {
+			await systemManager.setCurrentRegion(system.region_id)
 		}
 	}
 
@@ -133,12 +137,8 @@ class CharacterManager {
 
 		return this.activeCharacter.system
 	}
-
-	private sendUpdateNotification() {
-		events.$emit("updateLocationMarker")
-	}
 }
 
-const characterManager = Vue.observable(new CharacterManager())
+const characterManager = reactive(new CharacterManager())
 
 export default characterManager

@@ -13,23 +13,25 @@ import findIndex from "lodash/findIndex"
 import {IREGION, OVERLAY_TYPE} from "@/types/MAP"
 import {API_SYSTEM_JUMPS, API_SYSTEM_KILLS} from "@/types/API"
 import settingsService from "@/service/settings"
+import {reactive} from "@vue/composition-api"
 
 const SPECIAL_REGIONS = {
 	NEW_EDEN: -1,
 }
 
 class SystemManager {
-	systemsByName: { [key: string]: EVESystem } = {}
-	systemsById: { [key: number]: EVESystem } = {}
+	systemsByName: { [key: string]: EVESystem } = Object.preventExtensions({})
+	systemsById: { [key: number]: EVESystem } = Object.preventExtensions({})
 
-	regions: { [key: number]: IREGION } = {}
-
+	regions: { [key: number]: IREGION } = Object.preventExtensions({})
 	currentRegion: IREGION | null = null
 
-	jb: EVEJumpBridge[] = Vue.observable([])
+	ShipsDB: string[] = Object.preventExtensions([])
+
+	jb: EVEJumpBridge[] = []
 	jbByStructure: { [key: string]: EVEJumpBridge } = {}
 	jbBySystemId: { [key: number]: EVEJumpBridge } = {}
-	private jbIDtoSystemID: { [key: number]: number } = {}
+	#jbIDtoSystemID: { [key: number]: number } = {}
 
 	constructor() {
 		events.$on("electron:setSDE", this.loadSDE.bind(this))
@@ -67,16 +69,18 @@ class SystemManager {
 	//// TODO addNeighbourRegion
 	// }
 
-	ShipsDB: string[] = []
-
 	async loadSDE(event: IpcRendererEvent, {SystemDB, StarGateDB, RegionDB, ShipsDB}) {
 		log.info("SystemManager: start loading systems")
 
-		this.ShipsDB = (ShipsDB as string[]).map(val => val.toLowerCase())
+		this.ShipsDB = Object.preventExtensions(
+			(ShipsDB as string[]).map(val => val.toLowerCase())
+		)
+
+		const regions: { [key: number]: IREGION } = {}
 
 		Object.entries(RegionDB).map((entry) => {
 			const id = Number(entry[0])
-			this.regions[id] = Object.preventExtensions({
+			regions[id] = Object.preventExtensions({
 				id: id,
 				name: entry[1] as string,
 				systems: [],
@@ -85,12 +89,20 @@ class SystemManager {
 			})
 		})
 
-		sortBy(this.regions, "name")
-		this.regions = Object.preventExtensions(this.regions)
+		sortBy(regions, "name")
+		this.regions = Object.preventExtensions(regions)
 
+		const systemsByName = {}
+		const systemsById = {}
 		SystemDB.forEach((systemData => {
-			this.addSystem(systemData.name, systemData.id, systemData.regionId, systemData.security)
+			this.addSystem(
+				systemData.name, systemData.id, systemData.regionId, systemData.security,
+				systemsByName, systemsById
+			)
 		}))
+		this.systemsByName = Object.preventExtensions(systemsByName)
+		this.systemsById = Object.preventExtensions(systemsById)
+
 		const sgIDS = Object.keys(StarGateDB)
 		sgIDS.forEach((StarGateID => {
 			const StarGatesData = StarGateDB[StarGateID]
@@ -137,9 +149,9 @@ class SystemManager {
 	}
 
 	updateJB(jb: EVEJumpBridge, value: any = null) {
-		const systemFromId = this.jbIDtoSystemID[jb.structure_id]
+		const systemFromId = this.#jbIDtoSystemID[jb.structure_id]
 		if (systemFromId) {
-			delete this.jbIDtoSystemID[jb.structure_id]
+			delete this.#jbIDtoSystemID[jb.structure_id]
 			delete this.jbBySystemId[jb.systemFromId]
 		}
 
@@ -148,15 +160,15 @@ class SystemManager {
 		}
 		if (jb.systemFromId && jb.status === EVE_JUMP_BRIDGE_STATUS.API_FOUND) {
 			this.jbBySystemId[jb.systemFromId] = jb
-			this.jbIDtoSystemID[jb.structure_id] = jb.systemFromId
+			this.#jbIDtoSystemID[jb.structure_id] = jb.systemFromId
 		}
 	}
 
 	async deleteJB(jb: EVEJumpBridge) {
 		await jb.delete()
-		const systemFromId = this.jbIDtoSystemID[jb.structure_id]
+		const systemFromId = this.#jbIDtoSystemID[jb.structure_id]
 		if (systemFromId) {
-			delete this.jbIDtoSystemID[jb.structure_id]
+			delete this.#jbIDtoSystemID[jb.structure_id]
 			delete this.jbBySystemId[jb.systemFromId]
 		}
 		delete this.jbByStructure[jb.structure_id]
@@ -389,12 +401,15 @@ class SystemManager {
 		}
 	}
 
-	addSystem(name: string, id: number, region_id: number, security: number) {
-		if (this.systemsById[id]) return
+	addSystem(
+		name: string, id: number, region_id: number, security: number,
+		systemsByName, systemsById
+	) {
+		if (systemsById[id]) return
 
 		const system = Object.preventExtensions(new EVESystem(name, id, region_id, security))
-		this.systemsByName[name] = system
-		this.systemsById[id] = system
+		systemsByName[name] = system
+		systemsById[id] = system
 		this.regions[region_id].systems.push(system)
 	}
 
@@ -417,6 +432,6 @@ class SystemManager {
 	}
 }
 
-const systemManager = Object.preventExtensions(new SystemManager())
+const systemManager = reactive(new SystemManager())
 
 export default systemManager
