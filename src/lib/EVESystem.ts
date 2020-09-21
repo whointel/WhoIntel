@@ -77,7 +77,7 @@ const ALARM_COLORS_DARK: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } 
 	[ALARM_COLORS_KEYS.S2]: {
 		seconds: 60 * 15,
 		bgClass: "alertS2",
-		text: COLOR_WHITE,
+		text: COLOR_BLACK,
 	},
 	[ALARM_COLORS_KEYS.S3]: {
 		seconds: 60 * 25,
