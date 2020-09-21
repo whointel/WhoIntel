@@ -78,6 +78,16 @@
 				<!-- / Jump Bridges -->
 
 				<svg v-html="svgContent"/>
+
+				<line
+					:x1="line.x1" :y1="line.y1"
+					:x2="line.x2" :y2="line.y2"
+					:stroke="line.color"
+					stroke-width="3"
+					stroke-dasharray="4 1"
+					v-for="(line, index) in pathFinderPoints"
+					:key="index"
+				/>
 			</svg>
 		</div>
 		<region-map-context-menu
@@ -106,6 +116,8 @@ import {IRegionMapExport} from "@/service/Database"
 import * as log from "electron-log"
 import {IWindowLayoutScroll} from "@/types/WidnowLayout"
 import characterManager from "@/service/CharacterManager"
+import {IPATHPOINT, IPATHPOINT_POINT} from "@/types/PathFinder"
+import pathService from "@/service/PathService"
 
 const JB_COLORS = ["800000", "808000", "BC8F8F", "ff00ff", "c83737", "FF6347", "917c6f", "ffcc00",
 	"88aa00", "FFE4E1", "008080", "00BFFF", "4682B4", "00FF7F", "7FFF00", "ff6600",
@@ -478,6 +490,53 @@ export default class RegionMap extends Vue {
 				},
 			})
 		})
+
+		return result
+	}
+
+	get pathFinderPoints(): IPATHPOINT[] {
+		if (!this.isDrawCurrentRegion) return []
+
+		let result: any[] = []
+		let pathPoint: IPATHPOINT_POINT
+		let pathPointNext: IPATHPOINT_POINT
+		const currentRegionId = systemManager.currentRegion?.id
+
+		for (let i = 0; i < pathService.pathPoints.path.length - 1; i++) {
+			pathPoint = pathService.pathPoints.path[i]
+			pathPointNext = pathService.pathPoints.path[i + 1]
+
+			// jump start AND stop systems are not in current region, skip
+			if (
+				currentRegionId !== pathPoint.system.region_id
+				&& currentRegionId !== pathPointNext.system.region_id
+			) {
+				continue
+			}
+
+			// jump start OR stop systems are not in current region, skip, TODO
+			if (
+				currentRegionId !== pathPoint.system.region_id
+				|| currentRegionId !== pathPointNext.system.region_id
+			) {
+				continue
+			}
+
+			if (
+				!pathPoint.system.mapCoordinates
+				|| !pathPointNext.system.mapCoordinates
+			) {
+				continue
+			}
+
+			result.push({
+				x1: pathPoint.system.mapCoordinates?.center_x + 4,
+				y1: pathPoint.system.mapCoordinates?.center_y + 4,
+				x2: pathPointNext.system.mapCoordinates?.center_x + 4,
+				y2: pathPointNext.system.mapCoordinates?.center_y + 4,
+				color: pathPoint.jb ? "green" : "orange",
+			})
+		}
 
 		return result
 	}
