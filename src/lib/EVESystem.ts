@@ -106,7 +106,7 @@ export interface MapCoordinates {
 
 export default class EVESystem {
 	status: EVESystemStatus = EVESystemStatus.UNKNOWN
-	private alarmStatus: ALARM_COLORS_KEYS = ALARM_COLORS_KEYS.S0
+	#alarmStatus: ALARM_COLORS_KEYS = ALARM_COLORS_KEYS.S0
 	id: number
 	name: string
 	region_id: number
@@ -123,10 +123,10 @@ export default class EVESystem {
 	jumps = 0
 
 	svgContainer: HTMLElement | null = null
-	private svgSymbol: SVGSymbolElement | undefined | null = null
-	private svgSRect: SVGRectElement | null = null
-	private systemNameLine: SVGTextElement | null = null
-	private dataLine: SVGTextElement | null = null
+	#svgSymbol: SVGSymbolElement | undefined | null = null
+	#svgSRect: SVGRectElement | null = null
+	#systemNameLine: SVGTextElement | null = null
+	#dataLine: SVGTextElement | null = null
 
 	lastAlarmTime: Date | null = null
 	mapCoordinates: MapCoordinates | null = null
@@ -189,11 +189,11 @@ export default class EVESystem {
 	hide() {
 		this.isShow = false
 
-		this.mapCoordinates = null
+		// this.mapCoordinates = null
 		this.svgContainer = null
-		this.svgSymbol = null
-		this.svgSRect = null
-		this.dataLine = null
+		this.#svgSymbol = null
+		this.#svgSRect = null
+		this.#dataLine = null
 	}
 
 	show() {
@@ -279,12 +279,12 @@ export default class EVESystem {
 	}
 
 	private checkSVGBindings() {
-		this.svgSymbol = this.svgContainer?.querySelector(`#def${this.id}`)
-		if (this.svgSymbol) {
-			this.svgSRect = this.svgSymbol.querySelector(`rect#rect${this.id}`)
-			const textNodes = this.svgSymbol.querySelectorAll("text")
-			this.systemNameLine = textNodes[0]
-			this.dataLine = textNodes[1]
+		this.#svgSymbol = this.svgContainer?.querySelector(`#def${this.id}`)
+		if (this.#svgSymbol) {
+			this.#svgSRect = this.#svgSymbol.querySelector(`rect#rect${this.id}`)
+			const textNodes = this.#svgSymbol.querySelectorAll("text")
+			this.#systemNameLine = textNodes[0]
+			this.#dataLine = textNodes[1]
 		}
 	}
 
@@ -299,7 +299,7 @@ export default class EVESystem {
 	}
 
 	get region(): IREGION {
-		return systemManager.regions[this.region_id]
+		return systemManager.regions[this.region_id] as IREGION
 	}
 
 	addNeighbourRegion(region_id: number) {
@@ -354,7 +354,7 @@ export default class EVESystem {
 
 		this.status = EVESystemStatus.ALARM
 		this.lastAlarmTime = date
-		this.alarmStatus = ALARM_COLORS_KEYS.S0
+		this.#alarmStatus = ALARM_COLORS_KEYS.S0
 		this.needRefresh = true
 		this.update()
 		this.subscribeSystemLoop()
@@ -377,38 +377,38 @@ export default class EVESystem {
 	}
 
 	private setRectColorClass(color_class: string) {
-		if (!this.svgSRect) return
+		if (!this.#svgSRect) return
 
-		this.svgSRect.removeAttribute("class")
-		this.svgSRect.removeAttribute("style")
-		this.svgSRect.classList.add("s")
-		this.svgSRect.classList.add(color_class)
+		this.#svgSRect.removeAttribute("class")
+		this.#svgSRect.removeAttribute("style")
+		this.#svgSRect.classList.add("s")
+		this.#svgSRect.classList.add(color_class)
 	}
 
 	private setRectColor(color: string) {
-		if (!this.svgSRect) return
+		if (!this.#svgSRect) return
 
-		this.svgSRect.removeAttribute("class")
-		this.svgSRect.classList.add("s")
-		this.svgSRect.style.fill = color
+		this.#svgSRect.removeAttribute("class")
+		this.#svgSRect.classList.add("s")
+		this.#svgSRect.style.fill = color
 	}
 
 	setText(text: string) {
-		if (!this.dataLine) return
+		if (!this.#dataLine) return
 
-		this.dataLine.textContent = text
+		this.#dataLine.textContent = text
 	}
 
 	setTextSystemColor(color: string) {
-		if (!this.systemNameLine) return
+		if (!this.#systemNameLine) return
 
-		this.systemNameLine.style.fill = color
+		this.#systemNameLine.style.fill = color
 	}
 
 	setTextColor(color: string) {
-		if (!this.dataLine) return
+		if (!this.#dataLine) return
 
-		this.dataLine.style.fill = color
+		this.#dataLine.style.fill = color
 	}
 
 	private static formatTime(seconds: number): string {
@@ -422,54 +422,54 @@ export default class EVESystem {
 
 		if (!this.lastAlarmTime) return
 		let secondsFromAlarm = 0
-		const alarmColors = ALARM_COLORS[this.alarmStatus]
+		const alarmColors = ALARM_COLORS[this.#alarmStatus]
 
 		switch (this.status) {
 			case EVESystemStatus.ALARM:
 				secondsFromAlarm = differenceInSeconds(new Date(), this.lastAlarmTime)
 				this.setText(EVESystem.formatTime(secondsFromAlarm))
-				// this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+				// this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 
-				switch (this.alarmStatus) {
+				switch (this.#alarmStatus) {
 					case ALARM_COLORS_KEYS.S0:
 						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 						}
 						if (secondsFromAlarm > alarmColors.seconds) {
-							this.alarmStatus = ALARM_COLORS_KEYS.S1
-							this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+							this.#alarmStatus = ALARM_COLORS_KEYS.S1
+							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 						}
 						break
 					case ALARM_COLORS_KEYS.S1:
 						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 						}
 						if (secondsFromAlarm > alarmColors.seconds) {
-							this.alarmStatus = ALARM_COLORS_KEYS.S2
-							this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+							this.#alarmStatus = ALARM_COLORS_KEYS.S2
+							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 						}
 						break
 					case ALARM_COLORS_KEYS.S2:
 						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 						}
 						if (secondsFromAlarm > alarmColors.seconds) {
-							this.alarmStatus = ALARM_COLORS_KEYS.S3
-							this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+							this.#alarmStatus = ALARM_COLORS_KEYS.S3
+							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 						}
 						break
 					case ALARM_COLORS_KEYS.S3:
 						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 						}
 						if (secondsFromAlarm > alarmColors.seconds) {
-							this.alarmStatus = ALARM_COLORS_KEYS.S4
-							this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+							this.#alarmStatus = ALARM_COLORS_KEYS.S4
+							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 						}
 						break
 					case ALARM_COLORS_KEYS.S4:
 						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.alarmStatus])
+							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 						}
 						break
 				}

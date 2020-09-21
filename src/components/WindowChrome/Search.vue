@@ -127,7 +127,7 @@ export default class Search extends Vue {
 				if (id.includes(val)) {
 					this.items.push({
 						type: SEARCH_RESULT_TYPE.REGION,
-						entity: region,
+						entity: region as IREGION,
 						title: region.name,
 					})
 				}
@@ -137,7 +137,7 @@ export default class Search extends Vue {
 			if (region.name.toUpperCase().includes(val)) {
 				this.items.push({
 					type: SEARCH_RESULT_TYPE.REGION,
-					entity: region,
+					entity: region as IREGION,
 					title: region.name,
 				})
 			}
@@ -149,7 +149,7 @@ export default class Search extends Vue {
 				if (id.includes(val)) {
 					this.items.push({
 						type: SEARCH_RESULT_TYPE.SYSTEM,
-						entity: system,
+						entity: system as EVESystem,
 						title: system.name,
 					})
 				}
@@ -159,7 +159,7 @@ export default class Search extends Vue {
 			if (system.name.toUpperCase().includes(val)) {
 				this.items.push({
 					type: SEARCH_RESULT_TYPE.SYSTEM,
-					entity: system,
+					entity: system as EVESystem,
 					title: system.name,
 				})
 			}

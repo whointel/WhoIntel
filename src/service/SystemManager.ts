@@ -25,7 +25,6 @@ class SystemManager {
 	regions: { [key: number]: IREGION } = {}
 
 	currentRegion: IREGION | null = null
-	// currentSystem: EVESystem | null = null
 
 	jb: EVEJumpBridge[] = Vue.observable([])
 	jbByStructure: { [key: string]: EVEJumpBridge } = {}
@@ -41,8 +40,6 @@ class SystemManager {
 		ipcRenderer.send("getSDE")
 		setInterval(this.eventLoop.bind(this), 1000)
 	}
-
-	public regionHistoryShift = Vue.observable(-1)
 
 	eventLoop() {
 		this.currentRegion?.subscription.forEach(system => system.update())

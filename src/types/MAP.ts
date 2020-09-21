@@ -1,4 +1,4 @@
-import EVESystem from "@/lib/EVESystem";
+import EVESystem from "@/lib/EVESystem"
 
 export interface I_CONTEXT_MENU {
 	show: boolean

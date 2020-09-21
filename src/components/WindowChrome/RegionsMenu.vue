@@ -57,7 +57,6 @@ import {Component, Vue, Watch} from "vue-property-decorator"
 import systemManager from "@/service/SystemManager"
 import events from "@/service/EventBus"
 import settingsService from "@/service/settings"
-// eslint-disable-next-line no-unused-vars
 import {IREGION} from "@/types/MAP"
 
 @Component
@@ -77,7 +76,7 @@ export default class RegionsMenu extends Vue {
 	get regions(): IREGION[] {
 		if (!this.$store.getters.isAppReady) return []
 
-		return Object.values(systemManager.regions)
+		return Object.values(systemManager.regions) as IREGION[]
 	}
 
 	@Watch("region", {immediate: false})

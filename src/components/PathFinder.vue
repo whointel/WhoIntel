@@ -81,10 +81,8 @@
 import {Component, Vue, Watch} from "vue-property-decorator"
 import PathFinderCopyBtn from "@/components/PathFinderCopyBtn.vue"
 import api from "@/lib/EVEApi"
-// eslint-disable-next-line no-unused-vars
 import EVESystem from "@/lib/EVESystem"
 import systemManager from "@/service/SystemManager"
-// eslint-disable-next-line no-unused-vars
 import {IPATHPOINT} from "@/types/PathFinder"
 import Timeout from "await-timeout"
 import pathService from "@/service/PathService"
@@ -96,7 +94,7 @@ export default class PathFinder extends Vue {
 	get allSystems(): EVESystem[] {
 		if (!this.$store.getters.isAppReady) return []
 
-		return Object.values(systemManager.systemsById)
+		return Object.values(systemManager.systemsById) as EVESystem[]
 	}
 
 	disableGoBtn = false

@@ -175,7 +175,6 @@ import zkillboard from "@/service/ZKillboard"
 import debounce from "lodash/debounce"
 import ChannelsConfig from "@/components/Config/ChannelsConfig.vue"
 import ExtWinConfig from "@/components/Config/ExtWinConfig.vue"
-// eslint-disable-next-line no-unused-vars
 import {IREGION} from "@/types/MAP"
 import AlarmConfig from "@/components/Config/AlarmConfig.vue"
 
@@ -212,7 +211,7 @@ export default class ConfigWindow extends Vue {
 
 	get favoriteRegions() {
 		const favoriteRegions = this.settings.favoriteRegions || []
-		return this.regions.filter((region => favoriteRegions.includes(region.id)))
+		return this.regions.filter((region => favoriteRegions.includes(region.id))) as IREGION[]
 	}
 
 	set favoriteRegions(val: IREGION[]) {
@@ -221,7 +220,7 @@ export default class ConfigWindow extends Vue {
 
 	get favoriteZKB() {
 		const favoriteZKBRegions = this.settings.favoriteZKBRegions || []
-		return this.regions.filter((region => favoriteZKBRegions.includes(region.id)))
+		return this.regions.filter((region => favoriteZKBRegions.includes(region.id))) as IREGION[]
 	}
 
 	openLayoutsWindow() {

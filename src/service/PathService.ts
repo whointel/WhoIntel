@@ -1,7 +1,7 @@
 import {aStar, PathFinder} from "ngraph.path"
 import createGraph, {Graph} from "ngraph.graph"
 import systemManager from "@/service/SystemManager"
-import {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
+import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 import events from "@/service/EventBus"
 import * as log from "electron-log"
 import {IPATHPOINT} from "@/types/PathFinder"
@@ -9,6 +9,7 @@ import {reactive} from "@vue/composition-api"
 import find from "lodash/find"
 import $store from "@/store"
 import characterManager from "@/service/CharacterManager"
+import EVESystem from "@/lib/EVESystem"
 
 class PathService {
 	private readonly graph: Graph<null>
@@ -117,7 +118,7 @@ class PathService {
 				|| jb.systemTo?.id !== id
 			) throw "path found error"
 
-			next = jb.systemTo
+			next = jb.systemTo as EVESystem
 			if (!next) throw "path found error"
 
 			this.pathPoints.structures.push(jb.structure_id)
@@ -125,7 +126,7 @@ class PathService {
 			// console.debug(`${currentSystem?.name} / ${jb?.name} / ${next?.name}`)
 			this.pathPoints.path.push({
 				system: currentSystem!,
-				jb: jb,
+				jb: jb as EVEJumpBridge,
 			})
 			currentSystem = next
 		}

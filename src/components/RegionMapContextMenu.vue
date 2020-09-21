@@ -219,10 +219,8 @@
 <script lang="ts">
 import {Component, Vue, Prop, Watch} from "vue-property-decorator"
 import api from "@/lib/EVEApi"
-// eslint-disable-next-line no-unused-vars
 import EVESystem from "@/lib/EVESystem"
 import systemManager from "@/service/SystemManager"
-// eslint-disable-next-line no-unused-vars
 import {I_CONTEXT_MENU, IREGION} from "@/types/MAP"
 import events from "@/service/EventBus"
 import EVEJumpBridge from "@/lib/EVEJumpBridge"
@@ -313,7 +311,7 @@ export default class RegionMapContextMenu extends Vue {
 		if (!this.system) return null
 		if (this.system.region_id === systemManager.currentRegion?.id) return null
 
-		return systemManager.regions[this.system.region_id]
+		return systemManager.regions[this.system.region_id] as IREGION
 	}
 
 	goToNeighbourRegion() {
@@ -337,7 +335,7 @@ export default class RegionMapContextMenu extends Vue {
 
 		const jb = systemManager.jbBySystemId[this.system.id]
 
-		return jb?.systemToId ? jb : null
+		return jb?.systemToId ? jb as EVEJumpBridge : null
 	}
 
 	get jbToNeighbourRegion(): IREGION | null {
@@ -345,7 +343,7 @@ export default class RegionMapContextMenu extends Vue {
 
 		return this.jb.systemTo!.region_id === systemManager.currentRegion?.id
 			? null
-			: systemManager.regions[this.jb.systemTo!.region_id]
+			: systemManager.regions[this.jb.systemTo!.region_id] as IREGION
 	}
 
 	get isAPIAuthed() {
@@ -408,7 +406,7 @@ export default class RegionMapContextMenu extends Vue {
 	}
 
 	get activeCharacter(): ICharacterManagerCharacter | null {
-		return characterManager.activeCharacter
+		return characterManager.activeCharacter as ICharacterManagerCharacter
 	}
 
 	setSystemAsCurrent() {
