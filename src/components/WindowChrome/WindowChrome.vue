@@ -24,6 +24,7 @@
 			</div>
 			<j-b-btn class="titlebar--nodrag d-none d-sm-flex"/>
 			<z-k-b-btn class="titlebar--nodrag ml-2 d-none d-sm-flex"/>
+			<path-finder-btn class="titlebar--nodrag ml-2 d-none d-sm-flex"/>
 			<ext-win-btn class="titlebar--nodrag ml-2 d-none d-sm-flex"/>
 			<fleet-btn class="titlebar--nodrag ml-2 d-none d-sm-flex"/>
 			<overlay-btn class="titlebar--nodrag ml-2 d-none d-sm-flex"/>
@@ -119,9 +120,10 @@ import OverlayBtn from "@/components/WindowChrome/OverlayBtn.vue"
 import FleetBtn from "@/components/WindowChrome/FleetBtn.vue"
 import ShowLDBtn from "@/components/WindowChrome/ShowLDBtn.vue"
 import settingsService from "@/service/settings"
+import PathFinderBtn from "@/components/WindowChrome/PathFinderBtn.vue";
 
 @Component({
-	components: {ShowLDBtn, FleetBtn, OverlayBtn, TestBtn, HistoryBtn, ExtWinBtn, MapTS, Search, ZKBBtn, StatsServer, NoLogChannelsAlarm, AuthBtn, RegionsMenu, JBBtn}
+	components: {PathFinderBtn, ShowLDBtn, FleetBtn, OverlayBtn, TestBtn, HistoryBtn, ExtWinBtn, MapTS, Search, ZKBBtn, StatsServer, NoLogChannelsAlarm, AuthBtn, RegionsMenu, JBBtn}
 })
 export default class WindowChrome extends Vue {
 	usedJSHeapSize = 0
