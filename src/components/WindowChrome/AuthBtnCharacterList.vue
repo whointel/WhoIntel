@@ -50,17 +50,16 @@
 
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator"
-// eslint-disable-next-line no-unused-vars
 import characterManager, {ICharacterManagerCharacter} from "@/service/CharacterManager"
 
 @Component
 export default class AuthBtnCharacterList extends Vue {
 	get characters(): ICharacterManagerCharacter[] {
-		return Object.values(characterManager.characters)
+		return Object.values(characterManager.characters) as ICharacterManagerCharacter[]
 	}
 
 	get activeCharacter(): ICharacterManagerCharacter | null {
-		return characterManager.activeCharacter
+		return characterManager.activeCharacter as ICharacterManagerCharacter
 	}
 
 	set activeCharacter(character: ICharacterManagerCharacter | null) {

@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator"
-import events from "@/service/EventBus";
+import events from "@/service/EventBus"
 
 const colors = {
 	false: "red lighten-2",

@@ -124,18 +124,13 @@ import {Component, Vue, Watch} from "vue-property-decorator"
 import parseJSONDate from "date-fns/parseJSON"
 import format from "date-fns/format"
 import api, {apiPoll} from "@/lib/EVEApi"
-// eslint-disable-next-line no-unused-vars
 import {Subscription} from "rxjs"
-// eslint-disable-next-line no-unused-vars
 import {API_CHARACTER_LOCATION, API_CHARACTER_ONLINE, API_CHARACTER_SHIP} from "@/types/API"
 import systemManager from "@/service/SystemManager"
-// eslint-disable-next-line no-unused-vars
 import EVESystem from "@/lib/EVESystem"
 import characterResolveService from "@/service/CharacterResolveService"
-// eslint-disable-next-line no-unused-vars
 import {ICharacterExport} from "@/service/Database"
 import AuthBtnCharacterList from "@/components/WindowChrome/AuthBtnCharacterList.vue"
-// eslint-disable-next-line no-unused-vars
 import characterManager, {ICharacterManagerCharacter} from "@/service/CharacterManager"
 
 @Component({
@@ -165,7 +160,7 @@ export default class AuthBtn extends Vue {
 	}
 
 	get activeCharacter(): ICharacterManagerCharacter | null {
-		return characterManager.activeCharacter
+		return characterManager.activeCharacter as ICharacterManagerCharacter
 	}
 
 	get isAuth(): boolean {

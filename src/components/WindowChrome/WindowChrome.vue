@@ -109,16 +109,16 @@ import RegionsMenu from "@/components/WindowChrome/RegionsMenu.vue"
 import AuthBtn from "@/components/WindowChrome/AuthBtn.vue"
 import NoLogChannelsAlarm from "@/components/WindowChrome/NoLogChannelsAlarm.vue"
 import StatsServer from "@/components/WindowChrome/StatsServer.vue"
-import ZKBBtn from "@/components/WindowChrome/ZKBBtn.vue";
-import Search from "@/components/WindowChrome/Search.vue";
-import MapTS from "@/components/WindowChrome/MapTS.vue";
-import ExtWinBtn from "@/components/WindowChrome/ExtWinBtn.vue";
-import HistoryBtn from "@/components/WindowChrome/HistoryBtn.vue";
-import TestBtn from "@/components/WindowChrome/TestBtn.vue";
-import OverlayBtn from "@/components/WindowChrome/OverlayBtn.vue";
-import FleetBtn from "@/components/WindowChrome/FleetBtn.vue";
-import ShowLDBtn from "@/components/WindowChrome/ShowLDBtn.vue";
-import settingsService from "@/service/settings";
+import ZKBBtn from "@/components/WindowChrome/ZKBBtn.vue"
+import Search from "@/components/WindowChrome/Search.vue"
+import MapTS from "@/components/WindowChrome/MapTS.vue"
+import ExtWinBtn from "@/components/WindowChrome/ExtWinBtn.vue"
+import HistoryBtn from "@/components/WindowChrome/HistoryBtn.vue"
+import TestBtn from "@/components/WindowChrome/TestBtn.vue"
+import OverlayBtn from "@/components/WindowChrome/OverlayBtn.vue"
+import FleetBtn from "@/components/WindowChrome/FleetBtn.vue"
+import ShowLDBtn from "@/components/WindowChrome/ShowLDBtn.vue"
+import settingsService from "@/service/settings"
 
 @Component({
 	components: {ShowLDBtn, FleetBtn, OverlayBtn, TestBtn, HistoryBtn, ExtWinBtn, MapTS, Search, ZKBBtn, StatsServer, NoLogChannelsAlarm, AuthBtn, RegionsMenu, JBBtn}

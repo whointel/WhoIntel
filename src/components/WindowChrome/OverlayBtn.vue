@@ -58,7 +58,7 @@
 import {Component, Vue} from "vue-property-decorator"
 import systemManager from "@/service/SystemManager"
 import {OVERLAY_TYPE} from "@/types/MAP"
-import settingsService from "@/service/settings";
+import settingsService from "@/service/settings"
 
 const OVERLAY_TYPE_COLOR = {
 	[OVERLAY_TYPE.ALERT]: "grey",

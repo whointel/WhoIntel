@@ -6,7 +6,6 @@
 import {Component, Vue} from "vue-property-decorator"
 import events from "@/service/EventBus"
 import formatDistanceToNow from "date-fns/formatDistanceToNow"
-// eslint-disable-next-line no-unused-vars
 import {IRegionMapExport} from "@/service/Database"
 
 @Component

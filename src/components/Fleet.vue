@@ -34,13 +34,10 @@ import {Component, Vue} from "vue-property-decorator"
 // eslint-disable-next-line no-undef,no-unused-vars
 import Timeout = NodeJS.Timeout
 import api from "@/lib/EVEApi"
-// eslint-disable-next-line no-unused-vars
 import {API_FLEET, API_FLEET_MEMBER, API_FLEET_MEMBER_ROLE} from "@/types/API"
 import characterResolveService from "@/service/CharacterResolveService"
 import systemManager from "@/service/SystemManager"
-// eslint-disable-next-line no-unused-vars
 import EVESystem from "@/lib/EVESystem"
-// eslint-disable-next-line no-unused-vars
 import {ICharacterExport} from "@/service/Database"
 
 interface FLEET_MEMBER extends API_FLEET_MEMBER {

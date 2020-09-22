@@ -25,9 +25,7 @@ import {Component, Vue} from "vue-property-decorator"
 import LogEntry from "@/components/LogEntry.vue"
 import events from "@/service/EventBus"
 import logReader from "@/service/LogReader"
-// eslint-disable-next-line no-unused-vars
 import {ILogEntry} from "@/types/ILogEntry"
-// eslint-disable-next-line no-unused-vars
 import EVESystem from "@/lib/EVESystem"
 import systemManager from "@/service/SystemManager"
 import {ipcRenderer} from "electron"

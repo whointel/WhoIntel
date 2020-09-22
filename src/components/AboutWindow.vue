@@ -119,7 +119,6 @@
 import {Component, Vue, Watch} from "vue-property-decorator"
 import events from "@/service/EventBus"
 import {ipcRenderer, shell} from "electron"
-// eslint-disable-next-line no-unused-vars
 import {IUpdateStatus, UPDATE_STATUSES} from "@/types/UpdateStatuses"
 import DonateText from "@/components/DonateText.vue"
 import settingsService from "@/service/settings"

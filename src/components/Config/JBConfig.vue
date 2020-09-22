@@ -177,7 +177,6 @@
 import {Component, Vue, Watch} from "vue-property-decorator"
 import api from "@/lib/EVEApi"
 import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
-// eslint-disable-next-line no-unused-vars
 import {DataTableHeader} from "vuetify"
 import systemManager from "@/service/SystemManager"
 import Timeout from "await-timeout"

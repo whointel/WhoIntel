@@ -76,7 +76,7 @@
 import {Component, Vue, Watch} from "vue-property-decorator"
 import settingsService from "@/service/settings"
 import findIndex from "lodash/findIndex"
-import {ipcRenderer} from "electron";
+import {ipcRenderer} from "electron"
 
 @Component
 export default class ChannelsConfig extends Vue {
