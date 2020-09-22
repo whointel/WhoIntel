@@ -64,6 +64,17 @@
 					</template>
 
 					<v-list dense>
+						<v-list-item @click="pathFinderSetStartEnd">
+							<v-list-item-icon>
+								<v-icon>mdi-arrow-left-right</v-icon>
+							</v-list-item-icon>
+							<v-list-item-content>
+								<v-list-item-title>
+									{{ $t("find_path_from_current_to") }}
+								</v-list-item-title>
+							</v-list-item-content>
+						</v-list-item>
+
 						<v-list-item @click="pathFinderSetEnd">
 							<v-list-item-icon>
 								<v-icon>mdi-arrow-bottom-right</v-icon>
@@ -295,6 +306,14 @@ export default class RegionMapContextMenu extends Vue {
 		pathService.setMiddle(this.system.id)
 	}
 
+	pathFinderSetStartEnd() {
+		this.closeMenu()
+		if (!this.system) return
+
+		pathService.setEnd(this.system.id)
+		pathService.setStartFromCurrentSystem()
+	}
+
 	pathFinderSetEnd() {
 		this.closeMenu()
 		if (!this.system) return
@@ -452,6 +471,7 @@ export default class RegionMapContextMenu extends Vue {
 		"find_path": "Find path",
 		"find_path_from": "From",
 		"find_path_to": "To",
+		"find_path_from_current_to": "To (from current)",
 		"jumps": "jumps|jump|jumps",
 		"no_auth": "No authorization",
 		"show_system_log": "Show system log",
@@ -464,6 +484,7 @@ export default class RegionMapContextMenu extends Vue {
 		"find_path": "Построить маршрут",
 		"find_path_from": "Откуда",
 		"find_path_to": "Куда",
+		"find_path_from_current_to": "Куда (из текущего)",
 		"jumps": "прыжков|прыжок|прыжка|прыжков|прыжков",
 		"no_auth": "Вы не авторизованы",
 		"show_system_log": "Лог системы",
