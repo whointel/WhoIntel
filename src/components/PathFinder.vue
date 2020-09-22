@@ -59,8 +59,9 @@
 
 		<template v-slot:append>
 			<v-row class="path-finder--plate">
-				<v-col>
+				<v-col :cols="6">
 					<v-btn
+						small
 						class="ml-2"
 						color="orange"
 						:disabled="disableGoBtn || !isAPIAuthed"
@@ -69,8 +70,11 @@
 						в добрый путь
 					</v-btn>
 				</v-col>
-				<v-col :cols="5">
-					<v-btn @click="close">close</v-btn>
+				<v-col :cols="3" class="px-1">
+					<v-btn small @click="clear">clear</v-btn>
+				</v-col>
+				<v-col :cols="3" class="px-1">
+					<v-btn small @click="close">close</v-btn>
 				</v-col>
 			</v-row>
 		</template>
@@ -151,9 +155,12 @@ export default class PathFinder extends Vue {
 		systemManager.markSystem(system, true)
 	}
 
-	close() {
+	clear() {
 		pathService.setStart(0)
 		pathService.setEnd(0)
+	}
+
+	close() {
 		this.$store.commit("setShowPathPanel", false)
 	}
 }
