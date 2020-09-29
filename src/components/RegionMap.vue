@@ -22,9 +22,9 @@
 
 				<!-- selected system marker -->
 				<g
-					v-if="selectSystemMarker && isDrawCurrentRegion"
-					:opacity="selectSystemMarker.opacity"
+					v-if="selectSystemMarker.visible && canShowMarkers"
 					:transform="`translate(${selectSystemMarker.x}, ${selectSystemMarker.y})`"
+					id="system-marker"
 				>
 					<ellipse cx="0" cy="0" rx="56" ry="28" fill="#462CFF"></ellipse>
 					<line x1="0" y1="-10000" x2="0" y2="0" stroke="#462CFF"></line>
@@ -35,7 +35,7 @@
 				<!-- / selected system marker -->
 
 				<!-- character markers -->
-				<g v-for="marker in characterMarkers" :key="marker.name">
+				<g v-if="canShowMarkers" v-for="marker in characterMarkers" :key="marker.name">
 					<ellipse
 						:cx="marker.cx" :cy="marker.cy"
 						:rx="marker.rx" :ry="marker.ry"
@@ -45,7 +45,7 @@
 				<!-- / character markers -->
 
 				<!-- Jump Bridges -->
-				<g v-for="jb in jumpBridges" :key="jb.id">
+				<g v-if="canShowMarkers" v-for="jb in jumpBridges" :key="jb.id">
 					<line
 						:x1="jb.x1" :y1="jb.y1"
 						:x2="jb.x2" :y2="jb.y2"
@@ -80,13 +80,14 @@
 				<svg v-html="svgContent"/>
 
 				<line
+					v-if="canShowMarkers"
+					v-for="(line, index) in pathFinderPoints"
+					:key="index"
 					:x1="line.x1" :y1="line.y1"
 					:x2="line.x2" :y2="line.y2"
 					:stroke="line.color"
 					stroke-width="3"
 					stroke-dasharray="4 1"
-					v-for="(line, index) in pathFinderPoints"
-					:key="index"
 				/>
 			</svg>
 		</div>
@@ -108,8 +109,6 @@ import {dragscroll} from "vue-dragscroll"
 import RegionMapContextMenu from "@/components/RegionMapContextMenu.vue"
 import {I_CONTEXT_MENU} from "@/types/MAP"
 import EVESystem, {MapCoordinates} from "@/lib/EVESystem"
-// eslint-disable-next-line no-unused-vars,no-undef
-import Timeout = NodeJS.Timeout
 import PerfectScrollbar from "perfect-scrollbar"
 import {JB_DIRECTION_DIRECTION} from "@/lib/EVEJumpBridge"
 import {IRegionMapExport} from "@/service/Database"
@@ -119,6 +118,8 @@ import characterManager from "@/service/CharacterManager"
 import {IPATHPOINT, IPATHPOINT_POINT} from "@/types/PathFinder"
 import pathService from "@/service/PathService"
 import Character from "@/lib/Character"
+import {of, Subscription} from "rxjs"
+import {delay} from "rxjs/operators"
 
 const JB_COLORS = ["800000", "808000", "BC8F8F", "ff00ff", "c83737", "FF6347", "917c6f", "ffcc00",
 	"88aa00", "FFE4E1", "008080", "00BFFF", "4682B4", "00FF7F", "7FFF00", "ff6600",
@@ -143,16 +144,10 @@ export default class RegionMap extends Vue {
 	svgScale = 100
 	svgContent = ""
 	isMapDragging = false
-	// loadPercent = 0
 	initMapData: IRegionMapExport | null = null
 
 	containerW = 0
 	containerH = 0
-
-	markTime: number | null = null
-	markTimer: Timeout | null = null
-	markedSystem: EVESystem | null = null
-	selectSystemMarker: any = null
 
 	ps: PerfectScrollbar | null = null
 
@@ -172,14 +167,6 @@ export default class RegionMap extends Vue {
 		return this.$refs.svgContainer
 	}
 
-	init() {
-		if (this.markTimer) {
-			clearInterval(this.markTimer)
-		}
-		this.markedSystem = null
-		this.markTime = null
-	}
-
 	@Watch("isAppReady")
 	isAppReadyWatcher(val) {
 		if (val) {
@@ -189,7 +176,6 @@ export default class RegionMap extends Vue {
 
 	created() {
 		events.$on("setRegionMap", this.setMap)
-		events.$on("markSystem", this.markSystem)
 		events.$on("regionMap:set:scroll", this.setScroll)
 	}
 
@@ -221,7 +207,6 @@ export default class RegionMap extends Vue {
 
 	containerClicked(event: Event) {
 		event.preventDefault()
-		// console.warn("click", event.target)
 	}
 
 	contextMenuOptions: I_CONTEXT_MENU = {
@@ -315,8 +300,6 @@ export default class RegionMap extends Vue {
 	async loadMap() {
 		if (!this.isAppReady || !this.initMapData) return
 		log.debug("RegionMap, start loading svg")
-		this.init()
-		// this.loadPercent = 10
 
 		const chee = cheerio.load(this.initMapData.svg)
 		chee("script").remove()
@@ -347,8 +330,6 @@ export default class RegionMap extends Vue {
 				</marker>
       `)
 		})
-
-		// this.loadPercent = 20
 
 		chee("#jumps > line").removeClass().addClass("j")
 		chee("defs > symbol rect").removeAttr("style")
@@ -393,13 +374,15 @@ export default class RegionMap extends Vue {
 		this.drawRegionId = this.initMapData.id
 	}
 
-	get isDrawCurrentRegion(): boolean {
+	get canShowMarkers(): boolean {
+		// NOTE bug with double redraw map on region change
+		// return !this.$store.getters.isLoading &&
 		return this.drawRegionId === systemManager.currentRegion?.id
 	}
 
 	get jumpBridges(): any[] {
 		if (!this.isJBShow) return []
-		if (!this.isDrawCurrentRegion) return []
+		if (!this.canShowMarkers) return []
 
 		const jbData: JB_DATA[] = []
 
@@ -496,7 +479,7 @@ export default class RegionMap extends Vue {
 	}
 
 	get pathFinderPoints(): IPATHPOINT[] {
-		if (!this.isDrawCurrentRegion) return []
+		if (!this.canShowMarkers) return []
 
 		let result: any[] = []
 		let pathPoint: IPATHPOINT_POINT
@@ -573,70 +556,59 @@ export default class RegionMap extends Vue {
 		return result
 	}
 
-	markSystem(system: EVESystem) {
-		if (this.markTimer) {
-			clearInterval(this.markTimer)
-		}
-		this.markedSystem = system
-		this.markTime = null
+	markSystem$: Subscription = new Subscription()
 
-		this.markSystemInternal()
+	get markedSystem() {
+		return systemManager.markedSystem
 	}
 
-	markSystemInternal() {
-		if (!this.markedSystem) {
-			if (this.markTimer) {
-				clearInterval(this.markTimer)
+	// fix for re-mark same system - css animation doesn't see change
+	canShowMarkedSystem = false
+
+	get selectSystemMarker(): {
+		x: number
+		y: number
+		visible: boolean
+	} {
+		if (
+			!this.markedSystem
+			|| !this.markedSystem.mapCoordinates
+			|| this.markedSystem.region_id !== systemManager.currentRegion?.id
+		) {
+			return {
+				x: 0,
+				y: 0,
+				visible: false,
 			}
-			this.selectSystemMarker = null
+		}
+
+		const x = this.markedSystem.mapCoordinates.center_x
+		const y = this.markedSystem.mapCoordinates.center_y + 1
+
+		return {
+			x, y,
+			visible: this.canShowMarkedSystem,
+		}
+	}
+
+	@Watch("markedSystem")
+	markSystem(system: EVESystem | null) {
+		console.debug("markSystem map:", system?.nameDebug)
+		this.markSystem$.unsubscribe()
+		this.canShowMarkedSystem = false
+
+		if (!system) {
 			return
 		}
 
-		if (this.markTime) {
-			const diffMs = new Date().getTime() - this.markTime
+		this.$nextTick(() => this.canShowMarkedSystem = true)
 
-			let diff = (1 - (diffMs / 10000))
-			if (diff <= 0) {
-				diff = 0
-				if (this.markTimer) {
-					clearInterval(this.markTimer)
-					this.selectSystemMarker = null
-				}
-			}
-
-			if (!this.markedSystem.mapCoordinates) {
-				this.selectSystemMarker = null
-				return
-			}
-
-			const x = this.markedSystem.mapCoordinates.center_x
-			const y = this.markedSystem.mapCoordinates.center_y + 1
-
-			this.selectSystemMarker = {
-				opacity: diff,
-				x, y,
-			}
-		} else {
-			if (!this.markedSystem.mapCoordinates) {
-				this.selectSystemMarker = null
-				return
-			}
-
-			const x = this.markedSystem.mapCoordinates.center_x
-			const y = this.markedSystem.mapCoordinates.center_y + 1
-
-			this.selectSystemMarker = {
-				opacity: 1,
-				x, y,
-			}
-
-			this.markTime = new Date().getTime()
-			this.markTimer = setInterval(this.markSystemInternal.bind(this), 100)
-		}
+		this.markSystem$ = of([]).pipe(
+			delay(10_000 /* same value as fadeOutSystemMarker animation css*/),
+		).subscribe({complete: () => systemManager.unMarkSystem()})
 	}
 }
 </script>
-
 
 <style lang="scss">
 .svg-container {
@@ -652,6 +624,23 @@ export default class RegionMap extends Vue {
 .isMapDragging, .isMapDragging a {
 	cursor: grabbing !important;
 }
+
+@keyframes fadeOutSystemMarker {
+	0% {
+		opacity: 1;
+	}
+	60% {
+		opacity: 0.6;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+#system-marker {
+	animation: fadeOutSystemMarker 10s;
+}
+
 </style>
 
 <style lang="sass">

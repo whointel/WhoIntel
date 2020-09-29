@@ -8,7 +8,6 @@ import find from "lodash/find"
 import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 import db, {IRegionMapExport} from "@/service/Database"
 import Vue from "vue"
-import Timeout from "await-timeout"
 import findIndex from "lodash/findIndex"
 import {IREGION, OVERLAY_TYPE} from "@/types/MAP"
 import {API_SYSTEM_JUMPS, API_SYSTEM_KILLS} from "@/types/API"
@@ -213,6 +212,8 @@ class SystemManager {
 		const region = this.regions[region_id]
 		if (!region) return false
 
+		this.unMarkSystem()
+
 		store.commit("setLoading", true)
 
 		const loadMapPromise = this.getMap(region)
@@ -299,7 +300,16 @@ class SystemManager {
 		system.jumps = record.ship_jumps
 	}
 
+	markedSystem: EVESystem | null = null
+
+	unMarkSystem() {
+		this.markedSystem = null
+		console.debug("unMarkSystem")
+	}
+
 	async markSystem(system: EVESystem, change_region: boolean = false, force_change_region = false) {
+		this.unMarkSystem()
+
 		if (
 			system.region_id !== this.currentRegion?.id
 			&&
@@ -313,10 +323,9 @@ class SystemManager {
 			}
 
 			await this.setCurrentRegion(system!.region_id)
-			await Timeout.set(800)
 		}
 
-		events.$emit("markSystem", system)
+		this.markedSystem = system
 	}
 
 	systemSetMap(id: number, mapCoordinates: MapCoordinates, svgContainer: HTMLElement) {
