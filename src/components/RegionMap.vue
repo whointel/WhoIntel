@@ -77,7 +77,10 @@
 				</g>
 				<!-- / Jump Bridges -->
 
-				<svg v-html="svgContent"/>
+				<svg
+					v-html="svgContent"
+					ref="svgContentContainer"
+				/>
 
 				<line
 					v-if="canShowMarkers"
@@ -157,6 +160,7 @@ export default class RegionMap extends Vue {
 
 	$refs!: {
 		svgContainer: HTMLElement,
+		svgContentContainer: SVGElement,
 	}
 
 	get isAppReady() {
@@ -165,6 +169,10 @@ export default class RegionMap extends Vue {
 
 	get svgContainer(): HTMLElement {
 		return this.$refs.svgContainer
+	}
+
+	get svgContentContainer(): HTMLElement {
+		return this.$refs.svgContentContainer
 	}
 
 	@Watch("isAppReady")
@@ -276,14 +284,8 @@ export default class RegionMap extends Vue {
 	}
 
 	setSVGScale(scale: number) {
-		const svg = this.svgContainer.querySelector("svg")
 		this.svgScale = scale
-
-		if (svg) {
-			svg.style.width = this.svgScale + "%"
-			svg.style.height = this.svgScale + "%"
-			this.$nextTick(() => this.ps!.update())
-		}
+		this.$nextTick(() => this.ps!.update())
 	}
 
 	get isJBShow() {
@@ -365,7 +367,7 @@ export default class RegionMap extends Vue {
 			const id = Number(idString)
 			if (id.toString() !== idString) return
 
-			systemManager.systemSetMap(id, uses[id], this.svgContainer)
+			systemManager.systemSetMap(id, uses[id], this.svgContentContainer)
 		})
 
 		this.svgContent = svg.html() + ""

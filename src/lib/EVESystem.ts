@@ -204,8 +204,10 @@ export default class EVESystem {
 		this.isShow = true
 		this.needRefresh = true
 		this.checkSVGBindings()
-		this.setAlarmColor(ALARM_COLORS[ALARM_COLORS_KEYS.S4])
-		this.setText("?")
+		if (this.status === EVESystemStatus.UNKNOWN) {
+			this.setAlarmColor(ALARM_COLORS[ALARM_COLORS_KEYS.S4])
+			this.setText("?")
+		}
 	}
 
 	showKillsOverlay(max: number) {
