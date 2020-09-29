@@ -254,15 +254,14 @@ export function apiPollResponse<T>(api$: AxiosObservable<T>, options: API_POLL_O
 				observer.next(response)
 			}),
 			delayWhen(_ => {
-					if (options.interval) {
-						return interval(options.interval)
-					}
-
-					const jitter = Math.random() * 2000
-					console.debug(`EVEApi:poll:${options.name}:delay:`, new Date(new Date().getTime() + expireInMs + jitter))
-					return interval(expireInMs + jitter)
+				if (options.interval) {
+					return interval(options.interval)
 				}
-			),
+
+				const jitter = (Math.random() * 2000) + 1000
+				console.debug(`EVEApi:poll:${options.name}:delay:`, new Date(new Date().getTime() + expireInMs + jitter))
+				return interval(expireInMs + jitter)
+			}),
 			repeat()
 		)
 
