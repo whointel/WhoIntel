@@ -304,7 +304,6 @@ class SystemManager {
 
 	unMarkSystem() {
 		this.markedSystem = null
-		console.debug("unMarkSystem")
 	}
 
 	async markSystem(system: EVESystem, change_region: boolean = false, force_change_region = false) {

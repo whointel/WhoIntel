@@ -593,7 +593,6 @@ export default class RegionMap extends Vue {
 
 	@Watch("markedSystem")
 	markSystem(system: EVESystem | null) {
-		console.debug("markSystem map:", system?.nameDebug)
 		this.markSystem$.unsubscribe()
 		this.canShowMarkedSystem = false
 

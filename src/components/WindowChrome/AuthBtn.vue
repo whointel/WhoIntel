@@ -205,7 +205,7 @@ export default class AuthBtn extends Vue {
 
 		this.online$ = apiPoll(
 			character.character_online$(),
-			{name: "character_online"}
+			{name: `character_online:${character.name}`}
 		).subscribe(
 			online => this.online = online
 		)
@@ -219,7 +219,7 @@ export default class AuthBtn extends Vue {
 
 		this.location$ = apiPoll(
 			character.character_location$(),
-			{name: "character_location", interval: 30_000}
+			{name: `character_location:${character.name}`, interval: 30_000}
 		).subscribe(
 			location => {
 				this.location = Object.assign({}, location, location ? {
@@ -249,7 +249,6 @@ export default class AuthBtn extends Vue {
 
 	@Watch("activeCharacter", {immediate: true})
 	async characterWatcher(character: Character | null) {
-
 		this.unsubscribeCharacter()
 		if (!character || !character.auth.character_id) {
 			this.character = null
