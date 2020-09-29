@@ -11,7 +11,7 @@
 			v-model="show"
 		>
 			<v-list dense>
-				<v-list-item @click="apiSetDestination" :disabled="!isAPIAuthed">
+				<v-list-item @click="apiSetDestination" :disabled="!isAuthed">
 					<v-list-item-icon>
 						<v-icon>mdi-transfer-right</v-icon>
 					</v-list-item-icon>
@@ -19,12 +19,12 @@
 						<v-list-item-title>
 							Set Destination
 						</v-list-item-title>
-						<v-list-item-subtitle class="red--text text--lighten-3" v-if="!isAPIAuthed">
+						<v-list-item-subtitle class="red--text text--lighten-3" v-if="!isAuthed">
 							Вы не авторизованы
 						</v-list-item-subtitle>
 					</v-list-item-content>
 				</v-list-item>
-				<v-list-item @click="apiAddWaypoint" :disabled="!isAPIAuthed">
+				<v-list-item @click="apiAddWaypoint" :disabled="!isAuthed">
 					<v-list-item-icon>
 						<v-icon>mdi-transfer-right</v-icon>
 					</v-list-item-icon>
@@ -32,7 +32,7 @@
 						<v-list-item-title>
 							Add Waypoint
 						</v-list-item-title>
-						<v-list-item-subtitle class="red--text text--lighten-3" v-if="!isAPIAuthed">
+						<v-list-item-subtitle class="red--text text--lighten-3" v-if="!isAuthed">
 							Вы не авторизованы
 						</v-list-item-subtitle>
 					</v-list-item-content>
@@ -236,8 +236,9 @@ import {I_CONTEXT_MENU, IREGION} from "@/types/MAP"
 import events from "@/service/EventBus"
 import EVEJumpBridge from "@/lib/EVEJumpBridge"
 import {ipcRenderer} from "electron"
-import characterManager, {ICharacterManagerCharacter} from "@/service/CharacterManager"
+import characterManager from "@/service/CharacterManager"
 import pathService from "@/service/PathService"
+import Character from "@/lib/Character"
 
 @Component
 export default class RegionMapContextMenu extends Vue {
@@ -266,21 +267,21 @@ export default class RegionMapContextMenu extends Vue {
 		this.showWatcher(false)
 	}
 
-	get charactersInSystem(): ICharacterManagerCharacter[] {
+	get charactersInSystem(): Character[] {
 		if (!this.system) return []
 		const characters = characterManager.regionSystemToChars[this.system.region_id]?.[this.system.id]
 		if (!characters) return []
 
-		return characters as ICharacterManagerCharacter[]
+		return characters as Character[]
 	}
 
 	getCurrentSystemForAPICharacter() {
-		return characterManager.activeCharacter?.isAuthed ? characterManager.getCurrentSystem() : null
+		return characterManager.activeCharacter?.auth.isAuthed ? characterManager.getCurrentSystem() : null
 	}
 
 	get canSystemBeSetAsCurrent(): boolean {
 		if (!characterManager.activeCharacter) return false
-		return characterManager.activeCharacter?.system?.id !== this.system?.id
+		return characterManager.activeCharacter?.location?.id !== this.system?.id
 	}
 
 	get pathJumps(): number {
@@ -367,8 +368,8 @@ export default class RegionMapContextMenu extends Vue {
 			: systemManager.regions[this.jb.systemTo!.region_id] as IREGION
 	}
 
-	get isAPIAuthed() {
-		return api.auth.isAuth
+	get isAuthed(): boolean {
+		return characterManager.activeCharacter?.auth.isAuthed || false
 	}
 
 	get system(): EVESystem | null {
@@ -380,7 +381,7 @@ export default class RegionMapContextMenu extends Vue {
 		if (!this.system) return
 
 		try {
-			await api.setWaypoint(
+			await characterManager.activeCharacter?.setWaypoint(
 				this.options.system_id,
 				true, false
 			)
@@ -394,7 +395,7 @@ export default class RegionMapContextMenu extends Vue {
 		if (!this.system) return
 
 		try {
-			await api.setWaypoint(
+			await characterManager.activeCharacter?.setWaypoint(
 				this.options.system_id,
 				false, false
 			)
@@ -408,7 +409,7 @@ export default class RegionMapContextMenu extends Vue {
 		if (!this.jb || !this.jb.structure_id) return
 
 		try {
-			await api.setWaypoint(
+			await characterManager.activeCharacter?.setWaypoint(
 				this.jb.structure_id,
 				false, false
 			)
@@ -426,8 +427,8 @@ export default class RegionMapContextMenu extends Vue {
 		events.$emit("setLogFilterBySystem", this.system)
 	}
 
-	get activeCharacter(): ICharacterManagerCharacter | null {
-		return characterManager.activeCharacter as ICharacterManagerCharacter
+	get activeCharacter(): Character | null {
+		return characterManager.activeCharacter as Character
 	}
 
 	setSystemAsCurrent() {

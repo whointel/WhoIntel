@@ -37,7 +37,7 @@
 
 		<v-list dense>
 			<v-subheader v-if="pathPoints.path.length > 0" class="subtitle-2">
-				{{ pathPoints.path.length - 1 }}j:
+				{{ isAuthed ? activeCharacter.name : "" }} {{ pathPoints.path.length - 1 }}j:
 			</v-subheader>
 			<v-list-item
 				class="px-2"
@@ -64,7 +64,7 @@
 						small
 						class="ml-2"
 						color="orange"
-						:disabled="disableGoBtn || !isAPIAuthed"
+						:disabled="disableGoBtn || !isAuthed"
 						@click="apiSetDestinationPathGo"
 					>
 						в добрый путь
@@ -90,6 +90,8 @@ import systemManager from "@/service/SystemManager"
 import {IPATHPOINT} from "@/types/PathFinder"
 import Timeout from "await-timeout"
 import pathService from "@/service/PathService"
+import characterManager from "@/service/CharacterManager"
+import Character from "@/lib/Character"
 
 @Component({
 	components: {PathFinderCopyBtn}
@@ -108,8 +110,12 @@ export default class PathFinder extends Vue {
 		this.disableGoBtn = value.length <= 0
 	}
 
-	get isAPIAuthed() {
-		return api.auth.isAuth
+	get activeCharacter(): Character | null {
+		return characterManager.activeCharacter as Character
+	}
+
+	get isAuthed(): boolean {
+		return characterManager.activeCharacter?.auth.isAuthed || false
 	}
 
 	get isShow() {
@@ -145,7 +151,7 @@ export default class PathFinder extends Vue {
 		this.disableGoBtn = true
 		let isFirst = true
 		for (const id of this.pathPoints.structures) {
-			await api.setWaypoint(id, isFirst)
+			await characterManager.activeCharacter?.setWaypoint(id, isFirst)
 			isFirst = false
 			await Timeout.set(50)
 		}

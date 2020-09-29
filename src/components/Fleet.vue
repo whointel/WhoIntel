@@ -22,10 +22,6 @@
 				</v-list-item-icon>
 			</v-list-item>
 		</v-list>
-
-		<!--		<v-footer inset tile absolute>-->
-		<!--			<v-btn @click="test">test</v-btn>-->
-		<!--		</v-footer>-->
 	</v-col>
 </template>
 
@@ -33,12 +29,12 @@
 import {Component, Vue} from "vue-property-decorator"
 // eslint-disable-next-line no-undef,no-unused-vars
 import Timeout = NodeJS.Timeout
-import api from "@/lib/EVEApi"
 import {API_FLEET, API_FLEET_MEMBER, API_FLEET_MEMBER_ROLE} from "@/types/API"
 import characterResolveService from "@/service/CharacterResolveService"
 import systemManager from "@/service/SystemManager"
 import EVESystem from "@/lib/EVESystem"
 import {ICharacterExport} from "@/service/Database"
+import characterManager from "@/service/CharacterManager"
 
 interface FLEET_MEMBER extends API_FLEET_MEMBER {
 	system: EVESystem
@@ -74,7 +70,7 @@ export default class Fleet extends Vue {
 
 	async refreshFleet() {
 		try {
-			const {data: fleet} = await api.getMyFleet$().toPromise()
+			const {data: fleet} = (await characterManager.activeCharacter?.getMyFleet$().toPromise()) || {data: null}
 			this.fleet = fleet
 
 			if (!this.fleet) return
@@ -95,7 +91,7 @@ export default class Fleet extends Vue {
 	async refreshMembers() {
 		if (!this.fleet) return
 		try {
-			const {data: fleet_members} = await api.getFleetMembers$(this.fleet.fleet_id).toPromise()
+			const {data: fleet_members} = (await characterManager.activeCharacter?.getFleetMembers$(this.fleet.fleet_id).toPromise()) || {data: []}
 			const members: FLEET_MEMBER[] = []
 
 			for (let i = 0; i < fleet_members.length; i++) {
@@ -108,7 +104,7 @@ export default class Fleet extends Vue {
 					system: systemManager.getSystemById(member.solar_system_id)!
 				}))
 
-				if (member.character_id === api.auth.character_id) {
+				if (member.character_id === characterManager.activeCharacter?.auth.character_id) {
 					this.mySystemId = member.solar_system_id
 				}
 			}
@@ -120,16 +116,11 @@ export default class Fleet extends Vue {
 
 		this.timerMembers = setTimeout(this.refreshMembers.bind(this), 6_000)
 	}
-
-	// test() {
-	// 	this.refreshFleet()
-	// }
 }
 </script>
 
 <style scoped>
 .container {
-	/*height: calc(100vh - 30px);*/
 	height: 100%;
 	position: relative;
 }

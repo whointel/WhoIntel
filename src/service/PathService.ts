@@ -67,7 +67,7 @@ class PathService {
 	}
 
 	setStartFromCurrentSystem() {
-		const cur = characterManager.activeCharacter?.system?.id
+		const cur = characterManager.activeCharacter?.location?.id
 		if (cur) {
 			this.setStart(cur)
 		}

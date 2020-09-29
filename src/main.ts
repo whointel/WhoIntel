@@ -38,7 +38,6 @@ Vue.use(PortalVue)
 events.init()
 
 if (!layoutService.isLayoutWindow) {
-	api.init()
 	pathService.init()
 	logReader.init()
 	characterManager.init()

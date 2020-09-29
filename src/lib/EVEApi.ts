@@ -1,9 +1,7 @@
 import events from "@/service/EventBus"
-import {ipcRenderer} from "electron"
-import axios, {AxiosError, AxiosResponse} from "axios"
-import Timeout = NodeJS.Timeout
+import {AxiosError, AxiosResponse} from "axios"
 import differenceInMilliseconds from "date-fns/differenceInMilliseconds"
-import {AUTH_STATUSES, IAuthStatus} from "@/types/AuthStatuses"
+import {AUTH_STATUSES, IAuth} from "@/types/Auth"
 import * as log from "electron-log"
 import {
 	API_CHARACTER_LOCATION,
@@ -19,37 +17,13 @@ import {
 } from "@/types/API"
 import Axios from "axios-observable"
 import {AxiosObservable} from "axios-observable/lib/axios-observable.interface"
-import {reactive, UnwrapRef, watch, watchEffect} from "@vue/composition-api"
+import {reactive} from "@vue/composition-api"
 import {interval, Observable, of} from "rxjs"
 import {concatMap, delayWhen, map, repeat, tap} from "rxjs/operators"
 import {retryBackoff, RetryBackoffConfig} from "backoff-rxjs"
 import store from "@/store"
-import Vue from "vue"
 
 const API_BASE_URL = "https://esi.evetech.net/latest/"
-
-const REFRESH_TOKEN_PREDICTION_MINUTES = 2
-
-interface IEVEAPIAuth {
-	refresh_token: string | null
-	access_token: string | null
-	token: null | {
-		azp: string
-		exp: number
-		iss: string
-		jti: string
-		kid: string
-		name: string
-		owner: string
-		scp: string[]
-		sub: string
-	}
-	authStatus: AUTH_STATUSES
-	authError: any
-
-	isAuth: boolean
-	character_id: number | null
-}
 
 interface API_POLL_OPTIONS {
 	name?: string // name for log
@@ -65,149 +39,63 @@ const regularRetryBackoffConfig = {
 	shouldRetry: axiosShouldRetryOnServerError,
 }
 
-class EVEApi {
-	auth!: UnwrapRef<IEVEAPIAuth>
-	refreshTimer: Timeout | null = null
+export const ClearAuth: IAuth = {
+	refresh_token: null,
+	access_token: null,
+	token: null,
+	authStatus: AUTH_STATUSES.NONE,
+	authError: null,
+	character_id: null,
+	isAuthed: false,
+}
 
-	private axios$ = Axios.create({
+export class EVEApiPublic {
+	protected axios$ = Axios.create({
 		baseURL: API_BASE_URL
 	})
 
-	logout() {
-		this.stopRefreshTimer()
-
-		Object.assign(this.auth, {
-			refresh_token: null,
-			access_token: null,
-			token: null,
-			authStatus: AUTH_STATUSES.NONE
-		})
-
-		localStorage.removeItem("auth")
+	status$(): AxiosObservable<API_STATUS> {
+		return this.axios$.get<API_STATUS>("status/")
 	}
 
-	login() {
-		ipcRenderer.send("auth:EVE")
+	system_kills$(): AxiosObservable<API_SYSTEM_KILLS[]> {
+		return this.axios$.get<API_SYSTEM_KILLS[]>("universe/system_kills/")
 	}
 
-	refreshToken() {
-		log.info("EVEApi: refreshToken start")
-		ipcRenderer.send("auth:EVE:refresh", this.auth.refresh_token)
-		// TODO refresh timer
+	system_jumps$(): AxiosObservable<API_SYSTEM_JUMPS[]> {
+		return this.axios$.get<API_SYSTEM_JUMPS[]>("universe/system_jumps/")
 	}
 
-	readStoredAuth() {
-		const authFromStore = localStorage.getItem("auth")
-		if (!authFromStore) return
-
-		let auth
-		try {
-			auth = JSON.parse(authFromStore)
-		} catch (e) {
-			return
-		}
-
-		if (!auth) return
-
-		Object.assign(this.auth, {
-			refresh_token: auth.refresh_token,
-			access_token: auth.access_token,
-			token: auth.token,
-			authStatus: AUTH_STATUSES.AUTH
-		})
-
-		this.startRefreshTimer()
+	killmail$(killmail_id: number, killmail_hash: string): AxiosObservable<API_KILLMAIL> {
+		return this.axios$.get<API_KILLMAIL>(`killmails/${killmail_id}/${killmail_hash}/`).pipe(
+			retryBackoff(regularRetryBackoffConfig),
+		)
 	}
 
-	init() {
-		// Vue.observable
-		this.auth = reactive({
-			refresh_token: null,
-			access_token: null,
-			token: null,
-			authStatus: AUTH_STATUSES.NONE,
-			authError: null,
-			isAuth: false,
-			character_id: null,
-		})
-
-		// watchEffect(() => {
-		// 	this.auth.isAuth = !!this.auth?.token
-		// 	// events.$emit("auth", this.auth.isAuth)
-		// })
-		// watchEffect(() => {
-		// 	const part = this.auth.token?.sub?.split(":")[2]
-		//
-		// 	this.auth.character_id = part ? Number(part) : null
-		// })
-		// watchEffect(() => {
-		// 	this.axios$.defaults.headers.common["Authorization"] = `Bearer ${this.auth.access_token}`
-		// })
-
-		watch(() => this.auth.token, (token) => {
-			this.auth.isAuth = !!token
-
-			const part = token?.sub?.split(":")[2]
-			this.auth.character_id = part ? Number(part) : null
-
-			this.axios$.defaults.headers.common["Authorization"] = `Bearer ${this.auth.access_token}`
-		})
-
-		events.$on("electron:auth:EVE", this.onAuthEVE.bind(this))
-		this.readStoredAuth()
+	searchCharacter$(name: string): AxiosObservable<{ character: Array<number> }> {
+		return this.axios$.get<{ character: Array<number> }>("search/", {
+			params: {
+				categories: "character",
+				search: name,
+				strict: true,
+			}
+		}).pipe(
+			retryBackoff(regularRetryBackoffConfig),
+		)
 	}
 
-	startRefreshTimer() {
-		if (!this.auth.token || !this.auth.token.exp) return
-
-		// @ts-ignore
-		const tokenRefreshTimeout = differenceInMilliseconds(new Date(this.auth.token.exp * 1000), new Date())
-		let tokenRefreshTimeoutPrediction = tokenRefreshTimeout - REFRESH_TOKEN_PREDICTION_MINUTES * 60 * 1000
-		log.debug(`EVEApi: startRefreshTimer, tokenRefreshTimeout=${tokenRefreshTimeout}, tokenRefreshTimeoutPrediction=${tokenRefreshTimeoutPrediction}`)
-		if (tokenRefreshTimeoutPrediction < 0) {
-			tokenRefreshTimeoutPrediction = 0
-		}
-		log.info(`EVEApi: next refresh access_token in ${tokenRefreshTimeoutPrediction / 1000} sec`)
-		this.refreshTimer = setTimeout(this.refreshToken.bind(this), tokenRefreshTimeoutPrediction)
+	getCharacter$(id: number): AxiosObservable<IAPICharacter> {
+		return this.axios$.get<IAPICharacter>(`characters/${id}/`).pipe(
+			retryBackoff(regularRetryBackoffConfig),
+		)
 	}
+}
 
-	stopRefreshTimer() {
-		if (this.refreshTimer) {
-			clearTimeout(this.refreshTimer)
-		}
-	}
-
-	private onAuthEVE(event, data: IAuthStatus) {
-		this.auth.authStatus = data.status
-
-		switch (data.status) {
-			case AUTH_STATUSES.AUTH:
-				if (!data.auth) {
-					this.auth.authStatus = AUTH_STATUSES.ERROR
-					this.auth.authError = data.error || "unknown"
-					return
-				}
-
-				localStorage.setItem("auth", JSON.stringify(data.auth))
-
-				Object.assign(this.auth, {
-					refresh_token: data.auth.refresh_token,
-					access_token: data.auth.access_token,
-					token: data.auth.token,
-					authStatus: AUTH_STATUSES.AUTH,
-					authError: null,
-				})
-
-				this.startRefreshTimer()
-				break
-			case AUTH_STATUSES.ERROR:
-				this.auth.authError = data.error
-				break
-		}
-	}
+export class EVEApi extends EVEApiPublic {
+	auth: IAuth = reactive(Object.assign({}, ClearAuth))
 
 	private checkScope(scope: string) {
-		if (!this.auth?.isAuth || !this.auth.token?.scp) {
+		if (!this.auth.isAuthed || !this.auth.token?.scp) {
 			throw new Error("API call for undefined user")
 		}
 
@@ -233,18 +121,6 @@ class EVEApi {
 		this.checkScope("esi-location.read_location.v1")
 
 		return this.axios$.get<API_CHARACTER_LOCATION>(`characters/${this.auth.character_id}/location/`)
-	}
-
-	status$(): AxiosObservable<API_STATUS> {
-		return this.axios$.get<API_STATUS>("status/")
-	}
-
-	system_kills$(): AxiosObservable<API_SYSTEM_KILLS[]> {
-		return this.axios$.get<API_SYSTEM_KILLS[]>("universe/system_kills/")
-	}
-
-	system_jumps$(): AxiosObservable<API_SYSTEM_JUMPS[]> {
-		return this.axios$.get<API_SYSTEM_JUMPS[]>("universe/system_jumps/")
 	}
 
 	searchStructure$(search: string, strict = true): AxiosObservable<{ structure: number[] }> {
@@ -280,25 +156,9 @@ class EVEApi {
 		)
 	}
 
-	searchCharacter$(name: string): AxiosObservable<{ character: Array<number> }> {
-		return this.axios$.get<{ character: Array<number> }>("search/", {
-			params: {
-				categories: "character",
-				search: name,
-				strict: true,
-			}
-		}).pipe(
-			retryBackoff(regularRetryBackoffConfig),
-		)
-	}
-
-	getCharacter$(id: number): AxiosObservable<IAPICharacter> {
-		return this.axios$.get<IAPICharacter>(`characters/${id}/`).pipe(
-			retryBackoff(regularRetryBackoffConfig),
-		)
-	}
-
 	getStructure$(id: number): AxiosObservable<API_STRUCTURE> {
+		this.checkScope("esi-universe.read_structures.v1")
+
 		return this.axios$.get<API_STRUCTURE>(`universe/structures/${id}/`).pipe(
 			retryBackoff({
 				initialInterval: 10,
@@ -334,15 +194,9 @@ class EVEApi {
 			}),
 		).toPromise()
 	}
-
-	killmail$(killmail_id: number, killmail_hash: string): AxiosObservable<API_KILLMAIL> {
-		return this.axios$.get<API_KILLMAIL>(`killmails/${killmail_id}/${killmail_hash}/`).pipe(
-			retryBackoff(regularRetryBackoffConfig),
-		)
-	}
 }
 
-const api = new EVEApi()
+const api = new EVEApiPublic()
 
 export default api
 

@@ -6,13 +6,13 @@
 			type="error"
 			elevation="2"
 			class="mx-2"
-			v-if="!isAuth"
+			v-if="!isAuthed"
 		>
 			Вы не авторизованы через игру.<br>
 			Для поиска структур необходимо авторизоваться в меню наверху справа.
 		</v-alert>
 
-		<v-card flat :disabled="!isAuth">
+		<v-card flat :disabled="!isAuthed">
 			<v-expansion-panels inset tile>
 				<v-expansion-panel>
 					<v-expansion-panel-header disable-icon-rotate>
@@ -175,7 +175,6 @@
 
 <script lang="ts">
 import {Component, Vue, Watch} from "vue-property-decorator"
-import api from "@/lib/EVEApi"
 import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 import {DataTableHeader} from "vuetify"
 import systemManager from "@/service/SystemManager"
@@ -183,6 +182,7 @@ import Timeout from "await-timeout"
 import * as log from "electron-log"
 import events from "@/service/EventBus"
 import {shell} from "electron"
+import characterManager from "@/service/CharacterManager"
 
 const INITIAL_FIND_PATTERN = " » "
 // const ALPHABET_PATTERN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -223,8 +223,8 @@ export default class JBConfig extends Vue {
 
 	findPattern: string = INITIAL_FIND_PATTERN
 
-	get isAuth(): boolean {
-		return api.auth.isAuth
+	get isAuthed(): boolean {
+		return characterManager.activeCharacter?.auth.isAuthed|| false
 	}
 
 	get jb() {
@@ -249,7 +249,7 @@ export default class JBConfig extends Vue {
 	}
 
 	async loadStructures(search: string) {
-		const {data: {structure: structures}} = await api.searchStructure$(search, false).toPromise()
+		const {data: {structure: structures}} = (await characterManager.activeCharacter?.searchStructure$(search, false).toPromise()) || {data: {structure: null}}
 
 		if (!structures) {
 			return

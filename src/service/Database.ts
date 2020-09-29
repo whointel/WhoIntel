@@ -1,5 +1,6 @@
 import {DBSchema, openDB} from "idb/with-async-ittr.js"
 import {IEVEJumpBridgeExport} from "@/lib/EVEJumpBridge"
+import {IAuthToken} from "@/types/Auth"
 
 export interface IRegionMapExport {
 	id: number
@@ -14,6 +15,13 @@ export interface ICharacterExport {
 
 	expires: Date
 	exists: boolean
+}
+
+export interface IAuthExport {
+	character_id: number
+	refresh_token: string
+	access_token: string
+	token: IAuthToken
 }
 
 interface IntelDB extends DBSchema {
@@ -33,11 +41,15 @@ interface IntelDB extends DBSchema {
 		value: ICharacterExport
 		key: number
 		indexes: { id: number, name: string, expires: Date }
+	},
+	auth: {
+		value: IAuthExport
+		key: number
 	}
 }
 
 function createDB() {
-	return openDB<IntelDB>("intel", 9, {
+	return openDB<IntelDB>("intel", 10, {
 		upgrade(db, oldVersion, newVersion, transaction) {
 			if (oldVersion < 1) {
 				// see version 3
@@ -126,6 +138,14 @@ function createDB() {
 					keyPath: "id",
 					autoIncrement: false,
 				})
+			}
+
+			if (oldVersion < 10) {
+				db.createObjectStore("auth", {
+					keyPath: "character_id",
+					autoIncrement: false,
+				})
+				localStorage.removeItem("auth")
 			}
 		},
 	})

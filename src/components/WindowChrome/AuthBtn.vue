@@ -14,16 +14,36 @@
 					v-bind="attrs"
 					v-on="on"
 				>
-					{{ chipText }}
+					{{ btnTitleCurrentCharacterName }}
 				</v-chip>
 			</template>
 
-			<v-card v-if="!isAuth">
+			<v-card v-if="!activeCharacter">
 				<v-card-text>
 					<auth-btn-character-list/>
 				</v-card-text>
 
-				<v-card-text v-if="api.auth.authError">
+				<v-card-text>
+					Авторизация через игру позволит отправлять маршрут, получать информацию о пролинкованных игроках, искать актуальные мосты (Jump Bridge).
+				</v-card-text>
+
+				<v-card-actions>
+					<v-spacer/>
+					<v-btn color="green" text @click="loginNew">Авторизоваться</v-btn>
+				</v-card-actions>
+			</v-card>
+
+			<v-card v-else-if="!isAuthed">
+				<v-card-text>
+					<auth-btn-character-list/>
+				</v-card-text>
+
+				<span class="ml-2">НЕТ Авторизации через игру</span>
+				<v-card-title>
+					{{ activeCharacter.name }}
+				</v-card-title>
+
+				<v-card-text v-if="activeCharacter && activeCharacter.auth.authError">
 					<v-alert
 						border="left"
 						colored-border
@@ -31,27 +51,28 @@
 						elevation="2"
 					>
 						Ошибка авторизации:<br>
-						{{ api.auth.authError }}
+						{{ activeCharacter.auth.authError }}
 					</v-alert>
 				</v-card-text>
 
 				<v-card-text>
 					Авторизация через игру позволит отправлять маршрут, получать информацию о пролинкованных игроках, искать актуальные мосты (Jump Bridge).
 				</v-card-text>
+
 				<v-card-actions>
 					<v-spacer/>
 					<v-btn color="green" text @click="login">Авторизоваться</v-btn>
 				</v-card-actions>
 			</v-card>
 
-			<v-card v-if="isAuth">
+			<v-card v-else>
 				<v-card-text>
 					<auth-btn-character-list/>
 				</v-card-text>
 
 				<span class="ml-2">Авторизация через игру</span>
 				<v-card-title>
-					{{ api.auth.token.name }}
+					{{ activeCharacter.name }}
 				</v-card-title>
 
 				<v-card-text>
@@ -59,7 +80,7 @@
 						<v-col cols="4">
 							<v-img
 								v-if="ship"
-								:src="`https://images.evetech.net/characters/${api.auth.character_id}/portrait?size=64`"
+								:src="`https://images.evetech.net/characters/${activeCharacter.auth.character_id}/portrait?size=64`"
 								:height="64"
 								:width="64"
 							/>
@@ -85,7 +106,7 @@
 						<v-col :cols="4">
 							<span v-if="ship">{{ ship.ship_name }}</span>
 							<br>
-							<span v-if="location">{{ location.system ? location.system.name : '' }}</span>
+							<a @click.prevent="setLocationToCurrent" v-if="location && location.system">{{ location.system.name }}</a>
 						</v-col>
 
 						<v-col v-if="online">
@@ -101,15 +122,16 @@
 						colored-border
 						type="warning"
 						elevation="2"
-						v-if="api.auth.authError"
+						v-if="activeCharacter && activeCharacter.auth.authError"
 					>
 						Ошибка авторизации:<br>
-						{{ api.auth.authError }}
+						{{ activeCharacter.auth.authError }}
 					</v-alert>
 
 				</v-card-text>
 
 				<v-card-actions>
+					<v-btn color="green" text @click="loginNew">Добавить</v-btn>
 					<v-spacer/>
 					<v-btn color="red" text @click="logout">Logout</v-btn>
 				</v-card-actions>
@@ -123,7 +145,7 @@
 import {Component, Vue, Watch} from "vue-property-decorator"
 import parseJSONDate from "date-fns/parseJSON"
 import format from "date-fns/format"
-import api, {apiPoll} from "@/lib/EVEApi"
+import {apiPoll} from "@/lib/EVEApi"
 import {Subscription} from "rxjs"
 import {API_CHARACTER_LOCATION, API_CHARACTER_ONLINE, API_CHARACTER_SHIP} from "@/types/API"
 import systemManager from "@/service/SystemManager"
@@ -131,40 +153,33 @@ import EVESystem from "@/lib/EVESystem"
 import characterResolveService from "@/service/CharacterResolveService"
 import {ICharacterExport} from "@/service/Database"
 import AuthBtnCharacterList from "@/components/WindowChrome/AuthBtnCharacterList.vue"
-import characterManager, {ICharacterManagerCharacter} from "@/service/CharacterManager"
+import characterManager from "@/service/CharacterManager"
+import Character from "@/lib/Character"
 
 @Component({
 	components: {AuthBtnCharacterList}
 })
 export default class AuthBtn extends Vue {
 	menu = false
+	character: ICharacterExport | null = null
 
-	// menu = true
+	online: API_CHARACTER_ONLINE | null = null
+	online$: Subscription | null = null
+	ship: API_CHARACTER_SHIP | null = null
+	ship$: Subscription | null = null
+	location: API_CHARACTER_LOCATION & { system: EVESystem | null } | null = null
+	location$: Subscription | null = null
 
-	get api() {
-		return api
+	get activeCharacter(): Character | null {
+		return characterManager.activeCharacter as Character
 	}
 
-	get chipText(): string {
-		if (
-			characterManager.activeCharacter
-			&& api.auth.isAuth
-			&& characterManager.activeCharacter.name === api.auth.token?.name) {
-			return characterManager.activeCharacter.name
-		}
-
-		return `
-		${this.activeCharacter ? this.activeCharacter.name : "нет активного"}
-		/ ${this.isAuth ? api.auth.token?.name : "не авторизован"}
-		`
+	get btnTitleCurrentCharacterName(): string {
+		return this.activeCharacter ? this.activeCharacter.name : "нет активного"
 	}
 
-	get activeCharacter(): ICharacterManagerCharacter | null {
-		return characterManager.activeCharacter as ICharacterManagerCharacter
-	}
-
-	get isAuth(): boolean {
-		return api.auth.isAuth
+	get isAuthed(): boolean {
+		return this.activeCharacter?.auth.isAuthed || false
 	}
 
 	get last_login() {
@@ -179,32 +194,42 @@ export default class AuthBtn extends Vue {
 		return format(parseJSONDate(this.online.last_logout), "uuuu.MM.dd HH:mm:ss")
 	}
 
-	character: ICharacterExport | null = null
-
-	@Watch("api.auth.character_id", {immediate: true})
-	async characterWatcher(id: number) {
-		if (!id) {
-			this.character = null
-			return
-		}
-
-		this.character = await characterResolveService.findById(id)
-	}
-
 	get chipColor(): string {
-		if (!this.isAuth) return "red"
+		if (!this.isAuthed) return "red"
 
 		return (this.online && this.online.online) ? "green" : "orange"
 	}
 
-	online: API_CHARACTER_ONLINE | null = null
-	online$: Subscription | null = null
-	ship: API_CHARACTER_SHIP | null = null
-	ship$: Subscription | null = null
-	location: API_CHARACTER_LOCATION & { system: EVESystem | null } | null = null
-	location$: Subscription | null = null
+	subscribeCharacter(character: Character | null) {
+		if (!character) return
 
-	unsubscribeAll() {
+		this.online$ = apiPoll(
+			character.character_online$(),
+			{name: "character_online"}
+		).subscribe(
+			online => this.online = online
+		)
+
+		this.ship$ = apiPoll(
+			character.character_ship$(),
+			{name: "character_ship", interval: 60_000}
+		).subscribe(
+			ship => this.ship = ship
+		)
+
+		this.location$ = apiPoll(
+			character.character_location$(),
+			{name: "character_location", interval: 30_000}
+		).subscribe(
+			location => {
+				this.location = Object.assign({}, location, location ? {
+					system: systemManager.getSystemById(location.solar_system_id)
+				} : {system: null})
+			}
+		)
+	}
+
+	unsubscribeCharacter() {
 		if (this.online$) {
 			this.online$.unsubscribe()
 			this.online$ = null
@@ -222,51 +247,53 @@ export default class AuthBtn extends Vue {
 		}
 	}
 
-	beforeDestroy() {
-		this.unsubscribeAll()
+	@Watch("activeCharacter", {immediate: true})
+	async characterWatcher(character: Character | null) {
+
+		this.unsubscribeCharacter()
+		if (!character || !character.auth.character_id) {
+			this.character = null
+			return
+		}
+
+		this.subscribeCharacter(character)
 	}
 
-	@Watch("isAuth", {immediate: true})
-	authChangeHandler(val) {
-		if (val) {
-			this.unsubscribeAll()
-
-			this.online$ = apiPoll(
-				api.character_online$(),
-				{name: "character_online"}
-			).subscribe(
-				online => this.online = online
-			)
-
-			this.ship$ = apiPoll(
-				api.character_ship$(),
-				{name: "character_ship", interval: 60_000}
-			).subscribe(
-				ship => this.ship = ship
-			)
-
-			this.location$ = apiPoll(
-				api.character_location$(),
-				{name: "character_location", interval: 30_000}
-			).subscribe(
-				location => {
-					this.location = Object.assign({}, location, location ? {
-						system: systemManager.getSystemById(location.solar_system_id)
-					} : {system: null})
-				}
-			)
+	@Watch("isAuthed", {immediate: true})
+	async characterAuthWatcher(isAuthed: boolean) {
+		if (isAuthed) {
+			this.subscribeCharacter(this.activeCharacter)
+			this.character = await characterResolveService.findById(this.activeCharacter!.auth.character_id!)
 		} else {
-			this.unsubscribeAll()
+			this.unsubscribeCharacter()
+			this.character = null
 		}
+	}
+
+	async login() {
+		this.activeCharacter?.login()
 	}
 
 	logout() {
 		this.menu = false
-		api.logout()
+		this.activeCharacter?.logout()
 	}
 
-	async login() {
-		api.login()
+	async loginNew() {
+		const character = Object.preventExtensions(new Character("[authenticating]"))
+		await character.login()
+		characterManager.addCharacter(character)
+		characterManager.setActiveCharacter(character.name)
+	}
+
+	setLocationToCurrent() {
+		if (!this.location?.system) return
+
+		systemManager.markSystem(this.location.system, true)
+	}
+
+	beforeDestroy() {
+		this.unsubscribeCharacter()
 	}
 }
 </script>

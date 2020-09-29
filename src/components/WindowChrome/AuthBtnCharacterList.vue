@@ -14,8 +14,8 @@
 			</v-list-item-content>
 			<v-list-item-action>
 				<div>
-					<span class="green--text text--darken-3 caption mr-2" v-if="item.isAuthed">game auth</span>
-					<span class="grey--text caption" v-if="item.system">{{ item.system.name }}</span>
+					<span class="green--text text--darken-3 caption mr-2" v-if="item.auth.isAuthed">game auth</span>
+					<span class="grey--text caption" v-if="item.location">{{ item.location.name }}</span>
 				</div>
 			</v-list-item-action>
 		</template>
@@ -23,7 +23,7 @@
 		<template v-slot:selection="{ item }">
 			<div>
 				{{ item.name }}
-				<span v-if="item.isAuthed" class="green--text text--darken-3 caption">game auth</span>
+				<span v-if="item.auth.isAuthed" class="green--text text--darken-3 caption">game auth</span>
 			</div>
 		</template>
 
@@ -50,19 +50,20 @@
 
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator"
-import characterManager, {ICharacterManagerCharacter} from "@/service/CharacterManager"
+import characterManager from "@/service/CharacterManager"
+import Character from "@/lib/Character"
 
 @Component
 export default class AuthBtnCharacterList extends Vue {
-	get characters(): ICharacterManagerCharacter[] {
-		return Object.values(characterManager.characters) as ICharacterManagerCharacter[]
+	get characters(): Character[] {
+		return Object.values(characterManager.characters) as Character[]
 	}
 
-	get activeCharacter(): ICharacterManagerCharacter | null {
-		return characterManager.activeCharacter as ICharacterManagerCharacter
+	get activeCharacter(): Character | null {
+		return characterManager.activeCharacter as Character
 	}
 
-	set activeCharacter(character: ICharacterManagerCharacter | null) {
+	set activeCharacter(character: Character | null) {
 		characterManager.setActiveCharacter(character!.name)
 	}
 }

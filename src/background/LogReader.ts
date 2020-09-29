@@ -7,7 +7,7 @@ import * as path from "path"
 import mainWindow from "@/background/MainWindow"
 import * as log from "electron-log"
 import * as crypto from "crypto"
-import readline from "readline";
+import readline from "readline"
 
 interface IFileReaderFileWatch {
 	shift: number
