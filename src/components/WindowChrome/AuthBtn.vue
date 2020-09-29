@@ -250,7 +250,7 @@ export default class AuthBtn extends Vue {
 	@Watch("activeCharacter", {immediate: true})
 	async characterWatcher(character: Character | null) {
 		this.unsubscribeCharacter()
-		if (!character || !character.auth.character_id) {
+		if (!character || !character.auth.isAuthed) {
 			this.character = null
 			return
 		}
