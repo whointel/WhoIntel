@@ -372,8 +372,10 @@ export default class RegionMap extends Vue {
 
 		this.svgContent = svg.html() + ""
 
-		systemManager.showRegion()
-		this.drawRegionId = this.initMapData.id
+		this.$nextTick(() => {
+			systemManager.showRegion()
+			this.drawRegionId = this.initMapData.id
+		})
 	}
 
 	get canShowMarkers(): boolean {
