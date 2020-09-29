@@ -140,6 +140,10 @@ export default class EVESystem {
 		this.security = security
 	}
 
+	get nameDebug(): string {
+		return `EVESystem [${this.name} #${this.id}]`
+	}
+
 	get securityFormatted(): string {
 		const security = round(this.security, 1)
 		let result = String(security)

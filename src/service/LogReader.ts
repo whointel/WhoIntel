@@ -54,7 +54,7 @@ class LogReader {
 	private doLogLogEntry(logEntry: ILogEntry) {
 		const logEntryClone = clone(logEntry)
 		// @ts-ignore
-		logEntryClone.systems = logEntryClone.systems.map((system: EVESystem) => `EVESystem [${system.name} #${system.id}]`)
+		logEntryClone.systems = logEntryClone.systems.map((system: EVESystem) => system.nameDebug)
 		log.info("LogReader:logHandler:", logEntryClone)
 	}
 
