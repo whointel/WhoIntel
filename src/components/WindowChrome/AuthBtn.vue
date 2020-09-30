@@ -155,6 +155,7 @@ import {ICharacterExport} from "@/service/Database"
 import AuthBtnCharacterList from "@/components/WindowChrome/AuthBtnCharacterList.vue"
 import characterManager from "@/service/CharacterManager"
 import Character from "@/lib/Character"
+import {reactive} from "@vue/composition-api"
 
 @Component({
 	components: {AuthBtnCharacterList}
@@ -279,7 +280,7 @@ export default class AuthBtn extends Vue {
 	}
 
 	async loginNew() {
-		const character = Object.preventExtensions(new Character("[authenticating]"))
+		const character = reactive(new Character("[authenticating]"))
 		await character.login()
 		characterManager.addCharacter(character)
 		characterManager.setActiveCharacter(character.name)

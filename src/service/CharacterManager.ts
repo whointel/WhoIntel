@@ -20,7 +20,7 @@ class CharacterManager {
 	async init() {
 		const auths = await (await db()).getAll("auth")
 		auths.forEach(auth => {
-			const character = Object.preventExtensions(new Character(auth.token.name))
+			const character = reactive(new Character(auth.token.name)) as Character
 			character.setTokens(auth)
 			Vue.set(this.characters, character.name, character)
 			if (!this.activeCharacter) {

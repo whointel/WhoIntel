@@ -40,9 +40,10 @@
 				{{ isAuthed ? activeCharacter.name : "" }} {{ pathPoints.path.length - 1 }}j:
 			</v-subheader>
 			<v-list-item
-				class="px-2"
 				v-for="(pathPoint, index) in pathPoints.path" :key="index"
 				@click.prevent="setMarker(pathPoint.system)"
+				class="px-2"
+				:class="{'v-list-item--active': currentSystemId === pathPoint.system.id}"
 			>
 				<v-list-item-action class="mr-2 ml-0">
 					<span class="caption font-weight-black" :style="'color:'+pathPoint.system.securityColor" v-html="pathPoint.system.securityFormatted"></span>
@@ -108,6 +109,10 @@ export default class PathFinder extends Vue {
 	@Watch("pathPoints.path")
 	reActivateGoBtn(value: any[]) {
 		this.disableGoBtn = value.length <= 0
+	}
+
+	get currentSystemId(): number | null {
+		return characterManager.activeCharacter?.location?.id
 	}
 
 	get activeCharacter(): Character | null {
