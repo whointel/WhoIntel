@@ -111,7 +111,7 @@ export default class PathFinder extends Vue {
 		this.disableGoBtn = value.length <= 0
 	}
 
-	get currentSystemId(): number | null {
+	get currentSystemId(): number | undefined {
 		return characterManager.activeCharacter?.location?.id
 	}
 

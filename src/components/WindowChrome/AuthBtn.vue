@@ -280,7 +280,7 @@ export default class AuthBtn extends Vue {
 	}
 
 	async loginNew() {
-		const character = reactive(new Character("[authenticating]"))
+		const character = reactive(new Character("[authenticating]")) as Character
 		await character.login()
 		characterManager.addCharacter(character)
 		characterManager.setActiveCharacter(character.name)
