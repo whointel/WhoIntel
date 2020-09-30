@@ -117,7 +117,7 @@
 					dense
 					:transition="false"
 					open-on-hover
-					v-if="charactersInSystem.length || canSystemBeSetAsCurrent"
+					v-if="charactersInSystem.length || charactersNotInSystem.length"
 				>
 					<template v-slot:activator="{ on, attrs }">
 						<v-list-item
@@ -139,7 +139,10 @@
 					</template>
 
 					<v-list dense>
-						<v-list-item @click="setSystemAsCurrent" v-if="canSystemBeSetAsCurrent">
+						<v-list-item
+							v-for="character in charactersNotInSystem" :key="character.name"
+							@click="setSystemAsCurrentForCharacter(character)"
+						>
 							<v-list-item-icon>
 								<v-icon>mdi-arrow-bottom-right-bold-outline</v-icon>
 							</v-list-item-icon>
@@ -151,7 +154,10 @@
 							</v-list-item-content>
 						</v-list-item>
 
-						<v-list-item disabled v-for="character in charactersInSystem" :key="character.name">
+						<v-list-item
+							disabled
+							v-for="character in charactersInSystem" :key="character.name"
+						>
 							<v-list-item-icon>
 								<v-icon>mdi-account</v-icon>
 							</v-list-item-icon>
@@ -269,19 +275,20 @@ export default class RegionMapContextMenu extends Vue {
 
 	get charactersInSystem(): Character[] {
 		if (!this.system) return []
-		const characters = characterManager.regionSystemToChars[this.system.region_id]?.[this.system.id]
-		if (!characters) return []
 
-		return characters as Character[]
+		return Object.values(characterManager.characters)
+			.filter(character => this.system && character.location && (character.location.id === this.system.id)) as Character[]
+	}
+
+	get charactersNotInSystem(): Character[] {
+		if (!this.system) return []
+
+		return Object.values(characterManager.characters)
+			.filter(character => !this.system || !character.location || (character.location.id !== this.system.id)) as Character[]
 	}
 
 	getCurrentSystemForAPICharacter() {
 		return characterManager.activeCharacter?.auth.isAuthed ? characterManager.getCurrentSystem() : null
-	}
-
-	get canSystemBeSetAsCurrent(): boolean {
-		if (!characterManager.activeCharacter) return false
-		return characterManager.activeCharacter?.location?.id !== this.system?.id
 	}
 
 	get pathJumps(): number {
@@ -431,13 +438,11 @@ export default class RegionMapContextMenu extends Vue {
 		return characterManager.activeCharacter as Character
 	}
 
-	setSystemAsCurrent() {
+	setSystemAsCurrentForCharacter(character: Character) {
 		this.closeMenu()
-		const activeCharacter = this.activeCharacter
-		if (!this.system || !activeCharacter) return
+		if (!this.system) return
 
-		// systemManager.setCurrentSystem(this.system)
-		characterManager.setLocation(activeCharacter.name, this.system)
+		characterManager.setLocation(character.name, this.system)
 	}
 
 	get menuSystemStat() {
