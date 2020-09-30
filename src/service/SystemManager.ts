@@ -327,7 +327,7 @@ class SystemManager {
 		this.markedSystem = system
 	}
 
-	systemSetMap(id: number, mapCoordinates: MapCoordinates, svgContainer: HTMLElement) {
+	systemSetMap(id: number, mapCoordinates: MapCoordinates, svgContainer: SVGElement) {
 		const system = this.systemsById[id]
 		if (!system) return
 

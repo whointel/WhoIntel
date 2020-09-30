@@ -122,7 +122,7 @@ export default class EVESystem {
 
 	jumps = 0
 
-	svgContainer: HTMLElement | null = null
+	svgContainer: SVGElement | null = null
 	#svgSymbol: SVGSymbolElement | undefined | null = null
 	#svgSRect: SVGRectElement | null = null
 	#systemNameLine: SVGTextElement | null = null
@@ -279,7 +279,7 @@ export default class EVESystem {
 		this.setText(String(system_jumps))
 	}
 
-	setMap(mapCoordinates: MapCoordinates, svgContainer: HTMLElement) {
+	setMap(mapCoordinates: MapCoordinates, svgContainer: SVGElement) {
 		this.mapCoordinates = mapCoordinates
 		this.svgContainer = svgContainer
 	}
