@@ -171,7 +171,7 @@ export default class RegionMap extends Vue {
 		return this.$refs.svgContainer
 	}
 
-	get svgContentContainer(): HTMLElement {
+	get svgContentContainer(): SVGElement {
 		return this.$refs.svgContentContainer
 	}
 
@@ -372,9 +372,10 @@ export default class RegionMap extends Vue {
 
 		this.svgContent = svg.html() + ""
 
+		const mapId = this.initMapData.id
 		this.$nextTick(() => {
 			systemManager.showRegion()
-			this.drawRegionId = this.initMapData.id
+			this.drawRegionId = mapId
 		})
 	}
 
