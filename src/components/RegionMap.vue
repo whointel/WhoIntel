@@ -373,6 +373,7 @@ export default class RegionMap extends Vue {
 		this.svgContent = svg.html() + ""
 
 		const mapId = this.initMapData.id
+		// map need to be rendered
 		this.$nextTick(() => {
 			systemManager.showRegion()
 			this.drawRegionId = mapId
@@ -605,6 +606,7 @@ export default class RegionMap extends Vue {
 			return
 		}
 
+		// see definition for this.canShowMarkedSystem
 		this.$nextTick(() => this.canShowMarkedSystem = true)
 
 		this.markSystem$ = of([]).pipe(

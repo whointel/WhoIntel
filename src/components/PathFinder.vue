@@ -46,7 +46,11 @@
 				:class="{'v-list-item--active': currentSystemId === pathPoint.system.id}"
 			>
 				<v-list-item-action class="mr-2 ml-0">
-					<span class="caption font-weight-black" :style="'color:'+pathPoint.system.securityColor" v-html="pathPoint.system.securityFormatted"></span>
+					<span
+						class="caption font-weight-black"
+						:style="'color:' + pathPoint.system.securityColor"
+						v-html="pathPoint.system.securityFormatted"
+					/>
 				</v-list-item-action>
 				<v-list-item-content>
 					<v-list-item-title>

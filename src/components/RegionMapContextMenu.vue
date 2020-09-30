@@ -148,8 +148,7 @@
 							</v-list-item-icon>
 							<v-list-item-content>
 								<v-list-item-title>
-									{{ $t("set_system_as_current_for_character") }}
-									"{{ activeCharacter.name }}"
+									{{ $t("set_system_as_current_for_character", {name: character.name}) }}
 								</v-list-item-title>
 							</v-list-item-content>
 						</v-list-item>
@@ -235,7 +234,6 @@
 
 <script lang="ts">
 import {Component, Vue, Prop, Watch} from "vue-property-decorator"
-import api from "@/lib/EVEApi"
 import EVESystem from "@/lib/EVESystem"
 import systemManager from "@/service/SystemManager"
 import {I_CONTEXT_MENU, IREGION} from "@/types/MAP"
@@ -481,7 +479,7 @@ export default class RegionMapContextMenu extends Vue {
 		"jumps": "jumps|jump|jumps",
 		"no_auth": "No authorization",
 		"show_system_log": "Show system log",
-		"set_system_as_current_for_character": "Set as current for",
+		"set_system_as_current_for_character": "Set as current for \"{name}\"",
 		"region": "Region",
 		"adjacent": "adjacent",
 		"character_list": "Characters"
@@ -494,7 +492,7 @@ export default class RegionMapContextMenu extends Vue {
 		"jumps": "прыжков|прыжок|прыжка|прыжков|прыжков",
 		"no_auth": "Вы не авторизованы",
 		"show_system_log": "Лог системы",
-		"set_system_as_current_for_character": "Установить текущей для",
+		"set_system_as_current_for_character": "Установить текущей для \"{name}\"",
 		"region": "Регион",
 		"adjacent": "соседний",
 		"character_list": "Персонажи"

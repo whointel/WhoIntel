@@ -4,18 +4,17 @@ import fs from "fs"
 import * as log from "electron-log"
 import * as normalizePath from "normalize-path"
 import differenceInHours from "date-fns/differenceInHours"
-import Timeout = NodeJS.Timeout
-import {Subscription, of} from "rxjs"
-import {delay, repeat, tap} from "rxjs/operators"
+import {Subscription, timer} from "rxjs"
 
 const FILES_POLLING_INTERVAL = 300
+const FILES_POLLING_CLEANING_INTERVAL = 1000 * 60 * 30 /* 30 minutes */
 
 export default class LogWatcher extends EventEmitter {
 	private dirWatcher: fs.FSWatcher | null = null
 	private files = new Set()
 	private filesWatched = new Map()
-	private readonly filesPoolingForCleaningInterval: Timeout
-	private filesPoolingSubscription$: Subscription | null = null
+	private readonly filesPoolingSubscription$: Subscription
+	private readonly filesPoolingForCleaningInterval$: Subscription
 
 	constructor(dir: string) {
 		super()
@@ -24,17 +23,11 @@ export default class LogWatcher extends EventEmitter {
 			throw new Error(`${dir} is not a dir`)
 		}
 
-		const filesPooling$ = of({}).pipe(
-			tap(_ => {
-				this.filesPooling()
-			}),
-			delay(FILES_POLLING_INTERVAL),
-			repeat()
-		)
+		this.filesPoolingSubscription$ = timer(FILES_POLLING_INTERVAL, FILES_POLLING_INTERVAL)
+			.subscribe(() => this.filesPooling())
 
-		setTimeout(_ => this.filesPoolingSubscription$ = filesPooling$.subscribe(), FILES_POLLING_INTERVAL)
-
-		this.filesPoolingForCleaningInterval = setInterval(this.filesPoolingForCleaning.bind(this), 1000 * 60 * 60)
+		this.filesPoolingForCleaningInterval$ = timer(FILES_POLLING_CLEANING_INTERVAL, FILES_POLLING_CLEANING_INTERVAL)
+			.subscribe(() => this.filesPoolingForCleaning())
 	}
 
 	private watchDir(dir: string): boolean {
@@ -144,8 +137,9 @@ export default class LogWatcher extends EventEmitter {
 	}
 
 	close() {
-		if (this.filesPoolingSubscription$) this.filesPoolingSubscription$.unsubscribe()
-		clearInterval(this.filesPoolingForCleaningInterval)
+		this.filesPoolingSubscription$.unsubscribe()
+		this.filesPoolingForCleaningInterval$.unsubscribe()
+
 		if (this.dirWatcher) {
 			this.dirWatcher.close()
 			this.dirWatcher = null
