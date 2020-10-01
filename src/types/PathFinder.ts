@@ -11,5 +11,5 @@ export interface IPATHPOINT {
 	structures: number[]
 	start: number
 	end: number
-	middle: number[]
+	middle: EVESystem[]
 }

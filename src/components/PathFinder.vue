@@ -23,6 +23,7 @@
 							item-text="name"
 							v-model="endSystem"
 							:items="allSystems"
+							:disabled="pathPoints.middle.length !== 0"
 							hide-no-data dense hide-details
 							placeholder="Куда"
 							return-object
@@ -34,6 +35,34 @@
 				</v-row>
 			</div>
 		</template>
+
+		<v-list dense v-if="pathPoints.middle.length > 0">
+			<v-subheader class="subtitle-2">
+				Путь по промежуточным системам!
+			</v-subheader>
+
+			<v-list-item
+				v-for="pathPointMiddle in pathPoints.middle" :key="pathPointMiddle.id"
+				class="px-2"
+			>
+				<v-list-item-action class="mr-2 ml-0">
+					<span
+						class="caption font-weight-black"
+						:style="'color:' + pathPointMiddle.securityColor"
+						v-html="pathPointMiddle.securityFormatted"
+					/>
+				</v-list-item-action>
+				<v-list-item-content>
+					<v-list-item-title>
+						<span>{{ pathPointMiddle.name }}</span>&nbsp;
+						<span class="grey--text">{{ pathPointMiddle.region.name }}</span>
+					</v-list-item-title>
+				</v-list-item-content>
+				<v-list-item-action class="mr-2 ml-0">
+					<v-icon @click="removeMiddle(pathPointMiddle)">mdi-close</v-icon>
+				</v-list-item-action>
+			</v-list-item>
+		</v-list>
 
 		<v-list dense>
 			<v-subheader v-if="pathPoints.path.length > 0" class="subtitle-2">
@@ -151,6 +180,10 @@ export default class PathFinder extends Vue {
 		pathService.setEnd(system.id)
 	}
 
+	async removeMiddle(system: EVESystem) {
+		pathService.removeMiddle(system.id)
+	}
+
 	setStartCurrentSystem() {
 		pathService.setStartFromCurrentSystem()
 	}
@@ -172,6 +205,7 @@ export default class PathFinder extends Vue {
 
 	clear() {
 		pathService.setStart(0)
+		pathService.clearMiddle()
 		pathService.setEnd(0)
 	}
 

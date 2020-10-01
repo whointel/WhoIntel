@@ -97,16 +97,16 @@
 							</v-list-item-content>
 						</v-list-item>
 
-						<!--						<v-list-item @click="pathFinderSetMiddle">-->
-						<!--							<v-list-item-icon>-->
-						<!--								<v-icon>mdi-arrow-left-right</v-icon>-->
-						<!--							</v-list-item-icon>-->
-						<!--							<v-list-item-content>-->
-						<!--								<v-list-item-title>-->
-						<!--									Добавить точку-->
-						<!--								</v-list-item-title>-->
-						<!--							</v-list-item-content>-->
-						<!--						</v-list-item>-->
+						<v-list-item @click="pathFinderSetMiddle">
+							<v-list-item-icon>
+								<v-icon>mdi-arrow-left-right</v-icon>
+							</v-list-item-icon>
+							<v-list-item-content>
+								<v-list-item-title>
+									Добавить точку
+								</v-list-item-title>
+							</v-list-item-content>
+						</v-list-item>
 					</v-list>
 				</v-menu>
 
@@ -309,7 +309,7 @@ export default class RegionMapContextMenu extends Vue {
 		this.closeMenu()
 		if (!this.system) return
 
-		pathService.setMiddle(this.system.id)
+		pathService.addMiddle(this.system)
 	}
 
 	pathFinderSetStartEnd() {

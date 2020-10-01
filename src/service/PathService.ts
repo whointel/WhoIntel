@@ -10,6 +10,7 @@ import find from "lodash/find"
 import $store from "@/store"
 import characterManager from "@/service/CharacterManager"
 import EVESystem from "@/lib/EVESystem"
+import uniq from "lodash/uniq"
 
 class PathService {
 	private readonly graph: Graph<null>
@@ -78,9 +79,51 @@ class PathService {
 		this.reCalc()
 	}
 
-	public setMiddle(system_id: number) {
-		// this.pathPoints.middle.push(system_id)
-		// this.recalc()
+	public clearMiddle() {
+		this.pathPoints.middle = Object.assign([])
+		this.reCalc()
+	}
+
+	public addMiddle(system: EVESystem) {
+		this.pathPoints.middle.push(system)
+		this.pathPoints.middle = uniq(this.pathPoints.middle)
+		this.reCalc()
+	}
+
+	public removeMiddle(system_id: number) {
+		const index = this.pathPoints.middle.findIndex(system => system.id === system_id)
+		if (index >= 0) {
+			this.pathPoints.middle.splice(index, 1)
+			this.reCalc()
+		}
+	}
+
+	private reCalcMiddlePath(start: EVESystem, middle: EVESystem[]): number[] {
+		if (!middle.length) return []
+
+		let pathIdsBestFromNext: number[] = []
+		let cntScoped = 10000
+
+		middle.forEach((systemNext, index) => {
+			const pathIdsToNext = this.find(start.id, systemNext.id)
+
+			const middleCopy = middle.slice()
+			middleCopy.splice(index, 1)
+			const pathIdsFromNext = this.reCalcMiddlePath(systemNext, middleCopy)
+
+			const cntLocalScoped = pathIdsToNext.length + pathIdsFromNext.length
+
+			if (cntScoped > cntLocalScoped) {
+				cntScoped = cntLocalScoped
+				pathIdsBestFromNext = pathIdsToNext
+
+				if (pathIdsFromNext.length) {
+					pathIdsBestFromNext = pathIdsBestFromNext.concat(pathIdsFromNext)
+				}
+			}
+		})
+
+		return pathIdsBestFromNext
 	}
 
 	private reCalc() {
@@ -90,15 +133,33 @@ class PathService {
 
 		if (
 			!this.pathPoints.start
-			|| !this.pathPoints.end
+			|| (
+				!this.pathPoints.end
+				&& !this.pathPoints.middle.length
+			)
 		) {
 			return
 		}
 
-		const pathIds = this.find(this.pathPoints.start, this.pathPoints.end)
+		let pathIds: number[]
+		let currentSystem = systemManager.getSystemById(this.pathPoints.start) as EVESystem
+
+		if (this.pathPoints.middle.length) {
+			const label = `PathService: path finding by middle system, ${currentSystem.nameDebug} -> ${this.pathPoints.middle.map(system => system.nameDebug)}`
+			console.time(label)
+
+			pathIds = this.reCalcMiddlePath(
+				currentSystem,
+				this.pathPoints.middle,
+			)
+			console.timeEnd(label)
+
+		} else {
+			pathIds = this.find(this.pathPoints.start, this.pathPoints.end)
+		}
+
 		if (!pathIds.length) return
 
-		let currentSystem = systemManager.getSystemById(this.pathPoints.start)
 
 		for (const id of pathIds) {
 			let next = find(currentSystem!.neighbours, {id: id})
@@ -158,7 +219,6 @@ class PathService {
 
 		return pathResult.map(node => node.id as number)
 	}
-
 }
 
 const pathService = Object.preventExtensions(new PathService())
