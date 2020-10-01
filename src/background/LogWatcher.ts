@@ -4,16 +4,17 @@ import fs from "fs"
 import * as log from "electron-log"
 import * as normalizePath from "normalize-path"
 import differenceInHours from "date-fns/differenceInHours"
-import {Subscription, timer} from "rxjs"
+import {Subscription, timer, of} from "rxjs"
+import {delay, repeat, tap} from "rxjs/operators"
 
-const FILES_POLLING_INTERVAL = 300
+const FILES_POLLING_INTERVAL = 500
 const FILES_POLLING_CLEANING_INTERVAL = 1000 * 60 * 30 /* 30 minutes */
 
 export default class LogWatcher extends EventEmitter {
 	private dirWatcher: fs.FSWatcher | null = null
 	private files = new Set()
 	private filesWatched = new Map()
-	private readonly filesPoolingSubscription$: Subscription
+	private filesPoolingSubscription$: Subscription | null = null
 	private readonly filesPoolingForCleaningInterval$: Subscription
 
 	constructor(dir: string) {
@@ -23,8 +24,17 @@ export default class LogWatcher extends EventEmitter {
 			throw new Error(`${dir} is not a dir`)
 		}
 
-		this.filesPoolingSubscription$ = timer(FILES_POLLING_INTERVAL, FILES_POLLING_INTERVAL)
-			.subscribe(() => this.filesPooling())
+		// wait until sync files read done and repeat
+		const filesPooling$ = of({}).pipe(
+			tap(_ => {
+				this.filesPooling()
+			}),
+			delay(FILES_POLLING_INTERVAL),
+			repeat(),
+		)
+
+		// wait for first subscription - delay first poll cycle
+		setTimeout(_ => this.filesPoolingSubscription$ = filesPooling$.subscribe(), FILES_POLLING_INTERVAL)
 
 		this.filesPoolingForCleaningInterval$ = timer(FILES_POLLING_CLEANING_INTERVAL, FILES_POLLING_CLEANING_INTERVAL)
 			.subscribe(() => this.filesPoolingForCleaning())
@@ -137,7 +147,7 @@ export default class LogWatcher extends EventEmitter {
 	}
 
 	close() {
-		this.filesPoolingSubscription$.unsubscribe()
+		if (this.filesPoolingSubscription$) this.filesPoolingSubscription$.unsubscribe()
 		this.filesPoolingForCleaningInterval$.unsubscribe()
 
 		if (this.dirWatcher) {
