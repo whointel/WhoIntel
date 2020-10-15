@@ -49,12 +49,17 @@ class CharacterManager {
 		}
 	}
 
+	findCharacter(name: string): Character | null {
+		return this.characters[name]
+	}
+
 	findCreateCharacter(name: string): Character {
-		let character = this.characters[name]
+		let character = this.findCharacter(name)
 		if (!character) {
 			character = Object.preventExtensions(new Character(name))
 			Vue.set(this.characters, name, character)
 		}
+
 		return character
 	}
 

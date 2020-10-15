@@ -215,6 +215,10 @@ class LogReader {
 			&& !settingsService.$.alarmSound
 		) return
 
+		// do not alert for own characters
+		const character = characterManager.findCharacter(logEntry.sender)
+		if (character) return
+
 		const systemDistance = this.getNeighbourSystemDistance(alarmSystems)
 		log.info("LogReader:alert:systemDistance:", systemDistance)
 
