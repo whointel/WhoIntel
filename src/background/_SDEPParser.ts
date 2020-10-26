@@ -15,6 +15,7 @@ async function readRegions(invUniqueNamesPath: string) {
 	let nLine = -1
 	let curId = 0
 
+	// regular regions groupID == 3
 	for await (const line of lineReader) {
 		if (
 			line !== "-   groupID: 3"
@@ -36,8 +37,12 @@ async function readRegions(invUniqueNamesPath: string) {
 		regionNames[curId] = line.substr(14, line.length - 14)
 	}
 
+	// by 26.10.2020 there is no Pochven region in SDE
+	regionNames[10000070] = "Pochven"
+
 	fileStream = fs.createReadStream(invUniqueNamesPath, "utf8")
 
+	// regular systems groupID == 5
 	lineReader = readline.createInterface({
 		input: fileStream,
 	})
@@ -203,7 +208,7 @@ export const SDEParser = async (/*base_path: string*/) => {
 
 	const SystemDBPath = path.join(base_path, "SystemDB.json")
 	fs.writeFileSync(SystemDBPath, JSON.stringify(SystemDB))
-	//
+
 	const StarGateDBPath = path.join(base_path, "StarGateDB.json")
 	fs.writeFileSync(StarGateDBPath, JSON.stringify(StarGateDB))
 

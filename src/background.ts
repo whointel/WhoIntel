@@ -19,11 +19,6 @@ import {isPlatformMacOS, isPlatformWin} from "@/background/helpers"
 
 log.transports.file.maxSize = 1024 * 1024 * 20; // 20Mb
 
-// if (process.argv[2] === "--sdeparse") {
-// 	await SDEParser(process.argv[3])
-// 	app.quit()
-// }
-
 // (async () => {
 // 	await SDEParser()
 // 	log.debug("SDEParser done")
