@@ -644,9 +644,8 @@ export default class RegionMap extends Vue {
 }
 
 #system-marker {
-	animation: fadeOutSystemMarker 10s;
+	animation: fadeOutSystemMarker 10s forwards;
 }
-
 </style>
 
 <style lang="sass">
@@ -659,18 +658,50 @@ export default class RegionMap extends Vue {
 	#legend rect
 		fill: map-get($material, 'background')
 
-	rect.alertS0
-		fill: map-get($material, 'alertS0')
+	.alertIDLE
+		rect
+			fill: map-get($material, 'background')
 
-	rect.alertS1
-		fill: map-get($material, 'alertS1')
+		text
+			fill: map-get($material, 'alertIDLE-text')
 
-	rect.alertS2
-		fill: map-get($material, 'alertS2')
+	.alertS1
+		rect
+			fill: map-get($material, 'alertS1-bg')
 
-	rect.alertS3
-		fill: map-get($material, 'alertS3')
+		text
+			fill: map-get($material, 'alertS1-text')
 
-	rect.alertS4
-		fill: map-get($material, 'background')
+	.alertS2
+		rect
+			fill: map-get($material, 'alertS2-bg')
+
+		text
+			fill: map-get($material, 'alertS2-text')
+
+	.alertS3
+		rect
+			fill: map-get($material, 'alertS3-bg')
+
+		text
+			fill: map-get($material, 'alertS3-text')
+
+	.alertS4
+		rect
+			fill: map-get($material, 'alertS4-bg')
+
+		text
+			fill: map-get($material, 'alertS4-text')
+
+	.alertClear1
+		rect
+			fill: map-get($material, 'alertClear1-bg')
+		text
+			fill: map-get($material, 'alertClear1-text')
+
+	.alertClear2
+		rect
+			fill: map-get($material, 'alertClear2-bg')
+		text
+			fill: map-get($material, 'alertClear2-text')
 </style>

@@ -57,16 +57,15 @@ class SystemManager {
 		// console.debug(this.currentRegion?.subscription)
 	}
 
-	// unSubscribeSystemLoop(system: EVESystem) {
-	// 	const region = this.regions[system.region_id]
-	// 	if (!region) return
-	//
-	// 	const index = findIndex(region.subscription, {id: system.id})
-	// 	if (index < 0) return
-	//
-	// 	region.subscription.splice(index, 1)
-	//// TODO addNeighbourRegion
-	// }
+	unSubscribeSystemLoop(system: EVESystem) {
+		const region = this.regions[system.region_id]
+		if (!region) return
+
+		const index = findIndex(region.subscription, {id: system.id})
+		if (index < 0) return
+
+		region.subscription.splice(index, 1)
+	}
 
 	async loadSDE(event: IpcRendererEvent, {SystemDB, StarGateDB, RegionDB, ShipsDB}) {
 		log.info("SystemManager: start loading systems")

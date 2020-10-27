@@ -7,8 +7,7 @@ import round from "lodash/round"
 
 interface ALARM_COLORS_INTERFACE {
 	seconds: number
-	bgClass: string
-	text: string
+	class: string
 }
 
 export interface IGET_NEIGHBOURS {
@@ -18,16 +17,19 @@ export interface IGET_NEIGHBOURS {
 	}
 }
 
-enum ALARM_COLORS_KEYS {
-	S0,
+enum ALARM_KEYS {
+	IDLE,
 	S1,
 	S2,
 	S3,
 	S4,
+	CLEAR1,
+	CLEAR2,
+	CLEAR_IDLE,
 }
 
 export enum EVESystemStatus {
-	UNKNOWN,
+	IDLE,
 	CLEAR,
 	ALARM,
 }
@@ -35,65 +37,40 @@ export enum EVESystemStatus {
 const COLOR_WHITE = "rgb(255, 255, 255)"
 const COLOR_BLACK = "rgb(0, 0, 0)"
 
-const ALARM_COLORS_LIGHT: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } = {
-	[ALARM_COLORS_KEYS.S0]: {
+const STATUS_CFG: { [key in ALARM_KEYS]: ALARM_COLORS_INTERFACE } = {
+	[ALARM_KEYS.IDLE]: {
+		seconds: 0,
+		class: "alertIDLE",
+	},
+	[ALARM_KEYS.S1]: {
 		seconds: 60 * 4,
-		bgClass: "alertS0",
-		text: COLOR_WHITE,
+		class: "alertS1",
 	},
-	[ALARM_COLORS_KEYS.S1]: {
+	[ALARM_KEYS.S2]: {
 		seconds: 60 * 10,
-		bgClass: "alertS1",
-		text: COLOR_WHITE,
+		class: "alertS2",
 	},
-	[ALARM_COLORS_KEYS.S2]: {
+	[ALARM_KEYS.S3]: {
 		seconds: 60 * 15,
-		bgClass: "alertS2",
-		text: COLOR_BLACK,
+		class: "alertS3",
 	},
-	[ALARM_COLORS_KEYS.S3]: {
+	[ALARM_KEYS.S4]: {
 		seconds: 60 * 25,
-		bgClass: "alertS3",
-		text: COLOR_BLACK,
+		class: "alertS4",
 	},
-	[ALARM_COLORS_KEYS.S4]: {
-		seconds: 60 * 60,
-		bgClass: "alertS4",
-		text: COLOR_BLACK,
+	[ALARM_KEYS.CLEAR1]: {
+		seconds: 60 * 5,
+		class: "alertClear1",
+	},
+	[ALARM_KEYS.CLEAR2]: {
+		seconds: 60 * 10,
+		class: "alertClear2",
+	},
+	[ALARM_KEYS.CLEAR_IDLE]: {
+		seconds: 60 * 15,
+		class: "alertClear2",
 	},
 }
-
-const ALARM_COLORS_DARK: { [key in ALARM_COLORS_KEYS]: ALARM_COLORS_INTERFACE } = {
-	[ALARM_COLORS_KEYS.S0]: {
-		seconds: 60 * 4,
-		bgClass: "alertS0",
-		text: COLOR_BLACK,
-	},
-	[ALARM_COLORS_KEYS.S1]: {
-		seconds: 60 * 10,
-		bgClass: "alertS1",
-		text: COLOR_BLACK,
-	},
-	[ALARM_COLORS_KEYS.S2]: {
-		seconds: 60 * 15,
-		bgClass: "alertS2",
-		text: COLOR_BLACK,
-	},
-	[ALARM_COLORS_KEYS.S3]: {
-		seconds: 60 * 25,
-		bgClass: "alertS3",
-		text: COLOR_WHITE,
-	},
-	[ALARM_COLORS_KEYS.S4]: {
-		seconds: 60 * 60,
-		bgClass: "alertS4",
-		text: COLOR_WHITE,
-	},
-}
-
-let ALARM_COLORS = settingsService.$.darkTheme ? ALARM_COLORS_DARK : ALARM_COLORS_LIGHT
-
-events.$on("setDarkTheme", darkTheme => ALARM_COLORS = darkTheme ? ALARM_COLORS_DARK : ALARM_COLORS_LIGHT)
 
 export interface MapCoordinates {
 	x: number
@@ -105,8 +82,8 @@ export interface MapCoordinates {
 }
 
 export default class EVESystem {
-	status: EVESystemStatus = EVESystemStatus.UNKNOWN
-	#alarmStatus: ALARM_COLORS_KEYS = ALARM_COLORS_KEYS.S0
+	status: EVESystemStatus = EVESystemStatus.IDLE
+	#alarmStatus: ALARM_KEYS = ALARM_KEYS.IDLE
 	id: number
 	name: string
 	region_id: number
@@ -204,10 +181,15 @@ export default class EVESystem {
 		this.isShow = true
 		this.needRefresh = true
 		this.checkSVGBindings()
-		if (this.status === EVESystemStatus.UNKNOWN) {
-			this.setAlarmColor(ALARM_COLORS[ALARM_COLORS_KEYS.S4])
-			this.setText("?")
+		if (this.status === EVESystemStatus.IDLE) {
+			this.idle()
 		}
+	}
+
+	private idle() {
+		this.status = EVESystemStatus.IDLE
+		this.setAlarmColor(STATUS_CFG[ALARM_KEYS.IDLE])
+		this.setText("?")
 	}
 
 	showKillsOverlay(max: number) {
@@ -220,12 +202,10 @@ export default class EVESystem {
 		if (settingsService.$.darkTheme) {
 			system_color = system_kills * 255 / max
 			this.setTextColor(COLOR_WHITE)
-			this.setTextSystemColor(COLOR_WHITE)
 			this.setRectColor(`rgb(${system_color},0,0)`)
 		} else {
 			const system_color = 255 - (system_kills * 255 / max)
 			this.setTextColor(system_color > 127 ? COLOR_WHITE : COLOR_BLACK)
-			this.setTextSystemColor(system_color > 127 ? COLOR_BLACK : COLOR_WHITE)
 			this.setRectColor(`rgb(255,${system_color},${system_color})`)
 		}
 
@@ -243,12 +223,11 @@ export default class EVESystem {
 			system_color = system_kills * 255 / max
 
 			this.setTextColor(system_color > 170 ? COLOR_BLACK : COLOR_WHITE)
-			this.setTextSystemColor(system_color > 170 ? COLOR_BLACK : COLOR_WHITE)
 			this.setRectColor(`rgb(0,${system_color},0)`)
 		} else {
 			system_color = 255 - (system_kills * 255 / max)
+
 			this.setTextColor(COLOR_BLACK)
-			this.setTextSystemColor(COLOR_BLACK)
 			this.setRectColor(`rgb(${system_color},255,${system_color})`)
 		}
 
@@ -266,13 +245,11 @@ export default class EVESystem {
 			system_color = system_jumps * 255 / max
 
 			this.setTextColor(system_color > 127 ? COLOR_WHITE : COLOR_WHITE)
-			this.setTextSystemColor(system_color > 127 ? COLOR_WHITE : COLOR_WHITE)
 			this.setRectColor(`rgb(0,0,${system_color})`)
 		} else {
 			system_color = 255 - (system_jumps * 255 / max)
 
 			this.setTextColor(system_color > 127 ? COLOR_BLACK : COLOR_WHITE)
-			this.setTextSystemColor(system_color > 127 ? COLOR_BLACK : COLOR_WHITE)
 			this.setRectColor(`rgb(${system_color},${system_color},255)`)
 		}
 
@@ -342,13 +319,13 @@ export default class EVESystem {
 		return systems
 	}
 
-	subscribeSystemLoop() {
+	private subscribeSystemLoop() {
 		systemManager.subscribeSystemLoop(this)
 	}
 
-	// unSubscribeSystemLoop() {
-	// 	systemManager.unSubscribeSystemLoop(this)
-	// }
+	private unSubscribeSystemLoop() {
+		systemManager.unSubscribeSystemLoop(this)
+	}
 
 	setAlarm(date: Date = new Date()): boolean {
 		if (
@@ -360,7 +337,7 @@ export default class EVESystem {
 
 		this.status = EVESystemStatus.ALARM
 		this.lastAlarmTime = date
-		this.#alarmStatus = ALARM_COLORS_KEYS.S0
+		this.#alarmStatus = ALARM_KEYS.S1
 		this.needRefresh = true
 		this.update()
 		this.subscribeSystemLoop()
@@ -370,6 +347,7 @@ export default class EVESystem {
 
 	clearStatus() {
 		this.status = EVESystemStatus.CLEAR
+		this.#alarmStatus = ALARM_KEYS.CLEAR1
 		this.lastAlarmTime = new Date()
 		this.needRefresh = true
 		this.update()
@@ -377,26 +355,23 @@ export default class EVESystem {
 	}
 
 	private setAlarmColor(alarmStatus: ALARM_COLORS_INTERFACE) {
-		this.setRectColorClass(alarmStatus.bgClass)
-		this.setTextColor(alarmStatus.text)
-		this.setTextSystemColor(alarmStatus.text)
+		if (!this.#svgSymbol) return
+
+		this.#svgSymbol.removeAttribute("class")
+		this.#svgSymbol.classList.add(alarmStatus.class)
+
+		this.setRectColor()
+		this.setTextColor()
 	}
 
-	private setRectColorClass(color_class: string) {
+	private setRectColor(color?: string) {
 		if (!this.#svgSRect) return
 
-		this.#svgSRect.removeAttribute("class")
-		this.#svgSRect.removeAttribute("style")
-		this.#svgSRect.classList.add("s")
-		this.#svgSRect.classList.add(color_class)
-	}
-
-	private setRectColor(color: string) {
-		if (!this.#svgSRect) return
-
-		this.#svgSRect.removeAttribute("class")
-		this.#svgSRect.classList.add("s")
-		this.#svgSRect.style.fill = color
+		if (color) {
+			this.#svgSRect.style.fill = color
+		} else {
+			this.#svgSRect.removeAttribute("style")
+		}
 	}
 
 	setText(text: string) {
@@ -405,16 +380,22 @@ export default class EVESystem {
 		this.#dataLine.textContent = text
 	}
 
-	setTextSystemColor(color: string) {
-		if (!this.#systemNameLine) return
+	setTextColor(color?: string) {
+		if (this.#dataLine) {
+			if (color) {
+				this.#dataLine.style.fill = color
+			} else {
+				this.#dataLine.removeAttribute("style")
+			}
+		}
 
-		this.#systemNameLine.style.fill = color
-	}
-
-	setTextColor(color: string) {
-		if (!this.#dataLine) return
-
-		this.#dataLine.style.fill = color
+		if (this.#systemNameLine) {
+			if (color) {
+				this.#systemNameLine.style.fill = color
+			} else {
+				this.#systemNameLine.removeAttribute("style")
+			}
+		}
 	}
 
 	private static formatTime(seconds: number): string {
@@ -428,54 +409,48 @@ export default class EVESystem {
 
 		if (!this.lastAlarmTime) return
 		let secondsFromAlarm = 0
-		const alarmColors = ALARM_COLORS[this.#alarmStatus]
+		const alarmColors = STATUS_CFG[this.#alarmStatus]
 
 		switch (this.status) {
 			case EVESystemStatus.ALARM:
 				secondsFromAlarm = differenceInSeconds(new Date(), this.lastAlarmTime)
 				this.setText(EVESystem.formatTime(secondsFromAlarm))
-				// this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
 
 				switch (this.#alarmStatus) {
-					case ALARM_COLORS_KEYS.S0:
+					case ALARM_KEYS.S1:
 						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
 						}
 						if (secondsFromAlarm > alarmColors.seconds) {
-							this.#alarmStatus = ALARM_COLORS_KEYS.S1
-							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
+							this.#alarmStatus = ALARM_KEYS.S2
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
 						}
 						break
-					case ALARM_COLORS_KEYS.S1:
+					case ALARM_KEYS.S2:
 						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
 						}
 						if (secondsFromAlarm > alarmColors.seconds) {
-							this.#alarmStatus = ALARM_COLORS_KEYS.S2
-							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
+							this.#alarmStatus = ALARM_KEYS.S3
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
 						}
 						break
-					case ALARM_COLORS_KEYS.S2:
+					case ALARM_KEYS.S3:
 						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
 						}
 						if (secondsFromAlarm > alarmColors.seconds) {
-							this.#alarmStatus = ALARM_COLORS_KEYS.S3
-							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
+							this.#alarmStatus = ALARM_KEYS.S4
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
 						}
 						break
-					case ALARM_COLORS_KEYS.S3:
+					case ALARM_KEYS.S4:
 						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
 						}
 						if (secondsFromAlarm > alarmColors.seconds) {
-							this.#alarmStatus = ALARM_COLORS_KEYS.S4
-							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
-						}
-						break
-					case ALARM_COLORS_KEYS.S4:
-						if (this.needRefresh) {
-							this.setAlarmColor(ALARM_COLORS[this.#alarmStatus])
+							this.idle()
+							this.unSubscribeSystemLoop()
 						}
 						break
 				}
@@ -484,16 +459,34 @@ export default class EVESystem {
 				secondsFromAlarm = differenceInSeconds(new Date(), this.lastAlarmTime)
 				this.setText("clr: " + EVESystem.formatTime(secondsFromAlarm))
 
-				// eslint-disable-next-line no-case-declarations
-				const secondsUntilWhite = 10 * 60
-				// eslint-disable-next-line no-case-declarations
-				let calcValue = Number(secondsFromAlarm / (secondsUntilWhite / 255))
-				if (calcValue > 255) calcValue = 255
-
-				if (calcValue < 300) {
-					this.setTextColor("#008100")
-					this.setTextSystemColor("#008100")
-					this.setRectColor(`rgba(${calcValue},255,${calcValue})`)
+				switch (this.#alarmStatus) {
+					case ALARM_KEYS.CLEAR1:
+						if (this.needRefresh) {
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
+						}
+						if (secondsFromAlarm > alarmColors.seconds) {
+							this.#alarmStatus = ALARM_KEYS.CLEAR2
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
+						}
+						break
+					case ALARM_KEYS.CLEAR2:
+						if (this.needRefresh) {
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
+						}
+						if (secondsFromAlarm > alarmColors.seconds) {
+							this.#alarmStatus = ALARM_KEYS.IDLE
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
+						}
+						break
+					case ALARM_KEYS.IDLE:
+						if (this.needRefresh) {
+							this.setAlarmColor(STATUS_CFG[this.#alarmStatus])
+						}
+						if (secondsFromAlarm > alarmColors.seconds) {
+							this.idle()
+							this.unSubscribeSystemLoop()
+						}
+						break
 				}
 
 				break
