@@ -191,9 +191,11 @@ export default class RegionMap extends Vue {
 		if (!this.svgContainer) return
 
 		this.setSVGScale(Number(scroll.scale))
-		this.svgContainer.scrollTo({
-			left: Number(scroll.left),
-			top: Number(scroll.top),
+		this.$nextTick(() => {
+			this.svgContainer.scrollTo({
+				left: Number(scroll.left),
+				top: Number(scroll.top),
+			})
 		})
 	}
 
@@ -696,12 +698,14 @@ export default class RegionMap extends Vue {
 	.alertClear1
 		rect
 			fill: map-get($material, 'alertClear1-bg')
+
 		text
 			fill: map-get($material, 'alertClear1-text')
 
 	.alertClear2
 		rect
 			fill: map-get($material, 'alertClear2-bg')
+
 		text
 			fill: map-get($material, 'alertClear2-text')
 </style>
