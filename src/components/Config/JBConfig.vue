@@ -102,7 +102,7 @@
 					dense
 				>
 					<template v-slot:progress>
-						<v-progress-linear :value="isLoadingCurrentPercent"/>
+						<v-progress-linear :value="loadingCurrentPercent"/>
 					</template>
 
 					<template v-slot:no-data>
@@ -238,15 +238,10 @@ export default class JBConfig extends Vue {
 	}
 
 	isLoading = false
-	isLoadingCurrentPercent = 0
+	loadingCurrentPercent = 0
 	refreshAPIStop = false
 
 	filter = ""
-
-	@Watch("isLoading")
-	isLoadingWatcher(isLoading) {
-		this.$emit(isLoading ? "lock" : "unlock")
-	}
 
 	async loadStructures(search: string) {
 		const {data: {structure: structures}} = (await characterManager.activeCharacter?.searchStructure$(search, false).toPromise()) || {data: {structure: null}}
@@ -261,7 +256,7 @@ export default class JBConfig extends Vue {
 	}
 
 	async refreshAPI() {
-		this.isLoading = true
+		this.setLoadingCurrentPercent(0)
 		this.refreshAPIStop = false
 		this.$forceUpdate()
 
@@ -283,7 +278,7 @@ export default class JBConfig extends Vue {
 			await this.loadStructures(this.findPattern)
 
 			if (this.refreshAPIStop) {
-				this.isLoading = false
+				this.setLoadingCurrentPercent(null)
 				systemManager.refreshRegionMap()
 				return
 			}
@@ -292,17 +287,30 @@ export default class JBConfig extends Vue {
 		} catch (e) {
 			log.error(e)
 		} finally {
-			this.isLoading = false
+			this.setLoadingCurrentPercent(null)
 			this.refreshAPIStop = false
 			systemManager.refreshRegionMap()
 		}
 	}
 
+	setLoadingCurrentPercent(percent: number|null) {
+		if (percent === null) {
+			this.isLoading = false
+			this.loadingCurrentPercent = 0
+			this.$store.commit("setLoaderPercent", percent)
+		} else {
+			this.isLoading = true
+			this.loadingCurrentPercent = percent
+			this.$store.commit("setLoaderPercent", percent)
+		}
+	}
+
 	async refreshStructuresAPI() {
 		this.refreshAPIStop = false
-		this.isLoadingCurrentPercent = 0
+		this.loadingCurrentPercent = 0
+		this.setLoadingCurrentPercent(0)
 		for (let i = 0; i < systemManager.jb.length; i++) {
-			this.isLoadingCurrentPercent = Math.ceil(i * 100 / systemManager.jb.length)
+			this.setLoadingCurrentPercent(Math.ceil(i * 100 / systemManager.jb.length))
 			if (this.refreshAPIStop) break
 
 			const jb = systemManager.jb[i]
@@ -324,13 +332,13 @@ export default class JBConfig extends Vue {
 			// eslint-disable-next-line no-empty
 		} catch (e) {
 		}
-		this.isLoading = false
+		this.setLoadingCurrentPercent(null)
 	}
 
 	async deleteJB(jb: EVEJumpBridge) {
 		this.isLoading = true
 		await systemManager.deleteJB(jb)
-		this.isLoading = false
+		this.setLoadingCurrentPercent(null)
 		systemManager.refreshRegionMap()
 	}
 

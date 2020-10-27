@@ -19,6 +19,7 @@ const store = new Vuex.Store({
 		showLogsPanel: true,
 		showTopPanel: true,
 		showPathPanel: false,
+		loaderPercent: null,
 	},
 
 	getters: {
@@ -34,6 +35,7 @@ const store = new Vuex.Store({
 		showLogsPanel: state => state.showLogsPanel,
 		showTopPanel: state => state.showTopPanel,
 		showPathPanel: state => state.showPathPanel,
+		loaderPercent: state => state.loaderPercent,
 	},
 
 	mutations: {
@@ -69,6 +71,9 @@ const store = new Vuex.Store({
 		},
 		setShowPathPanel: (state, showPathPanel) => {
 			state.showPathPanel = showPathPanel
+		},
+		setLoaderPercent: (state, percent) => {
+			state.loaderPercent = percent
 		},
 	},
 

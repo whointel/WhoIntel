@@ -149,7 +149,7 @@
 
 					<v-tab-item value="jb">
 						<v-card flat min-height="400px">
-							<j-b-config @lock="windowLock = true" @unlock="windowLock = false"/>
+							<j-b-config/>
 						</v-card>
 					</v-tab-item>
 
