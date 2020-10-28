@@ -57,7 +57,7 @@
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator"
 import systemManager from "@/service/SystemManager"
-import {OVERLAY_TYPE} from "@/types/MAP"
+import {OVERLAY_TYPE} from "@/types/RegionMap"
 import settingsService from "@/service/settings"
 
 const OVERLAY_TYPE_COLOR = {

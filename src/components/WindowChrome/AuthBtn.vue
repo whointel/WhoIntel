@@ -184,13 +184,13 @@ export default class AuthBtn extends Vue {
 	}
 
 	get last_login() {
-		if (!this.online?.last_login) return ''
+		if (!this.online?.last_login) return ""
 
 		return format(parseJSONDate(this.online.last_login), "uuuu.MM.dd HH:mm:ss")
 	}
 
 	get last_logout() {
-		if (!this.online?.last_logout) return ''
+		if (!this.online?.last_logout) return ""
 
 		return format(parseJSONDate(this.online.last_logout), "uuuu.MM.dd HH:mm:ss")
 	}

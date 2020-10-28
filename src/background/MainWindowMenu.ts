@@ -108,16 +108,16 @@ export default function createMenu() {
 	const win = mainWindow.getWindow()
 	if (!win) return
 
-	win.on('focus', () => {
+	win.on("focus", () => {
 		win && win.webContents.send("app-menu:focus")
 	})
-	win.on('blur', () => {
+	win.on("blur", () => {
 		win && win.webContents.send("app-menu:blur")
 	})
-	win.on('maximize', () => {
+	win.on("maximize", () => {
 		win && win.webContents.send("app-menu:maximize")
 	})
-	win.on('unmaximize', () => {
+	win.on("unmaximize", () => {
 		win && win.webContents.send("app-menu:unmaximize")
 	})
 

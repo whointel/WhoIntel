@@ -60,12 +60,11 @@
 import {Component, Vue} from "vue-property-decorator"
 import findIndex from "lodash/findIndex"
 import layoutService from "@/service/LayoutService"
-// eslint-disable-next-line no-unused-vars
 import {IWindowLayout} from "@/types/WidnowLayout"
 import LayoutWindowLayout from "@/LayoutWindowLayout.vue"
 import settingsService from "@/service/settings"
-import {ipcRenderer} from "electron";
-import events from "@/service/EventBus";
+import {ipcRenderer} from "electron"
+import events from "@/service/EventBus"
 
 @Component({
 	components: {LayoutWindowLayout}

@@ -165,7 +165,6 @@
 <script lang="ts">
 import {Component, Vue, Watch} from "vue-property-decorator"
 import PathFinderCopyBtn from "@/components/PathFinderCopyBtn.vue"
-import api from "@/lib/EVEApi"
 import EVESystem from "@/lib/EVESystem"
 import systemManager from "@/service/SystemManager"
 import {IPATHPOINT} from "@/types/PathFinder"

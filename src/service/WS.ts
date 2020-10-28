@@ -1,4 +1,4 @@
-import {Observable, Subscription, Subject} from 'rxjs'
+import {Observable, Subscription, Subject} from "rxjs"
 
 interface EventWithCodeAndReason {
 	code: number
@@ -68,7 +68,7 @@ export default function makeWebSocketObservable<T extends WebSocketPayload = Web
 		) => {
 			if (inputSubscription) {
 				setClosedStatus()
-				const error = new Error('Web socket message factory function called more than once')
+				const error = new Error("Web socket message factory function called more than once")
 				observer.error(error)
 				throw error
 			} else {

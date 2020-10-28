@@ -54,12 +54,12 @@ export default class ExtWinConfig extends Vue {
 	newURLError = true
 	headers = [
 		{
-			text: 'url',
-			align: 'start',
+			text: "url",
+			align: "start",
 			sortable: true,
-			value: 'url',
+			value: "url",
 		},
-		{text: 'actions', value: 'actions', sortable: false, align: "end"},
+		{text: "actions", value: "actions", sortable: false, align: "end"},
 	]
 
 	get settings() {
@@ -67,8 +67,8 @@ export default class ExtWinConfig extends Vue {
 	}
 
 	rules = {
-		required: value => !!value || 'Required.',
-		min: v => v.length >= 3 || 'Min 3 characters',
+		required: value => !!value || "Required.",
+		min: v => v.length >= 3 || "Min 3 characters",
 		urlLike: this.isNewURLValid,
 	}
 
@@ -76,7 +76,9 @@ export default class ExtWinConfig extends Vue {
 		if (
 			!val.startsWith("http://")
 			&& !val.startsWith("https://")
-		) return "start with http:// or https://"
+		) {
+			return "start with http:// or https://"
+		}
 
 		try {
 			new URL(val)

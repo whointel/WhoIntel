@@ -4,7 +4,6 @@ import {
 } from "vue-cli-plugin-electron-builder/lib"
 import * as path from "path"
 import {getMenu} from "@/background/MainWindowMenu"
-import * as log from "electron-log"
 import {IWindowLayout} from "@/types/WidnowLayout"
 import {isPlatformWin} from "@/background/helpers"
 

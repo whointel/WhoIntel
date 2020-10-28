@@ -53,7 +53,7 @@ class PathService {
 
 		for (const systemId in systemManager.systemsById) {
 			const system = systemManager.systemsById[systemId]
-			if(this.pathPoints.exclude.includes(system as EVESystem)) continue
+			if (this.pathPoints.exclude.includes(system as EVESystem)) continue
 
 			system.neighbours.forEach(neighbour => this.graph.addLink(system.id, neighbour.id))
 		}
@@ -63,7 +63,9 @@ class PathService {
 				!jb.systemFromId
 				|| !jb.systemToId
 				|| jb.status !== EVE_JUMP_BRIDGE_STATUS.API_FOUND
-			) continue
+			) {
+				continue
+			}
 
 			this.graph.addLink(jb.systemFromId, jb.systemToId)
 		}
@@ -184,7 +186,6 @@ class PathService {
 
 		if (!pathIds.length) return
 
-
 		for (const id of pathIds) {
 			let next = find(currentSystem!.neighbours, {id: id})
 			if (next) {
@@ -201,7 +202,9 @@ class PathService {
 			if (
 				!jb
 				|| jb.systemTo?.id !== id
-			) throw "path found error"
+			) {
+				throw "path found error"
+			}
 
 			next = jb.systemTo as EVESystem
 			if (!next) throw "path found error"

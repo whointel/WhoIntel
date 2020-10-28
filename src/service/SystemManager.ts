@@ -9,7 +9,7 @@ import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 import db, {IRegionMapExport} from "@/service/Database"
 import Vue from "vue"
 import findIndex from "lodash/findIndex"
-import {IREGION, OVERLAY_TYPE} from "@/types/MAP"
+import {REGION, OVERLAY_TYPE} from "@/types/RegionMap"
 import {API_SYSTEM_JUMPS, API_SYSTEM_KILLS} from "@/types/API"
 import settingsService from "@/service/settings"
 import {reactive} from "@vue/composition-api"
@@ -22,8 +22,8 @@ class SystemManager {
 	systemsByName: { [key: string]: EVESystem } = Object.preventExtensions({})
 	systemsById: { [key: number]: EVESystem } = Object.preventExtensions({})
 
-	regions: { [key: number]: IREGION } = Object.preventExtensions({})
-	currentRegion: IREGION | null = null
+	regions: { [key: number]: REGION } = Object.preventExtensions({})
+	currentRegion: REGION | null = null
 
 	ShipsDB: string[] = Object.preventExtensions([])
 
@@ -74,7 +74,7 @@ class SystemManager {
 			(ShipsDB as string[]).map(val => val.toLowerCase())
 		)
 
-		const regions: { [key: number]: IREGION } = {}
+		const regions: { [key: number]: REGION } = {}
 
 		Object.entries(RegionDB).map((entry) => {
 			const id = Number(entry[0])
@@ -236,7 +236,7 @@ class SystemManager {
 		return true
 	}
 
-	private async downloadMap(region: IREGION, darkTheme: boolean): Promise<IRegionMapExport> {
+	private async downloadMap(region: REGION, darkTheme: boolean): Promise<IRegionMapExport> {
 		const regionName = region.name.replaceAll(" ", "_")
 		const svg = await ipcRenderer.invoke("downloadMap", regionName + (darkTheme ? ".dark" : ""))
 		return {
@@ -246,7 +246,7 @@ class SystemManager {
 		}
 	}
 
-	async getMap(region: IREGION): Promise<IRegionMapExport> {
+	async getMap(region: REGION): Promise<IRegionMapExport> {
 		const database = await db()
 		const darkTheme = settingsService.$.darkTheme
 

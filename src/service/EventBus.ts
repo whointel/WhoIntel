@@ -13,7 +13,7 @@ class EventBus {
 		this.originalEmit = ipcRenderer.emit
 		const self = this
 
-		ipcRenderer.emit = function (channel, event, ...args)  {
+		ipcRenderer.emit = function(channel, event, ...args) {
 			self.$emit(`electron:${channel as string}`, event, ...args)
 			return self.originalEmit.apply(ipcRenderer, arguments)
 		}

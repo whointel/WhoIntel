@@ -37,7 +37,10 @@ class ZKillboard {
 				},
 			),
 			tap({
-				error: (error) => log.error("zkillboard: error", error.code ? {code: error.code, reason: error.reason} : {readyState: error.target?.readyState})
+				error: (error) => log.error("zkillboard: error", error.code ? {
+					code: error.code,
+					reason: error.reason,
+				} : {readyState: error.target?.readyState})
 			}),
 			retryBackoff({
 				initialInterval: 500,
@@ -170,7 +173,10 @@ class ZKillboard {
 
 	private static isNPC(killmail: API_KILLMAIL) {
 		const victim = killmail.victim
-		if (victim.character_id == undefined && victim.corporation_id && (victim.corporation_id > 1 && victim.corporation_id < 1999999)) {
+		if (
+			victim.character_id === undefined
+			&& victim.corporation_id && (victim.corporation_id > 1 && victim.corporation_id < 1999999)
+		) {
 			return true
 		}
 

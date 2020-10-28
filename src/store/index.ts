@@ -1,7 +1,7 @@
 import Vue from "vue"
 import Vuex from "vuex"
 import {ZKB_STATUS} from "@/types/ZKillboard"
-import {OVERLAY_TYPE} from "@/types/MAP"
+import {OVERLAY_TYPE} from "@/types/RegionMap"
 
 Vue.use(Vuex)
 
@@ -83,7 +83,7 @@ const store = new Vuex.Store({
 		},
 	},
 
-	modules: {}
+	modules: {},
 })
 
 export default store

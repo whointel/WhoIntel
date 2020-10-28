@@ -19,6 +19,7 @@ export default class ShowLDBtn extends Vue {
 	timer: any = null
 
 	colorVariant = false
+
 	get color() {
 		return colors[String(this.colorVariant)]
 	}

@@ -1,7 +1,7 @@
 import events from "@/service/EventBus"
 import systemManager from "@/service/SystemManager"
 import Vue from "vue"
-import {IREGION} from "@/types/MAP";
+import {REGION} from "@/types/RegionMap"
 
 class HistoryService {
 	constructor() {
@@ -14,7 +14,7 @@ class HistoryService {
 	public regionHistoryShift = -1
 	private regionHistoryChanging = false
 
-	private historyAdd(region: IREGION) {
+	private historyAdd(region: REGION) {
 		if (this.regionHistoryChanging) return
 		if (this.regionHistory[this.regionHistory.length - 1 - this.regionHistoryShift] === region.id) return
 

@@ -3,6 +3,7 @@ import {ipcRenderer} from "electron"
 import * as log from "electron-log"
 import Vue from "vue"
 import compositionAPI from "@/plugins/compositionAPI"
+
 const dummyConst = compositionAPI
 
 import store from "@/store"
@@ -52,8 +53,8 @@ if (!layoutService.isLayoutWindow) {
 
 	setInterval(() => {
 		// @ts-ignore
-		const memoryUsage = JSON.parse(JSON.stringify(window.performance.memory, ['totalJSHeapSize', 'usedJSHeapSize', 'jsHeapSizeLimit']))
-		if (process.env.NODE_ENV === 'production') {
+		const memoryUsage = JSON.parse(JSON.stringify(window.performance.memory, ["totalJSHeapSize", "usedJSHeapSize", "jsHeapSizeLimit"]))
+		if (process.env.NODE_ENV === "production") {
 			log.info("memory usage", memoryUsage)
 		}
 	}, 60000);
@@ -70,6 +71,6 @@ if (!layoutService.isLayoutWindow) {
 		i18n,
 		store,
 		vuetify,
-		render: h => h(LayoutWindow)
+		render: h => h(LayoutWindow),
 	}).$mount("#app")
 }

@@ -1,5 +1,5 @@
 import EVESystem from "@/lib/EVESystem"
-import { watch} from "@vue/composition-api"
+import {watch} from "@vue/composition-api"
 import {AUTH_STATUSES} from "@/types/Auth"
 import {ipcRenderer} from "electron"
 import * as log from "electron-log"

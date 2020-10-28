@@ -83,12 +83,12 @@ export default class ChannelsConfig extends Vue {
 	newLogChannel = ""
 	headers = [
 		{
-			text: 'name',
-			align: 'start',
+			text: "name",
+			align: "start",
 			sortable: true,
-			value: 'name',
+			value: "name",
 		},
-		{text: 'actions', value: 'actions', sortable: false, align: "end"},
+		{text: "actions", value: "actions", sortable: false, align: "end"},
 	]
 
 	get settings() {

@@ -110,7 +110,7 @@ import cheerio from "cheerio"
 import systemManager from "@/service/SystemManager"
 import {dragscroll} from "vue-dragscroll"
 import RegionMapContextMenu from "@/components/RegionMapContextMenu.vue"
-import {I_CONTEXT_MENU} from "@/types/MAP"
+import {CONTEXT_MENU} from "@/types/RegionMap"
 import EVESystem, {MapCoordinates} from "@/lib/EVESystem"
 import PerfectScrollbar from "perfect-scrollbar"
 import {JB_DIRECTION_DIRECTION} from "@/lib/EVEJumpBridge"
@@ -219,7 +219,7 @@ export default class RegionMap extends Vue {
 		event.preventDefault()
 	}
 
-	contextMenuOptions: I_CONTEXT_MENU = {
+	contextMenuOptions: CONTEXT_MENU = {
 		show: false,
 		x: 0,
 		y: 0,

@@ -116,7 +116,7 @@ import settingsService from "@/service/settings"
 import logReader from "@/service/LogReader"
 import {LOG_ENTRY_TYPE} from "@/types/ILogEntry"
 
-const {dialog} = require('electron').remote
+const {dialog} = require("electron").remote
 
 @Component
 export default class ConfigWindow extends Vue {
@@ -163,7 +163,7 @@ export default class ConfigWindow extends Vue {
 				title: "Choose Alarm media",
 				properties: ["openFile", "dontAddToRecent"],
 				filters: [
-					{name: "Media", extensions: ['mp3', 'wav', 'ogg']},
+					{name: "Media", extensions: ["mp3", "wav", "ogg"]},
 				]
 			})
 			if (!result.canceled) {

@@ -13,7 +13,6 @@
 
 <script lang="ts">
 import {Component, Prop, Vue} from "vue-property-decorator"
-// eslint-disable-next-line no-unused-vars
 import {ILogEntry, LOG_ENTRY_TYPE} from "@/types/ILogEntry"
 import format from "date-fns/format"
 import Autolinker from "autolinker"
@@ -84,7 +83,7 @@ export default class LogEntry extends Vue {
 			stripTrailingSlash: false,
 			decodePercentEncoding: false,
 			sanitizeHtml: true,
-			replaceFn: function (match) {
+			replaceFn: function(match) {
 				const tag = match.buildTag()
 				tag.setAttr("rel", "nofollow noreferrer")
 				tag.setAttr("data-link", match.getAnchorHref())

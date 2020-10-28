@@ -153,7 +153,7 @@ function createDB() {
 
 const dbInstance = createDB()
 
-const db = function () {
+const db = function() {
 	return dbInstance
 }
 

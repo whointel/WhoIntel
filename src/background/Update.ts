@@ -12,8 +12,7 @@ let status: UPDATE_STATUSES = UPDATE_STATUSES.UPDATE_NOT_AVAILABLE
 
 function sendStatusToWindow(status: UPDATE_STATUSES, data: any = {}) {
 	mainWindow.send("update", {
-		status: status,
-		data: data,
+		status, data,
 	})
 }
 
@@ -24,14 +23,14 @@ autoUpdater.on("checking-for-update", () => {
 
 autoUpdater.on("error", (error) => {
 	sendStatusToWindow(UPDATE_STATUSES.ERROR, {
-		error
+		error,
 	})
 	status = UPDATE_STATUSES.UPDATE_NOT_AVAILABLE
 })
 
 autoUpdater.on("update-available", (update) => {
 	sendStatusToWindow(UPDATE_STATUSES.UPDATE_AVAILABLE, {
-		version: update.version
+		version: update.version,
 	})
 	status = UPDATE_STATUSES.UPDATE_AVAILABLE
 })
@@ -41,14 +40,14 @@ autoUpdater.on("update-not-available", () => {
 	status = UPDATE_STATUSES.UPDATE_NOT_AVAILABLE
 })
 
-autoUpdater.on('update-downloaded', () => {
+autoUpdater.on("update-downloaded", () => {
 	sendStatusToWindow(UPDATE_STATUSES.UPDATE_DOWNLOADED)
 	status = UPDATE_STATUSES.UPDATE_DOWNLOADED
 })
 
 ipcMain.on("update:status", async (event, arg) => {
 	event.reply({
-		status: status
+		status: status,
 	})
 })
 
@@ -80,6 +79,7 @@ function checkUpdate() {
 }
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000
+
 export function checkUpdatePeriodical() {
 	setInterval(checkUpdate, ONE_DAY_IN_MS)
 }

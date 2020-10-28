@@ -20,7 +20,9 @@ async function readRegions(invUniqueNamesPath: string) {
 		if (
 			line !== "-   groupID: 3"
 			&& nLine === -1
-		) continue
+		) {
+			continue
+		}
 
 		if (nLine === -1) {
 			nLine = 0
@@ -53,7 +55,9 @@ async function readRegions(invUniqueNamesPath: string) {
 		if (
 			line !== "-   groupID: 5"
 			&& nLine === -1
-		) continue
+		) {
+			continue
+		}
 
 		if (nLine === -1) {
 			nLine = 0

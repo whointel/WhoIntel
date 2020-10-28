@@ -12,7 +12,7 @@
 <script lang="ts">
 import {Component, Vue, Prop} from "vue-property-decorator"
 import Timeout from "await-timeout"
-import {IPATHPOINT} from "@/types/PathFinder";
+import {IPATHPOINT} from "@/types/PathFinder"
 
 @Component
 export default class PathFinderCopyBtn extends Vue {

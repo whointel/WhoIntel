@@ -34,7 +34,9 @@
 						Программа умеет искать JB, но CPP сломали свой API поиска - он отдает не все результаты.
 						<br>
 						Параллельно с этим CPP объявили запрет на использование вариантов обхода сломанного API
-						<a @click.prevent.stop="openExternal('https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it')" href="https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it">https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it</a>
+						<a
+							@click.prevent.stop="openExternal('https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it')"
+							href="https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it">https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it</a>
 						<br>
 						<br>
 						Что можно сделать?
@@ -50,11 +52,16 @@
 						Искать через ESI API разрешено CPP?
 					</v-expansion-panel-header>
 					<v-expansion-panel-content>
-						CPP <a @click.prevent.stop="openExternal('https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it')" href="https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it">наложили жесткие ограничения</a> на API поиска,
+						CPP
+						<a
+							@click.prevent.stop="openExternal('https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it')"
+							href="https://developers.eveonline.com/blog/article/the-esi-api-is-a-shared-resource-do-not-abuse-it">наложили жесткие ограничения</a> на API поиска,
 						однако давно существуют программы, аналогичные WhoIntel, которые используют поиск для поиска Мостов.
 						<br>
 						Пример -
-						<a @click.prevent.stop="openExternal('https://forums.eveonline.com/t/smt-eve-map-tool/3845/217')" href="https://forums.eveonline.com/t/smt-eve-map-tool/3845/217">SMT</a>.
+						<a
+							@click.prevent.stop="openExternal('https://forums.eveonline.com/t/smt-eve-map-tool/3845/217')"
+							href="https://forums.eveonline.com/t/smt-eve-map-tool/3845/217">SMT</a>.
 						<br>
 						<br>
 						Заметка для CPP - данная программа никак не автоматизирует использование ESI API поиска - пользователь самостоятельно инициализирует поиск нажатием на кнопку.
@@ -174,7 +181,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue, Watch} from "vue-property-decorator"
+import {Component, Vue} from "vue-property-decorator"
 import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 import {DataTableHeader} from "vuetify"
 import systemManager from "@/service/SystemManager"
@@ -224,7 +231,7 @@ export default class JBConfig extends Vue {
 	findPattern: string = INITIAL_FIND_PATTERN
 
 	get isAuthed(): boolean {
-		return characterManager.activeCharacter?.auth.isAuthed|| false
+		return characterManager.activeCharacter?.auth.isAuthed || false
 	}
 
 	get jb() {
@@ -269,7 +276,7 @@ export default class JBConfig extends Vue {
 			// 	const alphabet = ALPHABET_PATTERN.split("")
 			// 	for (let i = 0; i < alphabet.length; i++) {
 			// 		await this.loadStructures(INITIAL_FIND_PATTERN + alphabet[i])
-			//    await Timeout.set(500)
+			// 		await Timeout.set(500)
 			// 	}
 			// } else {
 			// 	await this.loadStructures(this.findPattern)
@@ -293,7 +300,7 @@ export default class JBConfig extends Vue {
 		}
 	}
 
-	setLoadingCurrentPercent(percent: number|null) {
+	setLoadingCurrentPercent(percent: number | null) {
 		if (percent === null) {
 			this.isLoading = false
 			this.loadingCurrentPercent = 0

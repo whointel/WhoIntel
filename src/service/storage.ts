@@ -1,5 +1,5 @@
 class StorageService {
-	setObject(key: string, value: Object) {
+	setObject(key: string, value: object) {
 		this.setItem(key, JSON.stringify(value))
 	}
 
@@ -32,6 +32,6 @@ class StorageService {
 	}
 }
 
-const storageService = new StorageService
+const storageService = new StorageService()
 
 export default storageService

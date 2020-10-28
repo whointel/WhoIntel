@@ -1,16 +1,15 @@
 import differenceInSeconds from "date-fns/differenceInSeconds"
 import systemManager from "@/service/SystemManager"
-import {IREGION} from "@/types/MAP"
+import {REGION} from "@/types/RegionMap"
 import settingsService from "@/service/settings"
-import events from "@/service/EventBus"
 import round from "lodash/round"
 
-interface ALARM_COLORS_INTERFACE {
+interface ALARM_COLORS {
 	seconds: number
 	class: string
 }
 
-export interface IGET_NEIGHBOURS {
+export interface GET_NEIGHBOURS {
 	[key: number]: {
 		distance: number
 		system: EVESystem
@@ -37,7 +36,7 @@ export enum EVESystemStatus {
 const COLOR_WHITE = "rgb(255, 255, 255)"
 const COLOR_BLACK = "rgb(0, 0, 0)"
 
-const STATUS_CFG: { [key in ALARM_KEYS]: ALARM_COLORS_INTERFACE } = {
+const STATUS_CFG: { [key in ALARM_KEYS]: ALARM_COLORS } = {
 	[ALARM_KEYS.IDLE]: {
 		seconds: 0,
 		class: "alertIDLE",
@@ -82,33 +81,33 @@ export interface MapCoordinates {
 }
 
 export default class EVESystem {
-	status: EVESystemStatus = EVESystemStatus.IDLE
+	public status: EVESystemStatus = EVESystemStatus.IDLE
 	#alarmStatus: ALARM_KEYS = ALARM_KEYS.IDLE
-	id: number
-	name: string
-	region_id: number
-	security: number
-	isShow = false
-	needRefresh = false
+	public id: number
+	public name: string
+	public region_id: number
+	public security: number
+	public isShow = false
+	public needRefresh = false
 
-	kills = {
+	public kills = {
 		npc: 0,
 		pod: 0,
 		ship: 0,
 	}
 
-	jumps = 0
+	public jumps = 0
 
-	svgContainer: SVGElement | null = null
+	public svgContainer: SVGElement | null = null
 	#svgSymbol: SVGSymbolElement | undefined | null = null
 	#svgSRect: SVGRectElement | null = null
 	#systemNameLine: SVGTextElement | null = null
 	#dataLine: SVGTextElement | null = null
 
-	lastAlarmTime: Date | null = null
-	mapCoordinates: MapCoordinates | null = null
-	neighbours: EVESystem[] = []
-	neighbourRegions: number[] = []
+	public lastAlarmTime: Date | null = null
+	public mapCoordinates: MapCoordinates | null = null
+	public neighbours: EVESystem[] = []
+	public neighbourRegions: number[] = []
 
 	constructor(name: string, id: number, region_id: number, security: number) {
 		this.name = name
@@ -128,6 +127,7 @@ export default class EVESystem {
 		if (security === 0) result = "0.0"
 		if (security === -1) result = "-1.0"
 		if (security >= 0) result = `&nbsp${result}`
+
 		return result
 	}
 
@@ -167,7 +167,7 @@ export default class EVESystem {
 		}
 	}
 
-	hide() {
+	public hide() {
 		this.isShow = false
 
 		// this.mapCoordinates = null
@@ -177,7 +177,7 @@ export default class EVESystem {
 		this.#dataLine = null
 	}
 
-	show() {
+	public show() {
 		this.isShow = true
 		this.needRefresh = true
 		this.checkSVGBindings()
@@ -192,7 +192,7 @@ export default class EVESystem {
 		this.setText("?")
 	}
 
-	showKillsOverlay(max: number) {
+	public showKillsOverlay(max: number) {
 		this.isShow = false
 		const system_kills = this.kills.ship + this.kills.pod
 
@@ -204,7 +204,7 @@ export default class EVESystem {
 			this.setTextColor(COLOR_WHITE)
 			this.setRectColor(`rgb(${system_color},0,0)`)
 		} else {
-			const system_color = 255 - (system_kills * 255 / max)
+			system_color = 255 - (system_kills * 255 / max)
 			this.setTextColor(system_color > 127 ? COLOR_WHITE : COLOR_BLACK)
 			this.setRectColor(`rgb(255,${system_color},${system_color})`)
 		}
@@ -212,7 +212,7 @@ export default class EVESystem {
 		this.setText(`${this.kills.ship} / ${this.kills.pod}`)
 	}
 
-	showKillsNpcOverlay(max: number) {
+	public showKillsNpcOverlay(max: number) {
 		this.isShow = false
 		const system_kills = this.kills.npc
 
@@ -234,7 +234,7 @@ export default class EVESystem {
 		this.setText(String(system_kills))
 	}
 
-	showJumpsOverlay(max: number) {
+	public showJumpsOverlay(max: number) {
 		this.isShow = false
 		const system_jumps = this.jumps
 
@@ -256,7 +256,7 @@ export default class EVESystem {
 		this.setText(String(system_jumps))
 	}
 
-	setMap(mapCoordinates: MapCoordinates, svgContainer: SVGElement) {
+	public setMap(mapCoordinates: MapCoordinates, svgContainer: SVGElement) {
 		this.mapCoordinates = mapCoordinates
 		this.svgContainer = svgContainer
 	}
@@ -271,7 +271,7 @@ export default class EVESystem {
 		}
 	}
 
-	addNeighbour(system: EVESystem) {
+	public addNeighbour(system: EVESystem) {
 		if (this.neighbours.includes(system)) return
 
 		this.neighbours.push(system)
@@ -281,18 +281,18 @@ export default class EVESystem {
 		}
 	}
 
-	get region(): IREGION {
-		return systemManager.regions[this.region_id] as IREGION
+	get region(): REGION {
+		return systemManager.regions[this.region_id] as REGION
 	}
 
-	addNeighbourRegion(region_id: number) {
+	public addNeighbourRegion(region_id: number) {
 		if (this.neighbourRegions.includes(region_id)) return
 
 		this.neighbourRegions.push(region_id)
 	}
 
-	getNeighbours(distance = 1): IGET_NEIGHBOURS {
-		const systems: IGET_NEIGHBOURS = {
+	public getNeighbours(distance = 1): GET_NEIGHBOURS {
+		const systems: GET_NEIGHBOURS = {
 			[this.id]: {
 				distance: 0,
 				system: this,
@@ -304,15 +304,15 @@ export default class EVESystem {
 			currentDistance += 1
 			const newSystems: EVESystem[] = []
 			for (const [, obj] of Object.entries(systems)) {
-				obj.system.neighbours.forEach(neighbour => {
+				obj.system.neighbours.forEach((neighbour) => {
 					if (!systems[neighbour.id]) {
 						newSystems.push(neighbour)
 					}
 				})
 			}
-			newSystems.forEach(system => systems[system.id] = {
+			newSystems.forEach((system) => systems[system.id] = {
 				distance: currentDistance,
-				system: system,
+				system,
 			})
 		}
 
@@ -327,7 +327,7 @@ export default class EVESystem {
 		systemManager.unSubscribeSystemLoop(this)
 	}
 
-	setAlarm(date: Date = new Date()): boolean {
+	public setAlarm(date: Date = new Date()): boolean {
 		if (
 			this.lastAlarmTime
 			&& this.lastAlarmTime > date
@@ -345,7 +345,7 @@ export default class EVESystem {
 		return true
 	}
 
-	clearStatus() {
+	public clearStatus() {
 		this.status = EVESystemStatus.CLEAR
 		this.#alarmStatus = ALARM_KEYS.CLEAR1
 		this.lastAlarmTime = new Date()
@@ -354,7 +354,7 @@ export default class EVESystem {
 		this.subscribeSystemLoop()
 	}
 
-	private setAlarmColor(alarmStatus: ALARM_COLORS_INTERFACE) {
+	private setAlarmColor(alarmStatus: ALARM_COLORS) {
 		if (!this.#svgSymbol) return
 
 		this.#svgSymbol.removeAttribute("class")
@@ -374,13 +374,13 @@ export default class EVESystem {
 		}
 	}
 
-	setText(text: string) {
+	public setText(text: string) {
 		if (!this.#dataLine) return
 
 		this.#dataLine.textContent = text
 	}
 
-	setTextColor(color?: string) {
+	public setTextColor(color?: string) {
 		if (this.#dataLine) {
 			if (color) {
 				this.#dataLine.style.fill = color
@@ -404,7 +404,7 @@ export default class EVESystem {
 		return `${min}:${sec}`
 	}
 
-	update() {
+	public update() {
 		if (!this.isShow) return
 
 		if (!this.lastAlarmTime) return

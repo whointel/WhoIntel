@@ -50,7 +50,9 @@ class CharacterResolveService {
 
 	private static countChars(char: string, str: string): number {
 		let result = 0, i = 0
-		for (i; i < str.length; i++) if (str[i] === char) result++
+		for (i; i < str.length; i++) {
+			if (str[i] === char) result++
+		}
 
 		return result
 	}

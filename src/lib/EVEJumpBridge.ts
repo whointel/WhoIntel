@@ -1,10 +1,9 @@
 import EVESystem from "@/lib/EVESystem"
-import api from "@/lib/EVEApi"
 import systemManager from "@/service/SystemManager"
 import db from "@/service/Database"
 import isAfter from "date-fns/isAfter"
 import {API_STRUCTURE} from "@/types/API"
-import characterManager from "@/service/CharacterManager";
+import characterManager from "@/service/CharacterManager"
 
 const ESI_API_TYPE_JUMP_GATE_ID = 35841
 

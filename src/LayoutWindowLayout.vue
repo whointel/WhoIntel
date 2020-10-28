@@ -124,7 +124,7 @@
 					<v-switch dense v-model="layout.winAlwaysOnTop" label="Поверх других окон"/>
 					<!--label="Ignore mouse (click through)"-->
 					<v-switch dense v-model="layout.winIgnoreMouseEvents"
-					label="Игнорировать мышь (клики попадают в окно под программой)" />
+										label="Игнорировать мышь (клики попадают в окно под программой)"/>
 					<v-switch dense v-model="layout.winSkipTaskbar" label="Спрятать программу из панели задач"/>
 				</v-col>
 			</v-row>
@@ -199,7 +199,8 @@
 
 			<div v-if="!bgModeValue">
 				<v-btn small outlined @click="setCurrentPositionSize">
-					использовать текущие положение и размер окна</v-btn>
+					использовать текущие положение и размер окна
+				</v-btn>
 				<br>
 				<br>
 				<p>
@@ -219,9 +220,8 @@
 <script lang="ts">
 import {Component, Prop, Vue} from "vue-property-decorator"
 import {ipcRenderer} from "electron"
-// eslint-disable-next-line no-unused-vars
 import {IWindowLayout} from "@/types/WidnowLayout"
-import events from "@/service/EventBus";
+import events from "@/service/EventBus"
 
 @Component
 export default class LayoutWindowLayout extends Vue {

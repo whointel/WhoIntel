@@ -175,7 +175,7 @@ import zkillboard from "@/service/ZKillboard"
 import debounce from "lodash/debounce"
 import ChannelsConfig from "@/components/Config/ChannelsConfig.vue"
 import ExtWinConfig from "@/components/Config/ExtWinConfig.vue"
-import {IREGION} from "@/types/MAP"
+import {REGION} from "@/types/RegionMap"
 import AlarmConfig from "@/components/Config/AlarmConfig.vue"
 
 @Component({
@@ -211,16 +211,16 @@ export default class ConfigWindow extends Vue {
 
 	get favoriteRegions() {
 		const favoriteRegions = this.settings.favoriteRegions || []
-		return this.regions.filter((region => favoriteRegions.includes(region.id))) as IREGION[]
+		return this.regions.filter((region => favoriteRegions.includes(region.id))) as REGION[]
 	}
 
-	set favoriteRegions(val: IREGION[]) {
+	set favoriteRegions(val: REGION[]) {
 		this.settings.favoriteRegions = val.map(region => region.id)
 	}
 
 	get favoriteZKB() {
 		const favoriteZKBRegions = this.settings.favoriteZKBRegions || []
-		return this.regions.filter((region => favoriteZKBRegions.includes(region.id))) as IREGION[]
+		return this.regions.filter((region => favoriteZKBRegions.includes(region.id))) as REGION[]
 	}
 
 	openLayoutsWindow() {
@@ -230,7 +230,7 @@ export default class ConfigWindow extends Vue {
 
 	reconnectZKB = debounce(zkillboard.reconnectZK, 4000)
 
-	set favoriteZKB(val: IREGION[]) {
+	set favoriteZKB(val: REGION[]) {
 		this.settings.favoriteZKBRegions = val.map(region => region.id)
 		// TODO resubscribe not reconnect
 		this.reconnectZKB()

@@ -42,7 +42,7 @@ class LayoutsWindow {
 			frame: true,
 			title: "WhoIntel Layouts",
 			// @ts-ignore
-			icon: path.join(__static, 'icon.png'),
+			icon: path.join(__static, "icon.png"),
 			minimizable: false,
 			resizable: true,
 			maximizable: false,
@@ -56,7 +56,7 @@ class LayoutsWindow {
 
 		this.win.setMenu(null)
 
-		this.win.once('ready-to-show', () => {
+		this.win.once("ready-to-show", () => {
 			if (!this.win) return
 
 			// this.win.maximize()
@@ -64,7 +64,7 @@ class LayoutsWindow {
 			this.win.focus()
 		})
 
-		this.win.on('closed', () => {
+		this.win.on("closed", () => {
 			this.win = null
 			log.debug("LayoutsWindow: cleaning 'win'")
 		})

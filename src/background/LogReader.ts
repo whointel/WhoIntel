@@ -196,7 +196,11 @@ export default class LogListener {
 			streamCharacterSync.close()
 		}
 
-		const stream = fs.createReadStream(block.watchedFile.filepath, {start: block.start, end: block.end, encoding: "utf16le"})
+		const stream = fs.createReadStream(block.watchedFile.filepath, {
+			start: block.start,
+			end: block.end,
+			encoding: "utf16le",
+		})
 
 		stream.on("error", (error) => {
 			log.error(`LogListener: stream error: ${error}`)

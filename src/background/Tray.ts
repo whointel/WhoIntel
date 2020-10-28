@@ -86,7 +86,7 @@ export default class TrayMenu {
 			{
 				label: "Layouts",
 				type: "submenu",
-				submenu: layouts
+				submenu: layouts,
 			},
 			{type: "separator"},
 			{
@@ -94,7 +94,7 @@ export default class TrayMenu {
 				click() {
 					mainWindow.closeExit()
 				},
-			}
+			},
 		])
 	}
 

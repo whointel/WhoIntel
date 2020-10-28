@@ -6,7 +6,7 @@ function getMedia(): string {
 	return (media && media.length) ? media : "default"
 }
 
-const player = new Audio( "sound://" + btoa(getMedia()))
+const player = new Audio("sound://" + btoa(getMedia()))
 
 export const PlayAlarm = () => {
 	player.pause()
