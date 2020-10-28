@@ -89,6 +89,26 @@
 					@click="refreshAPIStop = true"
 				>Остановить поиск
 				</v-btn>
+
+				<v-menu offset-y v-if="!isLoading">
+					<template v-slot:activator="{ on, attrs }">
+						<v-btn
+							v-bind="attrs"
+							v-on="on"
+						>
+							Import & Export
+						</v-btn>
+					</template>
+					<v-list dense>
+						<v-list-item @click="importFromClipboard">
+							<v-list-item-title>Import from Clipboard</v-list-item-title>
+						</v-list-item>
+						<v-list-item @click="exportToClipboard">
+							<v-list-item-title>Copy to Clipboard</v-list-item-title>
+						</v-list-item>
+					</v-list>
+				</v-menu>
+
 				<v-spacer/>
 				<v-text-field
 					v-model="filter"
@@ -190,6 +210,7 @@ import * as log from "electron-log"
 import events from "@/service/EventBus"
 import {shell} from "electron"
 import characterManager from "@/service/CharacterManager"
+import isNumber from "lodash/isNumber"
 
 const INITIAL_FIND_PATTERN = " » "
 // const ALPHABET_PATTERN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -347,6 +368,46 @@ export default class JBConfig extends Vue {
 		await systemManager.deleteJB(jb)
 		this.setLoadingCurrentPercent(null)
 		systemManager.refreshRegionMap()
+	}
+
+	async importFromClipboard() {
+		const jbs_import = await navigator.clipboard.readText()
+		const jbs_id: number[] = jbs_import
+			.split("\n")
+			.map(line => {
+				const parts = line.split("\t")
+				return parts.length ? Number(parts[0]) : null
+			}).filter(isNumber)
+
+		if (!jbs_id.length) return
+
+		this.setLoadingCurrentPercent(0)
+		this.refreshAPIStop = false
+		this.$forceUpdate()
+
+		try {
+			for (let i = 0; i < jbs_id.length; i++) {
+				await systemManager.addJB(jbs_id[i])
+			}
+
+			if (this.refreshAPIStop) {
+				this.setLoadingCurrentPercent(null)
+				systemManager.refreshRegionMap()
+				return
+			}
+			await this.refreshStructuresAPI()
+		} catch (e) {
+			log.error(e)
+		} finally {
+			this.setLoadingCurrentPercent(null)
+			this.refreshAPIStop = false
+			systemManager.refreshRegionMap()
+		}
+	}
+
+	async exportToClipboard() {
+		const jbs_export = systemManager.jb.map((jb) => `${jb.structure_id}\t${jb.name}`).join("\n")
+		await navigator.clipboard.writeText(jbs_export)
 	}
 
 	beforeDestroy() {
