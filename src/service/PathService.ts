@@ -21,6 +21,7 @@ class PathService {
 		start: 0,
 		end: 0,
 		middle: [],
+		exclude: [],
 	})
 
 	constructor() {
@@ -41,12 +42,19 @@ class PathService {
 		log.debug("PathService:enrichGraph:", reason)
 		console.time("PathService: graph enrich")
 
-		for (const systemId in systemManager.systemsById) {
-			this.graph.addNode(systemId)
-		}
+		// for (const systemId in systemManager.systemsById) {
+		// 	const system_id = Number(systemId)
+		// 	const index = this.pathPoints.exclude.findIndex(system => system.id === system_id)
+		// 	if (index >= 0) {
+		// 		continue
+		// 	}
+		// 	this.graph.addNode(system_id)
+		// }
 
 		for (const systemId in systemManager.systemsById) {
 			const system = systemManager.systemsById[systemId]
+			if(this.pathPoints.exclude.includes(system as EVESystem)) continue
+
 			system.neighbours.forEach(neighbour => this.graph.addLink(system.id, neighbour.id))
 		}
 
@@ -90,10 +98,26 @@ class PathService {
 		this.reCalc()
 	}
 
-	public removeMiddle(system_id: number) {
+	public addExclude(system: EVESystem) {
+		this.pathPoints.exclude.push(system)
+		this.pathPoints.exclude = uniq(this.pathPoints.exclude)
+		this.enrichGraph("change:excluded")
+		this.reCalc()
+	}
+
+	public removeMiddleSystem(system_id: number) {
 		const index = this.pathPoints.middle.findIndex(system => system.id === system_id)
 		if (index >= 0) {
 			this.pathPoints.middle.splice(index, 1)
+			this.reCalc()
+		}
+	}
+
+	public removeExcludeSystem(system_id: number) {
+		const index = this.pathPoints.exclude.findIndex(system => system.id === system_id)
+		if (index >= 0) {
+			this.pathPoints.exclude.splice(index, 1)
+			this.enrichGraph("change:excluded")
 			this.reCalc()
 		}
 	}

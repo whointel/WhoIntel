@@ -64,7 +64,10 @@
 					</template>
 
 					<v-list dense>
-						<v-list-item @click="pathFinderSetStartEnd">
+						<v-list-item
+							:disabled="isPathFinderSystemExcluded"
+							@click="pathFinderSetStartEnd"
+						>
 							<v-list-item-icon>
 								<v-icon>mdi-arrow-left-right</v-icon>
 							</v-list-item-icon>
@@ -75,7 +78,10 @@
 							</v-list-item-content>
 						</v-list-item>
 
-						<v-list-item @click="pathFinderSetEnd">
+						<v-list-item
+							:disabled="isPathFinderSystemExcluded"
+							@click="pathFinderSetEnd"
+						>
 							<v-list-item-icon>
 								<v-icon>mdi-arrow-bottom-right</v-icon>
 							</v-list-item-icon>
@@ -86,7 +92,10 @@
 							</v-list-item-content>
 						</v-list-item>
 
-						<v-list-item @click="pathFinderSetStart">
+						<v-list-item
+							:disabled="isPathFinderSystemExcluded"
+							@click="pathFinderSetStart"
+						>
 							<v-list-item-icon>
 								<v-icon>mdi-arrow-top-right</v-icon>
 							</v-list-item-icon>
@@ -97,13 +106,32 @@
 							</v-list-item-content>
 						</v-list-item>
 
-						<v-list-item @click="pathFinderSetMiddle">
+						<v-list-item
+							:disabled="isPathFinderSystemMiddle || isPathFinderSystemExcluded"
+							@click="pathFinderSetMiddle"
+						>
 							<v-list-item-icon>
 								<v-icon>mdi-arrow-left-right</v-icon>
 							</v-list-item-icon>
 							<v-list-item-content>
 								<v-list-item-title>
-									Добавить точку
+									<v-icon v-if="isPathFinderSystemMiddle" color="green">mdi-check</v-icon>
+									Прйти через систему
+								</v-list-item-title>
+							</v-list-item-content>
+						</v-list-item>
+
+						<v-list-item
+							:disabled="isPathFinderSystemMiddle || isPathFinderSystemExcluded"
+							@click="pathFinderAddExclude"
+						>
+							<v-list-item-icon>
+								<v-icon>mdi-close-octagon-outline</v-icon>
+							</v-list-item-icon>
+							<v-list-item-content>
+								<v-list-item-title>
+									<v-icon v-if="isPathFinderSystemExcluded" color="green">mdi-check</v-icon>
+									Исключить систему
 								</v-list-item-title>
 							</v-list-item-content>
 						</v-list-item>
@@ -328,6 +356,25 @@ export default class RegionMapContextMenu extends Vue {
 		if (!pathService.pathPoints.start) {
 			pathService.setStartFromCurrentSystem()
 		}
+	}
+
+	pathFinderAddExclude() {
+		this.closeMenu()
+		if (!this.system) return
+
+		pathService.addExclude(this.system)
+	}
+
+	get isPathFinderSystemExcluded(): boolean {
+		if (!this.system) return false
+
+		return pathService.pathPoints.exclude.includes(this.system)
+	}
+
+	get isPathFinderSystemMiddle(): boolean {
+		if (!this.system) return false
+
+		return pathService.pathPoints.middle.includes(this.system)
 	}
 
 	setMarker(system: EVESystem) {

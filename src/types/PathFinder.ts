@@ -12,4 +12,5 @@ export interface IPATHPOINT {
 	start: number
 	end: number
 	middle: EVESystem[]
+	exclude: EVESystem[]
 }

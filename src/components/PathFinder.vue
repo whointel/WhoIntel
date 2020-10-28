@@ -36,33 +36,45 @@
 			</div>
 		</template>
 
-		<v-list dense v-if="pathPoints.middle.length > 0">
-			<v-subheader class="subtitle-2">
-				Путь по промежуточным системам!
-			</v-subheader>
 
-			<v-list-item
-				v-for="pathPointMiddle in pathPoints.middle" :key="pathPointMiddle.id"
-				class="px-2"
-			>
-				<v-list-item-action class="mr-2 ml-0">
-					<span
-						class="caption font-weight-black"
-						:style="'color:' + pathPointMiddle.securityColor"
-						v-html="pathPointMiddle.securityFormatted"
-					/>
-				</v-list-item-action>
-				<v-list-item-content>
-					<v-list-item-title>
-						<span>{{ pathPointMiddle.name }}</span>&nbsp;
-						<span class="grey--text">{{ pathPointMiddle.region.name }}</span>
-					</v-list-item-title>
-				</v-list-item-content>
-				<v-list-item-action class="mr-2 ml-0">
-					<v-icon @click="removeMiddle(pathPointMiddle)">mdi-close</v-icon>
-				</v-list-item-action>
-			</v-list-item>
-		</v-list>
+		<v-expansion-panels
+			flat
+			:value="0"
+			v-if="pathPoints.middle.length"
+		>
+			<v-expansion-panel class="v-expansion-panel-shrink">
+				<v-expansion-panel-header>
+					Промежуточные системы
+					<v-icon color="green">mdi-axis-arrow</v-icon>
+				</v-expansion-panel-header>
+				<v-expansion-panel-content>
+					<v-list dense>
+						<v-list-item
+							v-for="pathPointMiddle in pathPoints.middle" :key="pathPointMiddle.id"
+							@click.prevent="setMarker(pathPointMiddle)"
+							class="px-2"
+						>
+							<v-list-item-action class="mr-2 ml-0">
+							<span
+								class="caption font-weight-black"
+								:style="'color:' + pathPointMiddle.securityColor"
+								v-html="pathPointMiddle.securityFormatted"
+							/>
+							</v-list-item-action>
+							<v-list-item-content>
+								<v-list-item-title>
+									<span>{{ pathPointMiddle.name }}</span>&nbsp;
+									<span class="grey--text">{{ pathPointMiddle.region.name }}</span>
+								</v-list-item-title>
+							</v-list-item-content>
+							<v-list-item-action class="mr-2 ml-0">
+								<v-icon @click="removeMiddleSystem(pathPointMiddle)">mdi-close</v-icon>
+							</v-list-item-action>
+						</v-list-item>
+					</v-list>
+				</v-expansion-panel-content>
+			</v-expansion-panel>
+		</v-expansion-panels>
 
 		<v-list dense>
 			<v-subheader v-if="pathPoints.path.length > 0" class="subtitle-2">
@@ -92,6 +104,41 @@
 		</v-list>
 
 		<template v-slot:append>
+			<v-expansion-panels
+				focusable flat
+				v-if="pathPoints.exclude.length"
+			>
+				<v-expansion-panel class="v-expansion-panel-shrink">
+					<v-expansion-panel-header expand-icon="mdi-chevron-up">Исключения ({{ pathPoints.exclude.length }})</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						<v-list dense>
+							<v-list-item
+								v-for="systemExclude in pathPoints.exclude" :key="systemExclude.id"
+								@click.prevent="setMarker(systemExclude)"
+								class="px-2"
+							>
+								<v-list-item-action class="mr-2 ml-0">
+								<span
+									class="caption font-weight-black"
+									:style="'color:' + systemExclude.securityColor"
+									v-html="systemExclude.securityFormatted"
+								/>
+								</v-list-item-action>
+								<v-list-item-content>
+									<v-list-item-title>
+										<span>{{ systemExclude.name }}</span>&nbsp;
+										<span class="grey--text">{{ systemExclude.region.name }}</span>
+									</v-list-item-title>
+								</v-list-item-content>
+								<v-list-item-action class="mr-2 ml-0">
+									<v-icon @click="removeExcludeSystem(systemExclude)">mdi-close</v-icon>
+								</v-list-item-action>
+							</v-list-item>
+						</v-list>
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+			</v-expansion-panels>
+
 			<v-row class="path-finder--plate">
 				<v-col :cols="6">
 					<v-btn
@@ -180,8 +227,12 @@ export default class PathFinder extends Vue {
 		pathService.setEnd(system.id)
 	}
 
-	async removeMiddle(system: EVESystem) {
-		pathService.removeMiddle(system.id)
+	async removeMiddleSystem(system: EVESystem) {
+		pathService.removeMiddleSystem(system.id)
+	}
+
+	async removeExcludeSystem(system: EVESystem) {
+		pathService.removeExcludeSystem(system.id)
 	}
 
 	setStartCurrentSystem() {
@@ -217,10 +268,17 @@ export default class PathFinder extends Vue {
 
 <style lang="sass">
 @import "src/scss/theme"
+
+.v-expansion-panel-shrink
+	.v-expansion-panel-header
+		min-height: unset
+
+	.v-expansion-panel-content__wrap
+		padding: 0 0 0 0
+
 .path-finder--plate
 	.v-input
 		font-size: 14px
-
 
 +theme-glob(path-finder) using($material)
 	.path-finder--plate
