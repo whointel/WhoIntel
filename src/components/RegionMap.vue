@@ -200,7 +200,7 @@ export default class RegionMap extends Vue {
 	}
 
 	mounted() {
-		this.svgContainer.addEventListener("click", this.containerClicked)
+		this.svgContainer.addEventListener("click", this.markNeighbourRegionSystem)
 		this.svgContainer.addEventListener("contextmenu", this.contextMenuOpen)
 
 		this.ps = Object.preventExtensions(new PerfectScrollbar(this.svgContainer, {wheelPropagation: false}))
@@ -215,10 +215,6 @@ export default class RegionMap extends Vue {
 		})
 	}
 
-	containerClicked(event: Event) {
-		event.preventDefault()
-	}
-
 	contextMenuOptions: CONTEXT_MENU = {
 		show: false,
 		x: 0,
@@ -226,10 +222,7 @@ export default class RegionMap extends Vue {
 		system_id: 0,
 	}
 
-	contextMenuOpen(event: MouseEvent) {
-		event.preventDefault()
-		if (this.contextMenuOptions.show) this.contextMenuOptions.show = false
-
+	menuOpenerDetectSystem(event: MouseEvent): number | null {
 		const target = event.target as HTMLElement
 
 		if (
@@ -238,7 +231,7 @@ export default class RegionMap extends Vue {
 			|| target.nodeName !== "use"
 			|| !target.id
 		) {
-			return
+			return null
 		}
 
 		const match = target.id.match(/^sys(?<system_id>\d+)$/)
@@ -248,10 +241,42 @@ export default class RegionMap extends Vue {
 			|| !match.groups
 			|| !match.groups.system_id
 		) {
-			return
+			return null
 		}
 
 		const system_id = Number(match.groups.system_id)
+
+		if (!system_id) {
+			return null
+		}
+
+		return system_id
+	}
+
+	markNeighbourRegionSystem(event: MouseEvent) {
+		event.preventDefault()
+		if (this.contextMenuOptions.show) this.contextMenuOptions.show = false
+
+		const system_id = this.menuOpenerDetectSystem(event)
+
+		if (!system_id) return
+
+		const system = systemManager.getSystemById(system_id)
+
+		if (!system) {
+			return
+		}
+
+		if (system.region_id !== systemManager.currentRegion?.id) {
+			systemManager.markSystem(system, true, true)
+		}
+	}
+
+	contextMenuOpen(event: MouseEvent) {
+		event.preventDefault()
+		if (this.contextMenuOptions.show) this.contextMenuOptions.show = false
+
+		const system_id = this.menuOpenerDetectSystem(event)
 
 		if (!system_id) return
 
