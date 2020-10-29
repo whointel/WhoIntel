@@ -1,6 +1,6 @@
 {
 	"name": "whointel",
-	"version": "0.8.8-dev",
+	"version": "0.8.8",
 	"private": true,
 	"description": "WhoIntel - EVE Online secure tool",
 	"repository": "github:whointel/WhoIntel",
