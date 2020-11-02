@@ -686,51 +686,51 @@ export default class RegionMap extends Vue {
 		fill: map-get($material, 'background')
 
 	.alertIDLE
-		rect
+		a > rect
 			fill: map-get($material, 'background')
 
-		text
+		a > text
 			fill: map-get($material, 'alertIDLE-text')
 
 	.alertS1
-		rect
+		a > rect
 			fill: map-get($material, 'alertS1-bg')
 
-		text
+		a > text
 			fill: map-get($material, 'alertS1-text')
 
 	.alertS2
-		rect
+		a > rect
 			fill: map-get($material, 'alertS2-bg')
 
-		text
+		a > text
 			fill: map-get($material, 'alertS2-text')
 
 	.alertS3
-		rect
+		a > rect
 			fill: map-get($material, 'alertS3-bg')
 
-		text
+		a > text
 			fill: map-get($material, 'alertS3-text')
 
 	.alertS4
-		rect
+		a > rect
 			fill: map-get($material, 'alertS4-bg')
 
-		text
+		a > text
 			fill: map-get($material, 'alertS4-text')
 
 	.alertClear1
-		rect
+		a > rect
 			fill: map-get($material, 'alertClear1-bg')
 
-		text
+		a > text
 			fill: map-get($material, 'alertClear1-text')
 
 	.alertClear2
-		rect
+		a > rect
 			fill: map-get($material, 'alertClear2-bg')
 
-		text
+		a > text
 			fill: map-get($material, 'alertClear2-text')
 </style>
