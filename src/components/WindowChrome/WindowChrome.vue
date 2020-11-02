@@ -47,11 +47,14 @@
 					>mdi-information-variant
 					</v-icon>
 				</template>
+				<span>{{ $t("logs_count") }}: {{ logEntryCount }}</span>
+				<map-t-s/>
+				<br>
+				<br>
 				{{ $t("memory_usage") }}:<br>
 				<span>{{ usedJSHeapSize }}/{{ totalJSHeapSize }} Mb front</span>
 				<br>
 				<span>{{ heapTotal }}/{{ heapUsed }}/{{ externalMem }} Mb back</span>
-				<map-t-s/>
 			</v-tooltip>
 
 			<stats-server class="ml-4 mt-1 d-none d-md-flex"/>
@@ -121,6 +124,7 @@ import FleetBtn from "@/components/WindowChrome/FleetBtn.vue"
 import ShowLDBtn from "@/components/WindowChrome/ShowLDBtn.vue"
 import settingsService from "@/service/settings"
 import PathFinderBtn from "@/components/WindowChrome/PathFinderBtn.vue";
+import logReader from "@/service/LogReader";
 
 @Component({
 	components: {PathFinderBtn, ShowLDBtn, FleetBtn, OverlayBtn, TestBtn, HistoryBtn, ExtWinBtn, MapTS, Search, ZKBBtn, StatsServer, NoLogChannelsAlarm, AuthBtn, RegionsMenu, JBBtn}
@@ -138,6 +142,10 @@ export default class WindowChrome extends Vue {
 
 	get showTopPanel(): boolean {
 		return this.$store.getters.showTopPanel
+	}
+
+	get logEntryCount(): number {
+		return logReader.logs.length
 	}
 
 	updateMemoryUsage() {
@@ -283,10 +291,12 @@ export default class WindowChrome extends Vue {
 <i18n>
 {
 	"en": {
-		"memory_usage": "memory usage"
+		"memory_usage": "memory usage",
+		"logs_count": "logs count"
 	},
 	"ru": {
-		"memory_usage": "используется памяти"
+		"memory_usage": "используется памяти",
+		"logs_count": "объем логов"
 	}
 }
 </i18n>
