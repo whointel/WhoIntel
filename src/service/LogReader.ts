@@ -187,7 +187,7 @@ class LogReader {
 			return
 		}
 
-		this.alert(logEntry, true, logEntry.systems)
+		this.alert(logEntry, true, logEntry.systems.filter((system: EVESystem) => system.setAlarm(logEntry.ts)))
 	}
 
 	private getNeighbourSystemDistance(alarmSystems: EVESystem[]): string[] {
