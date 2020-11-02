@@ -375,7 +375,7 @@ export default class JBConfig extends Vue {
 		const jbs_id: number[] = jbs_import
 			.split("\n")
 			.map(line => {
-				const parts = line.split("\t")
+				const parts = line.split(" ")
 				return parts.length ? Number(parts[0]) : null
 			}).filter(isNumber)
 
@@ -406,7 +406,7 @@ export default class JBConfig extends Vue {
 	}
 
 	async exportToClipboard() {
-		const jbs_export = systemManager.jb.map((jb) => `${jb.structure_id}\t${jb.name}`).join("\n")
+		const jbs_export = systemManager.jb.map((jb) => `${jb.structure_id}  ${jb.name}`).join("\n")
 		await navigator.clipboard.writeText(jbs_export)
 	}
 
