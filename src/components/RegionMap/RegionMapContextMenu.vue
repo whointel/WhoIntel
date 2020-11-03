@@ -254,6 +254,18 @@
 					</v-list-item-title>
 				</v-list-item-content>
 			</v-list-item>
+
+			<v-divider v-if="isDevServer && system"/>
+
+			<v-list-item v-if="isDevServer && system">
+				<v-list-item-content>
+					<v-list-item-title>
+						{{ system.nameDebug }}
+						<br>
+						{{ system.region.nameDebug }}
+					</v-list-item-title>
+				</v-list-item-content>
+			</v-list-item>
 		</v-list>
 	</v-menu>
 </template>
@@ -288,6 +300,7 @@ export default class RegionMapContextMenu extends Vue {
 		this.show = show
 	}
 
+	isDevServer = process.env.NODE_ENV !== "production"
 
 	get currentRegion() {
 		return systemManager.currentRegion
@@ -418,7 +431,7 @@ export default class RegionMapContextMenu extends Vue {
 
 		return this.jb.systemTo!.region_id === systemManager.currentRegion?.id
 			? null
-			: systemManager.regions[this.jb.systemTo!.region_id]  as EVERegion
+			: systemManager.regions[this.jb.systemTo!.region_id] as EVERegion
 	}
 
 	get isAuthed(): boolean {
