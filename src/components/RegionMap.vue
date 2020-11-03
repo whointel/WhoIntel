@@ -268,7 +268,7 @@ export default class RegionMap extends Vue {
 		}
 
 		if (system.region_id !== systemManager.currentRegion?.id) {
-			systemManager.markSystem(system, true, true)
+			systemManager.markSystem(system, true)
 		}
 	}
 
@@ -591,8 +591,8 @@ export default class RegionMap extends Vue {
 
 	markSystem$: Subscription = new Subscription()
 
-	get markedSystem() {
-		return systemManager.markedSystem
+	get markedSystem(): EVESystem | null {
+		return systemManager.markedSystem as EVESystem
 	}
 
 	// fix for re-mark same system - css animation doesn't see change
@@ -638,7 +638,7 @@ export default class RegionMap extends Vue {
 
 		this.markSystem$ = of([]).pipe(
 			delay(10_000 /* same value as fadeOutSystemMarker animation css*/),
-		).subscribe({complete: () => systemManager.unMarkSystem()})
+		).subscribe({complete: () => systemManager.unMarkSystem("markSystem delay")})
 	}
 }
 </script>

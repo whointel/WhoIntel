@@ -250,7 +250,7 @@ export default class PathFinder extends Vue {
 	}
 
 	setMarker(system: EVESystem) {
-		systemManager.markSystem(system, true)
+		systemManager.markSystem(system)
 	}
 
 	clear() {

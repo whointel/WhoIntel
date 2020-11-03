@@ -1,5 +1,5 @@
 import EVESystem, {MapCoordinates} from "@/lib/EVESystem"
-import events from "@/service/EventBus"
+import events, {EventBusEvents} from "@/service/EventBus"
 import {ipcRenderer, IpcRendererEvent} from "electron"
 import store from "@/store"
 import * as log from "electron-log"
@@ -9,21 +9,18 @@ import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
 import db, {IRegionMapExport} from "@/service/Database"
 import Vue from "vue"
 import findIndex from "lodash/findIndex"
-import {REGION, OVERLAY_TYPE} from "@/types/RegionMap"
+import {OVERLAY_TYPE} from "@/types/RegionMap"
 import {API_SYSTEM_JUMPS, API_SYSTEM_KILLS} from "@/types/API"
 import settingsService from "@/service/settings"
 import {reactive} from "@vue/composition-api"
-
-const SPECIAL_REGIONS = {
-	NEW_EDEN: -1,
-}
+import EVERegion, {SPECIAL_REGIONS} from "@/lib/EVERegion"
 
 class SystemManager {
 	systemsByName: { [key: string]: EVESystem } = Object.preventExtensions({})
 	systemsById: { [key: number]: EVESystem } = Object.preventExtensions({})
 
-	regions: { [key: number]: REGION } = Object.preventExtensions({})
-	currentRegion: REGION | null = null
+	regions: { [key: number]: EVERegion } = Object.preventExtensions({})
+	currentRegion: EVERegion | null = null
 
 	ShipsDB: string[] = Object.preventExtensions([])
 
@@ -37,16 +34,16 @@ class SystemManager {
 		events.$on("setDarkTheme", () => this.refreshRegionMap())
 	}
 
-	init() {
+	public init() {
 		ipcRenderer.send("getSDE")
 		setInterval(this.eventLoop.bind(this), 1000)
 	}
 
-	eventLoop() {
+	private eventLoop() {
 		this.currentRegion?.subscription.forEach(system => system.update())
 	}
 
-	subscribeSystemLoop(system: EVESystem) {
+	public subscribeSystemLoop(system: EVESystem) {
 		const regions = [system.region_id, ...system.neighbourRegions]
 		regions.forEach(region_id => {
 			const region = this.regions[region_id]
@@ -57,7 +54,7 @@ class SystemManager {
 		// console.debug(this.currentRegion?.subscription)
 	}
 
-	unSubscribeSystemLoop(system: EVESystem) {
+	public unSubscribeSystemLoop(system: EVESystem) {
 		const region = this.regions[system.region_id]
 		if (!region) return
 
@@ -67,24 +64,21 @@ class SystemManager {
 		region.subscription.splice(index, 1)
 	}
 
-	async loadSDE(event: IpcRendererEvent, {SystemDB, StarGateDB, RegionDB, ShipsDB}) {
+	private async loadSDE(event: IpcRendererEvent, {SystemDB, StarGateDB, RegionDB, ShipsDB}) {
 		log.info("SystemManager: start loading systems")
 
 		this.ShipsDB = Object.preventExtensions(
-			(ShipsDB as string[]).map(val => val.toLowerCase())
+			(ShipsDB as string[]).map(val => val.toLowerCase()),
 		)
 
-		const regions: { [key: number]: REGION } = {}
+		const regions: { [key: number]: EVERegion } = {}
 
 		Object.entries(RegionDB).map((entry) => {
 			const id = Number(entry[0])
-			regions[id] = Object.preventExtensions({
-				id: id,
-				name: entry[1] as string,
-				systems: [],
-				subscription: [],
-				neighbourSystems: [],
-			})
+			regions[id] = Object.preventExtensions(new EVERegion(
+				id,
+				entry[1] as string,
+			))
 		})
 
 		sortBy(regions, "name")
@@ -95,7 +89,7 @@ class SystemManager {
 		SystemDB.forEach((systemData => {
 			this.addSystem(
 				systemData.name, systemData.id, systemData.regionId, systemData.security,
-				systemsByName, systemsById
+				systemsByName, systemsById,
 			)
 		}))
 		this.systemsByName = Object.preventExtensions(systemsByName)
@@ -124,10 +118,10 @@ class SystemManager {
 
 		log.info("SystemManager: finish loading systems")
 		store.commit("setAppReady")
-		events.$emit("systemManager:ready")
+		events.$emit(EventBusEvents["systemManager:ready"])
 	}
 
-	async refreshRegionMap() {
+	public async refreshRegionMap() {
 		if (this.currentRegion) {
 			await this.setCurrentRegion(this.currentRegion.id)
 		}
@@ -141,12 +135,12 @@ class SystemManager {
 				await this.updateJB(jb, jbs[i])
 			}
 			log.debug("jb loaded", jbs.length, this.jb.length)
-			events.$emit("JB:ready")
+			events.$emit(EventBusEvents["JB:ready"])
 			// Vue.nextTick(() => this.refreshRegionMap())
 		}
 	}
 
-	updateJB(jb: EVEJumpBridge, value: any = null) {
+	public updateJB(jb: EVEJumpBridge, value: any = null) {
 		const systemFromId = this.#jbIDtoSystemID[jb.structure_id]
 		if (systemFromId) {
 			delete this.#jbIDtoSystemID[jb.structure_id]
@@ -162,7 +156,7 @@ class SystemManager {
 		}
 	}
 
-	async deleteJB(jb: EVEJumpBridge) {
+	public async deleteJB(jb: EVEJumpBridge) {
 		await jb.delete()
 		const systemFromId = this.#jbIDtoSystemID[jb.structure_id]
 		if (systemFromId) {
@@ -176,7 +170,7 @@ class SystemManager {
 		}
 	}
 
-	async addJB(structure_id: number): Promise<EVEJumpBridge> {
+	public async addJB(structure_id: number): Promise<EVEJumpBridge> {
 		const findJB = this.jbByStructure[structure_id]
 		if (findJB) return findJB
 
@@ -191,85 +185,50 @@ class SystemManager {
 		return jb
 	}
 
-	async loadNewEdenRegion() {
+	public async loadNewEdenRegion() {
 		store.commit("setLoading", true)
 
-		const record = await this.getMap(Object.preventExtensions({
-			id: SPECIAL_REGIONS.NEW_EDEN,
-			name: "New Eden",
-			systems: [],
-			subscription: [],
-			neighbourSystems: [],
-		}))
+		const record = await new EVERegion(
+			SPECIAL_REGIONS.NEW_EDEN,
+			"New Eden",
+		).getMap()
 
-		events.$emit("showRegionMapNewEden", record)
+		events.$emit(EventBusEvents.showRegionMapNewEden, record)
 
 		store.commit("setLoading", false)
 	}
 
-	async setCurrentRegion(region_id: number): Promise<boolean> {
+	public async setCurrentRegion(region_id: number): Promise<boolean> {
 		const region = this.regions[region_id]
 		if (!region) return false
 
-		this.unMarkSystem()
+		this.unMarkSystem(`setCurrentRegion: ${region_id} ${region.name}`)
 
 		store.commit("setLoading", true)
 
-		const loadMapPromise = this.getMap(region)
+		const loadMapPromise = region.getMap()
 
 		this.currentRegion?.systems.forEach(system => system.hide())
 
 		const record = await loadMapPromise
 
 		this.currentRegion = region
-		this.storeRegion()
+		region.storeAsCurrent()
 
 		// @see systemSetMap()
 		// this.currentRegion.systems.forEach(system => system.show())
 
-		events.$emit("setRegionMap", record)
-		events.$emit("updateCurrentRegion", this.currentRegion)
-		events.$emit("hideRegionMapNewEden")
+		events.$emit(EventBusEvents.setRegionMap, record)
+		events.$emit(EventBusEvents.updateCurrentRegion, this.currentRegion)
+		events.$emit(EventBusEvents.hideRegionMapNewEden)
 
 		store.commit("setLoading", false)
 
 		return true
 	}
 
-	private async downloadMap(region: REGION, darkTheme: boolean): Promise<IRegionMapExport> {
-		const regionName = region.name.replaceAll(" ", "_")
-		const svg = await ipcRenderer.invoke("downloadMap", regionName + (darkTheme ? ".dark" : ""))
-		return {
-			id: region.id,
-			svg: svg,
-			ts: new Date(),
-		}
-	}
-
-	async getMap(region: REGION): Promise<IRegionMapExport> {
-		const database = await db()
-		const darkTheme = settingsService.$.darkTheme
-
-		let record = await database.get(darkTheme ? "regionMapDark" : "regionMap", region.id)
-		if (record) {
-			if (Number(new Date()) - Number(record.ts) > (6 * 60 * 60 * 1000)) {
-				record = await this.downloadMap(region, darkTheme)
-				await database.put(darkTheme ? "regionMapDark" : "regionMap", record)
-			}
-		} else {
-			record = await this.downloadMap(region, darkTheme)
-			await database.put(darkTheme ? "regionMapDark" : "regionMap", record)
-		}
-
-		return record
-	}
-
-	private storeRegion() {
-		localStorage.setItem("region", this.currentRegion?.id as unknown as string)
-	}
-
 	private async unStoreRegion() {
-		const id = Number(localStorage.getItem("region")) || 0
+		const id = EVERegion.getStoredRegionId()
 		let isSet = false
 		if (id) {
 			isSet = await this.setCurrentRegion(id)
@@ -283,7 +242,7 @@ class SystemManager {
 		}
 	}
 
-	setSystemKills(record: API_SYSTEM_KILLS) {
+	public setSystemKills(record: API_SYSTEM_KILLS) {
 		const system = this.systemsById[record.system_id]
 		if (!system) return
 
@@ -292,7 +251,7 @@ class SystemManager {
 		system.kills.ship = record.ship_kills
 	}
 
-	setSystemJumps(record: API_SYSTEM_JUMPS) {
+	public setSystemJumps(record: API_SYSTEM_JUMPS) {
 		const system = this.systemsById[record.system_id]
 		if (!system) return
 
@@ -301,12 +260,14 @@ class SystemManager {
 
 	markedSystem: EVESystem | null = null
 
-	unMarkSystem() {
+	unMarkSystem(cause?: string) {
+		// tslint:disable-next-line:no-console
+		console.debug("systemManager:unMarkSystem:", cause)
 		this.markedSystem = null
 	}
 
-	async markSystem(system: EVESystem, change_region: boolean = false, force_change_region = false) {
-		this.unMarkSystem()
+	public async markSystem(system: EVESystem, force_change_region = false) {
+		this.unMarkSystem(`markSystem:init: ${system.nameDebug}`)
 
 		if (
 			system.region_id !== this.currentRegion?.id
@@ -316,24 +277,21 @@ class SystemManager {
 				|| !system.neighbourRegions.includes(this.currentRegion?.id || 0)
 			)
 		) {
-			if (!change_region) {
-				return
-			}
 
-			await this.setCurrentRegion(system!.region_id)
+			await this.setCurrentRegion(system.region_id)
 		}
 
 		this.markedSystem = system
 	}
 
-	systemSetMap(id: number, mapCoordinates: MapCoordinates, svgContainer: SVGElement) {
+	public systemSetMap(id: number, mapCoordinates: MapCoordinates, svgContainer: SVGElement) {
 		const system = this.systemsById[id]
 		if (!system) return
 
 		system.setMap(mapCoordinates, svgContainer)
 	}
 
-	showRegion(overlay: OVERLAY_TYPE = OVERLAY_TYPE.ALERT) {
+	public showRegion(overlay: OVERLAY_TYPE = OVERLAY_TYPE.ALERT) {
 		if (!this.currentRegion) return
 
 		store.commit("setOverlay", overlay)
@@ -408,9 +366,9 @@ class SystemManager {
 		}
 	}
 
-	addSystem(
+	private addSystem(
 		name: string, id: number, region_id: number, security: number,
-		systemsByName, systemsById
+		systemsByName, systemsById,
 	) {
 		if (systemsById[id]) return
 
@@ -420,21 +378,11 @@ class SystemManager {
 		this.regions[region_id].systems.push(system)
 	}
 
-	setNeighbours(id1: number, id2: number) {
-		const startSystem = this.systemsById[id1]
-		const stopSystem = this.systemsById[id2]
-
-		if (!startSystem || !stopSystem) return
-
-		startSystem.addNeighbour(stopSystem)
-		stopSystem.addNeighbour(startSystem)
-	}
-
-	getSystemById(id: number): EVESystem | null {
+	public getSystemById(id: number): EVESystem | null {
 		return this.systemsById[id] || null
 	}
 
-	getSystemByName(name: string): EVESystem | null {
+	public getSystemByName(name: string): EVESystem | null {
 		return this.systemsByName[name] || null
 	}
 }

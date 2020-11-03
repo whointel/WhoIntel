@@ -1,8 +1,8 @@
 import differenceInSeconds from "date-fns/differenceInSeconds"
 import systemManager from "@/service/SystemManager"
-import {REGION} from "@/types/RegionMap"
 import settingsService from "@/service/settings"
 import round from "lodash/round"
+import EVERegion from "@/lib/EVERegion";
 
 interface ALARM_COLORS {
 	seconds: number
@@ -281,8 +281,8 @@ export default class EVESystem {
 		}
 	}
 
-	get region(): REGION {
-		return systemManager.regions[this.region_id] as REGION
+	get region(): EVERegion {
+		return systemManager.regions[this.region_id] as EVERegion
 	}
 
 	public addNeighbourRegion(region_id: number) {

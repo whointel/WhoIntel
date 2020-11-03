@@ -289,7 +289,7 @@ export default class AuthBtn extends Vue {
 	setLocationToCurrent() {
 		if (!this.location?.system) return
 
-		systemManager.markSystem(this.location.system, true)
+		systemManager.markSystem(this.location.system)
 	}
 
 	beforeDestroy() {

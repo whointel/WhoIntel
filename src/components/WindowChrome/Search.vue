@@ -58,7 +58,7 @@ import debounce from "lodash/debounce"
 import trim from "lodash/trim"
 import systemManager from "@/service/SystemManager"
 import EVESystem from "@/lib/EVESystem"
-import {REGION} from "@/types/RegionMap"
+import EVERegion from "@/lib/EVERegion"
 
 enum SEARCH_RESULT_TYPE {
 	SYSTEM,
@@ -67,7 +67,7 @@ enum SEARCH_RESULT_TYPE {
 
 interface ISearchResult {
 	type: SEARCH_RESULT_TYPE
-	entity: EVESystem | REGION
+	entity: EVESystem | EVERegion
 	title: string,
 }
 
@@ -104,7 +104,7 @@ export default class Search extends Vue {
 		}
 
 		if (item.type === SEARCH_RESULT_TYPE.SYSTEM) {
-			systemManager.markSystem(item.entity as EVESystem, true)
+			systemManager.markSystem(item.entity as EVESystem)
 		}
 
 		this.close()
@@ -127,7 +127,7 @@ export default class Search extends Vue {
 				if (id.includes(val)) {
 					this.items.push({
 						type: SEARCH_RESULT_TYPE.REGION,
-						entity: region as REGION,
+						entity: region as EVERegion,
 						title: region.name,
 					})
 				}
@@ -137,7 +137,7 @@ export default class Search extends Vue {
 			if (region.name.toUpperCase().includes(val)) {
 				this.items.push({
 					type: SEARCH_RESULT_TYPE.REGION,
-					entity: region as REGION,
+					entity: region as EVERegion,
 					title: region.name,
 				})
 			}

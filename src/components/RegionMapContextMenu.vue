@@ -262,13 +262,14 @@
 import {Component, Vue, Prop, Watch} from "vue-property-decorator"
 import EVESystem from "@/lib/EVESystem"
 import systemManager from "@/service/SystemManager"
-import {CONTEXT_MENU, REGION} from "@/types/RegionMap"
+import {CONTEXT_MENU} from "@/types/RegionMap"
 import events from "@/service/EventBus"
 import EVEJumpBridge from "@/lib/EVEJumpBridge"
 import {ipcRenderer} from "electron"
 import characterManager from "@/service/CharacterManager"
 import pathService from "@/service/PathService"
 import Character from "@/lib/Character"
+import EVERegion from "@/lib/EVERegion"
 
 @Component
 export default class RegionMapContextMenu extends Vue {
@@ -379,27 +380,25 @@ export default class RegionMapContextMenu extends Vue {
 		systemManager.markSystem(system)
 	}
 
-	get neighbourRegion(): REGION | null {
+	get neighbourRegion(): EVERegion | null {
 		if (!this.system) return null
 		if (this.system.region_id === systemManager.currentRegion?.id) return null
 
-		return systemManager.regions[this.system.region_id] as REGION
+		return systemManager.regions[this.system.region_id] as EVERegion
 	}
 
 	goToNeighbourRegion() {
 		this.closeMenu()
 		if (!this.system || !this.neighbourRegion) return
 
-		// systemManager.setCurrentRegion(this.neighbourRegion.id)
-		systemManager.markSystem(this.system, true, true)
+		systemManager.markSystem(this.system, true)
 	}
 
 	goToJBNeighbourRegion() {
 		this.closeMenu()
 		if (!this.jbToNeighbourRegion) return
 
-		// systemManager.setCurrentRegion(this.jbToNeighbourRegion.id)
-		systemManager.markSystem(this.jb!.systemTo!, true, true)
+		systemManager.markSystem(this.jb!.systemTo!, true)
 	}
 
 	get jb(): EVEJumpBridge | null {
@@ -410,12 +409,12 @@ export default class RegionMapContextMenu extends Vue {
 		return jb?.systemToId ? jb as EVEJumpBridge : null
 	}
 
-	get jbToNeighbourRegion(): REGION | null {
+	get jbToNeighbourRegion(): EVERegion | null {
 		if (!this.jb) return null
 
 		return this.jb.systemTo!.region_id === systemManager.currentRegion?.id
 			? null
-			: systemManager.regions[this.jb.systemTo!.region_id] as REGION
+			: systemManager.regions[this.jb.systemTo!.region_id]  as EVERegion
 	}
 
 	get isAuthed(): boolean {

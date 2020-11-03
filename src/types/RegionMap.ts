@@ -1,5 +1,3 @@
-import EVESystem from "@/lib/EVESystem"
-
 export enum OVERLAY_TYPE {
 	ALERT = "ALERT",
 	JUMPS = "JUMPS",
@@ -12,15 +10,4 @@ export interface CONTEXT_MENU {
 	x: number
 	y: number
 	system_id: number
-}
-
-export interface REGION {
-	id: number
-	name: string
-	systems: EVESystem[]
-	subscription: EVESystem[]
-	neighbourSystems: EVESystem[]
-	isSpecial?: {
-		newEden?: boolean
-	}
 }

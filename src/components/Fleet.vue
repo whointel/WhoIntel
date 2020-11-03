@@ -65,7 +65,7 @@ export default class Fleet extends Vue {
 	}
 
 	markSystem(member: FLEET_MEMBER) {
-		systemManager.markSystem(member.system, true)
+		systemManager.markSystem(member.system)
 	}
 
 	async refreshFleet() {

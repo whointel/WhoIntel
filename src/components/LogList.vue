@@ -74,7 +74,7 @@ export default class LogList extends Vue {
 			const system_id = Number(target.attributes["data-id"].value)
 			const system = systemManager.getSystemById(system_id)
 			if (system) {
-				systemManager.markSystem(system, true)
+				systemManager.markSystem(system)
 				event.preventDefault()
 				return
 			}

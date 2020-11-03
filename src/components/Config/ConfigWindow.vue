@@ -175,8 +175,8 @@ import zkillboard from "@/service/ZKillboard"
 import debounce from "lodash/debounce"
 import ChannelsConfig from "@/components/Config/ChannelsConfig.vue"
 import ExtWinConfig from "@/components/Config/ExtWinConfig.vue"
-import {REGION} from "@/types/RegionMap"
 import AlarmConfig from "@/components/Config/AlarmConfig.vue"
+import EVERegion from "@/lib/EVERegion"
 
 @Component({
 	components: {AlarmConfig, ExtWinConfig, ChannelsConfig, JBConfig}
@@ -209,18 +209,18 @@ export default class ConfigWindow extends Vue {
 		ipcRenderer.send("openLogFolderGame")
 	}
 
-	get favoriteRegions() {
+	get favoriteRegions(): EVERegion[] {
 		const favoriteRegions = this.settings.favoriteRegions || []
-		return this.regions.filter((region => favoriteRegions.includes(region.id))) as REGION[]
+		return this.regions.filter((region => favoriteRegions.includes(region.id))) as EVERegion[]
 	}
 
-	set favoriteRegions(val: REGION[]) {
+	set favoriteRegions(val: EVERegion[]) {
 		this.settings.favoriteRegions = val.map(region => region.id)
 	}
 
 	get favoriteZKB() {
 		const favoriteZKBRegions = this.settings.favoriteZKBRegions || []
-		return this.regions.filter((region => favoriteZKBRegions.includes(region.id))) as REGION[]
+		return this.regions.filter((region => favoriteZKBRegions.includes(region.id))) as EVERegion[]
 	}
 
 	openLayoutsWindow() {
@@ -230,7 +230,7 @@ export default class ConfigWindow extends Vue {
 
 	reconnectZKB = debounce(zkillboard.reconnectZK, 4000)
 
-	set favoriteZKB(val: REGION[]) {
+	set favoriteZKB(val: EVERegion[]) {
 		this.settings.favoriteZKBRegions = val.map(region => region.id)
 		// TODO resubscribe not reconnect
 		this.reconnectZKB()

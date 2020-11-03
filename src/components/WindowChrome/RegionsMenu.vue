@@ -55,9 +55,9 @@
 <script lang="ts">
 import {Component, Vue, Watch} from "vue-property-decorator"
 import systemManager from "@/service/SystemManager"
-import events from "@/service/EventBus"
+import events, {EventBusEvents} from "@/service/EventBus"
 import settingsService from "@/service/settings"
-import {REGION} from "@/types/RegionMap"
+import EVERegion from "@/lib/EVERegion"
 
 @Component
 export default class RegionsMenu extends Vue {
@@ -65,7 +65,7 @@ export default class RegionsMenu extends Vue {
 	region = {id: 0, name: "[region loading]"}
 
 	showNewEdenMap() {
-		events.$emit("showNewEden")
+		events.$emit(EventBusEvents.showNewEden)
 		this.menu = false
 	}
 
@@ -73,10 +73,10 @@ export default class RegionsMenu extends Vue {
 		return this.$store.getters.isLoading
 	}
 
-	get regions(): REGION[] {
+	get regions(): EVERegion[] {
 		if (!this.$store.getters.isAppReady) return []
 
-		return Object.values(systemManager.regions) as REGION[]
+		return Object.values(systemManager.regions) as EVERegion[]
 	}
 
 	@Watch("region", {immediate: false})
@@ -95,7 +95,7 @@ export default class RegionsMenu extends Vue {
 	}
 
 	created() {
-		events.$on("updateCurrentRegion", this.setRegion)
+		events.$on(EventBusEvents.updateCurrentRegion, this.setRegion)
 	}
 }
 </script>
