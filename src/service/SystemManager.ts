@@ -6,13 +6,12 @@ import * as log from "electron-log"
 import sortBy from "lodash/sortBy"
 import find from "lodash/find"
 import EVEJumpBridge, {EVE_JUMP_BRIDGE_STATUS} from "@/lib/EVEJumpBridge"
-import db, {IRegionMapExport} from "@/service/Database"
+import db from "@/service/Database"
 import Vue from "vue"
 import findIndex from "lodash/findIndex"
 import {OVERLAY_TYPE} from "@/types/RegionMap"
 import {API_SYSTEM_JUMPS, API_SYSTEM_KILLS} from "@/types/API"
-import settingsService from "@/service/settings"
-import {reactive} from "@vue/composition-api"
+import {reactive, watch} from "@vue/composition-api"
 import EVERegion, {SPECIAL_REGIONS} from "@/lib/EVERegion"
 
 class SystemManager {
@@ -36,6 +35,9 @@ class SystemManager {
 
 	public init() {
 		ipcRenderer.send("getSDE")
+		watch(() => store.getters.overlay, () => {
+			this.showRegion()
+		})
 		setInterval(this.eventLoop.bind(this), 1000)
 	}
 
@@ -75,10 +77,10 @@ class SystemManager {
 
 		Object.entries(RegionDB).map((entry) => {
 			const id = Number(entry[0])
-			regions[id] = Object.preventExtensions(new EVERegion(
+			regions[id] = new EVERegion(
 				id,
 				entry[1] as string,
-			))
+			)
 		})
 
 		sortBy(regions, "name")
@@ -106,19 +108,20 @@ class SystemManager {
 
 			system.addNeighbour(systemDST)
 			const region = this.regions[system.region_id]
+			if (!region) return
+
 			const regionDST = this.regions[systemDST.region_id]
 			if (region !== regionDST) {
-				region?.neighbourSystems.push(systemDST)
+				region.neighbourSystems.push(systemDST)
 			}
 		}))
-
-		await this.unStoreRegion()
 
 		Vue.nextTick(() => this.initJBs())
 
 		log.info("SystemManager: finish loading systems")
 		store.commit("setAppReady")
 		events.$emit(EventBusEvents["systemManager:ready"])
+		this.unStoreRegion()
 	}
 
 	public async refreshRegionMap() {
@@ -185,42 +188,39 @@ class SystemManager {
 		return jb
 	}
 
-	public async loadNewEdenRegion() {
+	public async loadNewEdenRegion(): Promise<EVERegion> {
 		store.commit("setLoading", true)
 
-		const record = await new EVERegion(
+		const EdenRegion = new EVERegion(
 			SPECIAL_REGIONS.NEW_EDEN,
 			"New Eden",
-		).getMap()
-
-		events.$emit(EventBusEvents.showRegionMapNewEden, record)
+		)
+		await EdenRegion.loadMap()
 
 		store.commit("setLoading", false)
+
+		return EdenRegion
 	}
 
 	public async setCurrentRegion(region_id: number): Promise<boolean> {
 		const region = this.regions[region_id]
 		if (!region) return false
 
-		this.unMarkSystem(`setCurrentRegion: ${region_id} ${region.name}`)
+		this.unMarkSystem(`setCurrentRegion: ${region.nameDebug}`)
 
 		store.commit("setLoading", true)
 
-		const loadMapPromise = region.getMap()
+		const loadMapPromise = region.loadMap()
 
-		this.currentRegion?.systems.forEach(system => system.hide())
+		this.currentRegion?.hideSystems()
 
-		const record = await loadMapPromise
+		await loadMapPromise
 
 		this.currentRegion = region
 		region.storeAsCurrent()
 
 		// @see systemSetMap()
 		// this.currentRegion.systems.forEach(system => system.show())
-
-		events.$emit(EventBusEvents.setRegionMap, record)
-		events.$emit(EventBusEvents.updateCurrentRegion, this.currentRegion)
-		events.$emit(EventBusEvents.hideRegionMapNewEden)
 
 		store.commit("setLoading", false)
 
@@ -291,11 +291,10 @@ class SystemManager {
 		system.setMap(mapCoordinates, svgContainer)
 	}
 
-	public showRegion(overlay: OVERLAY_TYPE = OVERLAY_TYPE.ALERT) {
+	public showRegion() {
 		if (!this.currentRegion) return
 
-		store.commit("setOverlay", overlay)
-
+		const overlay = store.getters.overlay
 		if (overlay === OVERLAY_TYPE.ALERT) {
 			this.currentRegion.systems.forEach(system => {
 				system.show()
@@ -364,6 +363,8 @@ class SystemManager {
 				system.showJumpsOverlay(max)
 			})
 		}
+
+		this.eventLoop()
 	}
 
 	private addSystem(

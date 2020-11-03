@@ -56,7 +56,6 @@
 
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator"
-import systemManager from "@/service/SystemManager"
 import {OVERLAY_TYPE} from "@/types/RegionMap"
 import settingsService from "@/service/settings"
 
@@ -85,7 +84,7 @@ export default class OverlayBtn extends Vue {
 	}
 
 	setOverlay(overlay: OVERLAY_TYPE) {
-		systemManager.showRegion(overlay)
+		this.$store.commit("setOverlay", overlay)
 	}
 }
 </script>

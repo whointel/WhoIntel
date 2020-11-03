@@ -20,7 +20,7 @@
 
 		<v-btn
 			fab top right fixed small
-			@click="dialog = false"
+			@click="hideThisPopup"
 		>
 			<v-icon>mdi-close</v-icon>
 		</v-btn>
@@ -30,12 +30,10 @@
 
 <script lang="ts">
 import {Component, Vue, Watch} from "vue-property-decorator"
-import events from "@/service/EventBus"
 import cheerio from "cheerio"
 import systemManager from "@/service/SystemManager"
 import {dragscroll} from "vue-dragscroll"
 import PerfectScrollbar from "perfect-scrollbar"
-import {IRegionMapExport} from "@/service/Database"
 import * as log from "electron-log"
 
 const SCALE_FACTOR = 10
@@ -56,8 +54,6 @@ export default class EdenMapPopup extends Vue {
 	svgScale = 100
 	svgContent = ""
 	isMapDragging = false
-
-	initMapData: IRegionMapExport | null = null
 
 	containerW = 0
 	containerH = 0
@@ -81,31 +77,78 @@ export default class EdenMapPopup extends Vue {
 		return this.$refs.svgContainer
 	}
 
-	@Watch("isAppReady")
-	isAppReadyWatcher(val) {
-		if (val) {
-			this.loadMap()
-		}
+	get currentRegion() {
+		return systemManager.currentRegion
 	}
 
-	created() {
-		events.$on("showRegionMapNewEden", this.setMap)
-		events.$on("hideRegionMapNewEden", this.hideThisPopup)
-		systemManager.loadNewEdenRegion()
+	@Watch("isAppReady", {immediate: true})
+	async loadMap() {
+		const region = await systemManager.loadNewEdenRegion()
+		log.debug("NewEdenMap, start loading svg")
+
+		const chee = cheerio.load(region.svg)
+		chee("script").remove()
+		chee("#controls").remove()
+		// TODO check for valid svg
+		const svg = chee("svg")
+		svg.addClass("pa-3")
+		svg.removeAttr("onload")
+		svg.attr("style", `width:${this.svgScale}%;height:${this.svgScale}%`)
+		svg.removeAttr("height")
+		svg.removeAttr("width")
+
+		const regionID = systemManager.currentRegion?.id
+
+		if (regionID) {
+			chee("#sysuse > use").each((index, use) => {
+				const href = use.attribs["href"]
+				const id = Number(href.substring(4)) // eg xlink:href="#def10000001"
+				if (id !== regionID) return
+
+				const uses = {
+					x: parseFloat(use.attribs["x"]),
+					y: parseFloat(use.attribs["y"]),
+					width: parseFloat(use.attribs["width"]),
+					height: parseFloat(use.attribs["height"]),
+					center_x: 0.0,
+					center_y: 0.0,
+				}
+				uses.center_x = (uses.x + (uses.width / 2))
+				uses.center_y = (uses.y + (uses.height / 2))
+
+				svg.prepend(`
+					<g>
+						<ellipse
+						cx="${uses.center_x - 2.5}"
+						cy="${uses.center_y}"
+						rx="${(uses.width / 2) + 4}"
+						ry="${(uses.height / 2) + 4}"
+						style="fill:#8B008D"></ellipse>
+					</g>
+				`)
+			})
+		}
+
+		this.svgContent = cheerio.html(svg)
+	}
+
+	@Watch("currentRegion", {immediate: false})
+	onChangeCurrentRegion() {
+		this.hideThisPopup()
 	}
 
 	beforeDestroy() {
-		events.$off("showRegionMapNewEden", this.setMap)
-		events.$off("hideRegionMapNewEden", this.hideThisPopup)
-	}
-
-	hideThisPopup() {
-		this.dialog = false
+		this.svgContainer.removeEventListener("click", this.containerClicked)
+		if (this.ps) this.ps.destroy()
 	}
 
 	mounted() {
 		this.svgContainer.addEventListener("click", this.containerClicked)
 		this.ps = Object.preventExtensions(new PerfectScrollbar(this.svgContainer, {wheelPropagation: false}))
+	}
+
+	hideThisPopup() {
+		this.dialog = false
 	}
 
 	containerClicked(event: MouseEvent) {
@@ -170,61 +213,6 @@ export default class EdenMapPopup extends Vue {
 			svg.style.height = this.svgScale + "%"
 			this.$nextTick(() => this.ps!.update())
 		}
-	}
-
-	setMap(map: IRegionMapExport) {
-		this.initMapData = map
-		this.loadMap()
-	}
-
-	async loadMap() {
-		if (!this.isAppReady || !this.initMapData) return
-		log.debug("NewEdenMap, start loading svg")
-
-		const chee = cheerio.load(this.initMapData.svg);
-		chee("script").remove()
-		chee("#controls").remove()
-		// TODO check for valid svg
-		const svg = chee("svg")
-		svg.addClass("pa-3")
-		svg.removeAttr("onload")
-		svg.attr("style", `width:${this.svgScale}%;height:${this.svgScale}%`)
-		svg.removeAttr("height")
-		svg.removeAttr("width")
-
-		const regionID = systemManager.currentRegion?.id
-
-		if (regionID) {
-			chee("#sysuse > use").each((index, use) => {
-				const href = use.attribs["href"]
-				const id = Number(href.substring(4)) // eg xlink:href="#def10000001"
-				if (id !== regionID) return
-
-				const uses = {
-					x: parseFloat(use.attribs["x"]),
-					y: parseFloat(use.attribs["y"]),
-					width: parseFloat(use.attribs["width"]),
-					height: parseFloat(use.attribs["height"]),
-					center_x: 0.0,
-					center_y: 0.0,
-				}
-				uses.center_x = (uses.x + (uses.width / 2))
-				uses.center_y = (uses.y + (uses.height / 2))
-
-				svg.prepend(`
-					<g>
-						<ellipse
-						cx="${uses.center_x - 2.5}"
-						cy="${uses.center_y}"
-						rx="${(uses.width / 2) + 4}"
-						ry="${(uses.height / 2) + 4}"
-						style="fill:#8B008D"></ellipse>
-					</g>
-				`)
-			})
-		}
-
-		this.svgContent = cheerio.html(svg)
 	}
 }
 </script>

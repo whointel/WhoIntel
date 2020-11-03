@@ -288,10 +288,14 @@ export default class RegionMapContextMenu extends Vue {
 		this.show = show
 	}
 
-	mounted() {
-		events.$on("setRegionMap", () => {
-			this.show = false
-		})
+
+	get currentRegion() {
+		return systemManager.currentRegion
+	}
+
+	@Watch("currentRegion", {immediate: false})
+	onChangeCurrentRegion() {
+		this.show = false
 	}
 
 	beforeDestroy() {

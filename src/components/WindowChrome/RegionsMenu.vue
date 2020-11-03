@@ -12,7 +12,7 @@
 					v-bind="attrs"
 					v-on="on"
 				>
-					{{ region.name }}
+					{{ selectedRegion.name }}
 				</v-chip>
 			</template>
 
@@ -21,8 +21,8 @@
 					<v-row>
 						<v-col :cols="10" class="pr-0">
 							<v-autocomplete
-								v-model="region"
-								:items="regions"
+								v-model="selectedRegion"
+								:items="regionList"
 								item-text="name"
 								outlined autofocus dense hide-details
 								return-object
@@ -62,40 +62,48 @@ import EVERegion from "@/lib/EVERegion"
 @Component
 export default class RegionsMenu extends Vue {
 	menu = false
-	region = {id: 0, name: "[region loading]"}
-
-	showNewEdenMap() {
-		events.$emit(EventBusEvents.showNewEden)
-		this.menu = false
-	}
+	selectedRegion = {id: 0, name: "[loading]"}
 
 	get isLoading() {
 		return this.$store.getters.isLoading
 	}
 
-	get regions(): EVERegion[] {
+	get regionList(): EVERegion[] {
 		if (!this.$store.getters.isAppReady) return []
 
 		return Object.values(systemManager.regions) as EVERegion[]
 	}
 
-	@Watch("region", {immediate: false})
+	get currentRegion() {
+		return systemManager.currentRegion
+	}
+
+	get favoriteRegions() {
+		const favoriteRegions = settingsService.$.favoriteRegions || []
+		return this.regionList.filter((region => favoriteRegions.includes(region.id)))
+	}
+
+	showNewEdenMap() {
+		this.menu = false
+		events.$emit(EventBusEvents.showNewEden)
+	}
+
+	@Watch("currentRegion", {immediate: false})
+	onChangeCurrentRegion(region) {
+		this.menu = false
+		this.setRegion(region)
+	}
+
+	@Watch("selectedRegion", {immediate: false})
 	changeRegion(region) {
 		this.menu = false
 		systemManager.setCurrentRegion(region.id)
 	}
 
 	setRegion(region) {
-		this.region = region
-	}
+		if (this.selectedRegion === region) return
 
-	get favoriteRegions() {
-		const favoriteRegions = settingsService.$.favoriteRegions || []
-		return this.regions.filter((region => favoriteRegions.includes(region.id)))
-	}
-
-	created() {
-		events.$on(EventBusEvents.updateCurrentRegion, this.setRegion)
+		this.selectedRegion = region
 	}
 }
 </script>

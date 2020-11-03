@@ -2,10 +2,6 @@ import Vue from "vue"
 import {ipcRenderer} from "electron"
 
 export enum EventBusEvents {
-	showRegionMapNewEden = "showRegionMapNewEden",
-	setRegionMap = "setRegionMap",
-	updateCurrentRegion = "updateCurrentRegion",
-	hideRegionMapNewEden = "hideRegionMapNewEden",
 	"systemManager:ready" = "systemManager:ready",
 	"JB:ready" = "JB:ready",
 	showNewEden = "showNewEden",

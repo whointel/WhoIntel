@@ -1,28 +1,27 @@
 <template>
-	<span v-if="ts"><br>кэш карты региона: {{ time }}</span>
+	<span v-if="time"><br>кэш карты региона: {{ time }}</span>
 </template>
 
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator"
-import events from "@/service/EventBus"
 import formatDistanceToNow from "date-fns/formatDistanceToNow"
-import {IRegionMapExport} from "@/service/Database"
+import systemManager from "@/service/SystemManager"
 
 @Component
 export default class MapTS extends Vue {
-	ts: Date | null = null
+	updateInterval: any = null
 
 	get time() {
-		return this.ts ? formatDistanceToNow(this.ts) : ""
-	}
-
-	setMap(map: IRegionMapExport) {
-		this.ts = map.ts
+		const ts = systemManager.currentRegion?.tsUpdate
+		return ts ? formatDistanceToNow(ts) : null
 	}
 
 	mounted() {
-		events.$on("setRegionMap", this.setMap)
-		setInterval(() => this.$forceUpdate(), 60000)
+		this.updateInterval = setInterval(() => this.$forceUpdate(), 60_000)
+	}
+
+	beforeDestroy() {
+		if (this.updateInterval) clearInterval(this.updateInterval)
 	}
 }
 </script>

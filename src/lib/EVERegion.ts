@@ -14,12 +14,18 @@ export default class EVERegion {
 	public readonly isSpecial = {
 		newEden: false,
 	}
+	svg: string = ""
+	tsUpdate: Date | null = null
 
 	constructor(
 		public readonly id: number = 0,
 		public readonly name: string = "",
 	) {
 
+	}
+
+	get nameDebug(): string {
+		return `EVERegion [${this.name} #${this.id}]`
 	}
 
 	public static getStoredRegionId(): number {
@@ -36,7 +42,7 @@ export default class EVERegion {
 		}
 	}
 
-	public async getMap(): Promise<IRegionMapExport> {
+	public async loadMap() {
 		const database = await db()
 		const darkTheme = settingsService.$.darkTheme
 
@@ -51,10 +57,15 @@ export default class EVERegion {
 			await database.put(darkTheme ? "regionMapDark" : "regionMap", record)
 		}
 
-		return record
+		this.svg = record.svg
+		this.tsUpdate = record.ts
 	}
 
 	public storeAsCurrent() {
 		localStorage.setItem("region", this.id as unknown as string)
+	}
+
+	public hideSystems() {
+		this.systems.forEach(system => system.hide())
 	}
 }

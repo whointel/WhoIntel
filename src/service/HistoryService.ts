@@ -1,13 +1,17 @@
 import events from "@/service/EventBus"
 import systemManager from "@/service/SystemManager"
 import Vue from "vue"
-import EVERegion from "@/lib/EVERegion";
+import EVERegion from "@/lib/EVERegion"
+import {watch} from "@vue/composition-api"
 
 class HistoryService {
 	constructor() {
 		events.$on("btn:back", this.historyBack.bind(this))
 		events.$on("btn:forward", this.historyForward.bind(this))
-		events.$on("updateCurrentRegion", this.historyAdd.bind(this))
+
+		watch(() => systemManager.currentRegion, (region) => {
+			this.historyAdd(region as EVERegion)
+		})
 	}
 
 	public regionHistory: number[] = []
@@ -15,6 +19,8 @@ class HistoryService {
 	private regionHistoryChanging = false
 
 	private historyAdd(region: EVERegion) {
+		if (!region) return
+
 		if (this.regionHistoryChanging) return
 		if (this.regionHistory[this.regionHistory.length - 1 - this.regionHistoryShift] === region.id) return
 

@@ -302,15 +302,15 @@ export default class LayoutWindowLayout extends Vue {
 	}
 
 	setCurrentScroll() {
-		events.sendToMain("window:layouts:get:mapscroll", this.layout.uuid)
+		events.sendToMain("window:layouts:get:MapScroll", this.layout.uuid)
 	}
 
 	created() {
-		events.$on("electron:window:layouts:set:mapscroll", this.setMapScroll.bind(this))
+		events.$on("electron:window:layouts:set:MapScroll", this.setMapScroll.bind(this))
 	}
 
 	beforeDestroy() {
-		events.$off("electron:window:layouts:set:mapscroll", this.setMapScroll.bind(this))
+		events.$off("electron:window:layouts:set:MapScroll", this.setMapScroll.bind(this))
 	}
 
 	setMapScroll(event, scroll: any) {
