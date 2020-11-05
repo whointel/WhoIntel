@@ -121,7 +121,7 @@ export default class RegionMap extends Vue {
 
 	mounted() {
 		this.svgContainer.addEventListener("click", this.markNeighbourRegionSystem)
-		// this.svgContainer.addEventListener("contextmenu", this.contextMenuOpen)
+		this.svgContainer.addEventListener("contextmenu", this.contextMenuOpen)
 		events.$on("electron:window:layouts:get:MapScroll", this.sendMapScroll)
 
 		this.ps = Object.preventExtensions(new PerfectScrollbar(this.svgContainer, {wheelPropagation: false}))
