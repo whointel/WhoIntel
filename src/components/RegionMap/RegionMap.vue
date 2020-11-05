@@ -21,12 +21,13 @@
 				<region-map-system-marker/>
 				<region-map-character-marker/>
 				<region-map-jump-bridges/>
-				<region-map-path-points/>
 
 				<svg
 					v-html="svgContent"
 					ref="svgContentContainer"
 				/>
+
+				<region-map-path-points/>
 			</svg>
 		</div>
 		<region-map-context-menu

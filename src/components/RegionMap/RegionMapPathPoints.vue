@@ -21,8 +21,8 @@
 		</marker>
 
 		<g
-			v-for="(line, index) in pathFinderPoints"
-			:key="index"
+			v-for="line in pathFinderPoints.lines"
+			:key="line.key"
 		>
 			<line
 				:x1="line.x1" :y1="line.y1"
@@ -30,18 +30,33 @@
 				:stroke="line.jb ? 'green' : 'orange'"
 				stroke-width="3"
 				stroke-dasharray="4 1"
-				:marker-start="index === 0 ? 'url(#path_start)' : ''"
-				:marker-end="pathFinderPoints.length - 1 === index ? 'url(#path_end)' : ''"
+				:marker-start="line.begin ? 'url(#path_start)' : ''"
+				:marker-end="line.end ? 'url(#path_end)' : ''"
 			/>
 			<circle
-				v-if="index === 0 && !line.start"
-				:fill="line.jb ? 'green' : 'orange'"
+				v-if="line.begin"
+				:fill="line.jbPrev ? '#11FF11' : 'orange'"
 				:cx="line.x1" :cy="line.y1" r="4"
 			/>
 			<circle
-				v-if="pathFinderPoints.length - 1 === index && !line.end"
-				:fill="line.jbNext ? 'green' : 'orange'"
+				v-if="line.end"
+				:fill="line.jbNext ? '#11FF11' : 'orange'"
 				:cx="line.x2" :cy="line.y2" r="4"
+			/>
+		</g>
+		<g
+			v-for="point in pathFinderPoints.points"
+			:key="point.key"
+		>
+			<circle
+				v-if="point.begin"
+				:fill="point.jb ? '#11FF11' : 'orange'"
+				:cx="point.x" :cy="point.y" r="4"
+			/>
+			<circle
+				v-if="point.end"
+				:fill="point.jb ? '#11FF11' : 'orange'"
+				:cx="point.x" :cy="point.y" r="4"
 			/>
 		</g>
 	</svg>
@@ -50,23 +65,64 @@
 <script lang="ts">
 import {Component, Vue} from "vue-property-decorator"
 import systemManager from "@/service/SystemManager"
-import {IPATHPOINT, IPATHPOINT_POINT} from "@/types/PathFinder"
+import {IPATHPOINT_POINT} from "@/types/PathFinder"
 import pathService from "@/service/PathService"
+
+interface pathFinderPointsResult {
+	lines: {
+		x1: number
+		y1: number
+		x2: number
+		y2: number
+		jb: boolean
+		jbNext: boolean
+		jbPrev: boolean
+		begin: boolean
+		end: boolean
+		key: string
+	}[],
+	points: {
+		x: number
+		y: number
+		jb: boolean
+		begin: boolean
+		end: boolean
+		key: string
+		system: string
+	}[]
+}
 
 @Component
 export default class RegionMapPathPoints extends Vue {
-	get pathFinderPoints(): IPATHPOINT[] {
-		let result: any[] = []
+	get pathFinderPoints(): pathFinderPointsResult {
+		let result: pathFinderPointsResult = {
+			lines: [],
+			points: [],
+		}
 		let pathPoint: IPATHPOINT_POINT
+		let pathPointPrev: IPATHPOINT_POINT | null
 		let pathPointNext: IPATHPOINT_POINT
 		const currentRegionId = systemManager.currentRegion?.id
+
+		if (!currentRegionId) return result
+
+		let isPathSectionStart = true
+
+		const previousLine = () => result.lines.length ? result.lines[result.lines.length - 1] : null
+		const setEndLastLineTrue = () => {
+			const previousLineObj = previousLine()
+			if (previousLineObj) previousLineObj.end = true
+		}
 
 		for (let i = 0; i < pathService.pathPoints.path.length - 1; i++) {
 			pathPoint = pathService.pathPoints.path[i]
 			pathPointNext = pathService.pathPoints.path[i + 1]
+			pathPointPrev = pathService.pathPoints.path[i - 1]
 
 			if (
-				!pathPoint.system.mapCoordinates
+				!pathPoint
+				|| !pathPointNext
+				|| !pathPoint.system.mapCoordinates
 				|| !pathPointNext.system.mapCoordinates
 			) {
 				continue
@@ -85,26 +141,81 @@ export default class RegionMapPathPoints extends Vue {
 				currentRegionId !== pathPoint.system.region_id
 				|| currentRegionId !== pathPointNext.system.region_id
 			) {
+				if (!pathPointNext.system.neighbourRegions.includes(currentRegionId)) {
+					previousLine()
+					setEndLastLineTrue()
+					isPathSectionStart = true
+				}
+
 				if (
 					!pathPoint.system.neighbourRegions.includes(currentRegionId)
 					&& !pathPointNext.system.neighbourRegions.includes(currentRegionId)
 				) {
-					if (!!pathPoint.jb && result.length) {
-						result[result.length - 1].jbNext = true
-					}
+
 					continue
 				}
 			}
 
-			result.push({
+			result.lines.push({
 				x1: pathPoint.system.mapCoordinates?.center_x + 4,
 				y1: pathPoint.system.mapCoordinates?.center_y + 4,
 				x2: pathPointNext.system.mapCoordinates?.center_x + 4,
 				y2: pathPointNext.system.mapCoordinates?.center_y + 4,
+				jbPrev: pathPointPrev && !!pathPointPrev.jb,
 				jb: !!pathPoint.jb,
-				jbNext: false,
-				start: i === 0,
-				end: i === (pathService.pathPoints.path.length - 2),
+				jbNext: !!pathPointNext.jb,
+				begin: isPathSectionStart,
+				end: false,
+				key: `pl_${pathPoint.system.id}_${pathPointNext.system.id}`
+			})
+
+			isPathSectionStart = false
+		}
+
+		setEndLastLineTrue()
+
+		// fix dot for first and only point in region/path
+		pathPoint = pathService.pathPoints.path[0]
+		if (
+			pathPoint
+			&& pathPoint.system.mapCoordinates
+			&& (
+				currentRegionId === pathPoint.system.region_id
+				|| pathPoint.system.neighbourRegions.includes(currentRegionId)
+			)
+		) {
+			result.points.push({
+				x: pathPoint.system.mapCoordinates?.center_x + 4,
+				y: pathPoint.system.mapCoordinates?.center_y + 4,
+				jb: !!pathPoint.jb,
+				system: pathPoint.system.nameDebug,
+				begin: true,
+				end: false,
+				key: `pp1_${pathPoint.system.id}`,
+			})
+		}
+
+		// fix dot for last and only point in region/path
+		pathPoint = pathService.pathPoints.path[pathService.pathPoints.path.length - 1]
+		pathPointPrev = pathService.pathPoints.path[pathService.pathPoints.path.length - 2]
+		if (
+			currentRegionId
+			&& pathPoint
+			&& pathPointPrev
+			&& pathPoint.system.mapCoordinates
+			&& (
+				currentRegionId === pathPoint.system.region_id
+				|| pathPoint.system.neighbourRegions.includes(currentRegionId)
+			)
+		) {
+			result.points.push({
+				x: pathPoint.system.mapCoordinates?.center_x + 4,
+				y: pathPoint.system.mapCoordinates?.center_y + 4,
+				jb: !!pathPointPrev.jb,
+				system: pathPoint.system.nameDebug,
+				begin: false,
+				end: true,
+				key: `pp2_${pathPoint.system.id}`,
 			})
 		}
 
