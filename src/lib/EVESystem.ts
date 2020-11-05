@@ -205,7 +205,7 @@ export default class EVESystem {
 			this.setRectColor(`rgb(${system_color},0,0)`)
 		} else {
 			system_color = 255 - (system_kills * 255 / max)
-			this.setTextColor(system_color > 127 ? COLOR_WHITE : COLOR_BLACK)
+			this.setTextColor(system_color > 127 ? COLOR_BLACK : COLOR_WHITE )
 			this.setRectColor(`rgb(255,${system_color},${system_color})`)
 		}
 
