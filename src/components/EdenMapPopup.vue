@@ -101,6 +101,8 @@ export default class EdenMapPopup extends Vue {
 
 		if (regionID) {
 			chee("#sysuse > use").each((index, use) => {
+				use = use as cheerio.TagElement
+
 				const href = use.attribs["href"]
 				const id = Number(href.substring(4)) // eg xlink:href="#def10000001"
 				if (id !== regionID) return
