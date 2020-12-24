@@ -18,7 +18,7 @@ yarn install
 yarn electron:serve
 ```
 
-Сборка дистрибутива под Windows
+Сборка дистрибутива
 ```
-yarn electron:build:win
+yarn electron:build
 ```
