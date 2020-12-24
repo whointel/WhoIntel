@@ -198,16 +198,17 @@ class PathService {
 				continue
 			}
 
-			const jb = systemManager.jbBySystemId[currentSystem!.id]
-			if (
-				!jb
-				|| jb.systemTo?.id !== id
-			) {
+			const jb = systemManager.jbBySystemId[currentSystem!.id][id]
+			if (!jb) {
+				// TODO alert
 				throw "path found error"
 			}
 
 			next = jb.systemTo as EVESystem
-			if (!next) throw "path found error"
+			if (!next) {
+				// TODO alert
+				throw "path found error"
+			}
 
 			this.pathPoints.structures.push(jb.structure_id)
 

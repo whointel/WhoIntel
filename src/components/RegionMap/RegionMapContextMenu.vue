@@ -213,21 +213,22 @@
 				</v-list-item-icon>
 				<v-list-item-content>
 					<v-list-item-title>
-						{{ $t("region") }} "{{ neighbourRegion.name }}" / {{ $t("adjacent") }}
+						{{ $t("adjacent") }}: {{ $t("region") }} "{{ neighbourRegion.name }}"
 					</v-list-item-title>
 				</v-list-item-content>
 			</v-list-item>
 
 			<v-list-item
-				@click="goToJBNeighbourRegion"
-				v-if="jbToNeighbourRegion"
+				@click="goToJBNeighbourRegion(record.jb)"
+				v-for="record in neighbourRegionsThroughJB"
+				:key="record.jb.structure_id"
 			>
 				<v-list-item-icon>
 					<v-icon>mdi-map-marker-path</v-icon>
 				</v-list-item-icon>
 				<v-list-item-content>
 					<v-list-item-title>
-						{{ $t("region") }} "{{ jbToNeighbourRegion.name }}" / jb
+						JB: {{ $t("region") }} "{{ record.region.name }}" / {{ record.jb.systemTo.name }}
 					</v-list-item-title>
 				</v-list-item-content>
 			</v-list-item>
@@ -244,7 +245,7 @@
 
 			<v-divider/>
 
-			<v-list-item v-if="system" disabled>
+			<v-list-item v-if="system && !isDevServer" disabled>
 				<v-list-item-content>
 					<v-list-item-title>
 						{{ menuSystemStat }}
@@ -255,17 +256,51 @@
 				</v-list-item-content>
 			</v-list-item>
 
-			<v-divider v-if="isDevServer && system"/>
+			<v-menu
+				offset-x
+				dense
+				:transition="false"
+				open-on-hover
+				:close-on-content-click="false"
+				v-if="system && isDevServer"
+			>
+				<template v-slot:activator="{ on, attrs }">
+					<v-list-item
+						v-bind="attrs"
+						v-on="on"
+					>
+						<v-list-item-content>
+							<v-list-item-title>
+								{{ menuSystemStat }}
+								<span v-if="pathJumps">
+								/ {{ pathJumps }} {{ $tc("jumps", pathJumps) }}
+							</span>
+							</v-list-item-title>
+						</v-list-item-content>
+						<v-list-item-action>
+							<v-icon color="grey lighten-1">mdi-chevron-right</v-icon>
+						</v-list-item-action>
+					</v-list-item>
+				</template>
 
-			<v-list-item v-if="isDevServer && system">
-				<v-list-item-content>
-					<v-list-item-title>
-						{{ system.nameDebug }}
-						<br>
-						{{ system.region.nameDebug }}
-					</v-list-item-title>
-				</v-list-item-content>
-			</v-list-item>
+				<v-list dense>
+					<v-list-item>
+						<v-list-item-content>
+							<v-list-item-title>
+								{{ system.nameDebug }}
+								<br>
+								{{ system.region.nameDebug }}
+								<br>
+								<div v-for="(jb, index) in jbDebug" :key="index">
+									{{ jb }}
+									<br>
+								</div>
+							</v-list-item-title>
+						</v-list-item-content>
+					</v-list-item>
+				</v-list>
+			</v-menu>
+
 		</v-list>
 	</v-menu>
 </template>
@@ -331,6 +366,20 @@ export default class RegionMapContextMenu extends Vue {
 
 	getCurrentSystemForAPICharacter() {
 		return characterManager.activeCharacter?.auth.isAuthed ? characterManager.getCurrentSystem() : null
+	}
+
+	get jbDebug() {
+		let jbs = systemManager.jbBySystemId[this.system!.id]
+		if (!jbs) {
+			return []
+		}
+
+		let result: any[] = []
+		for (const jb_id in jbs) {
+			result.push(jbs[jb_id].nameDebug)
+		}
+
+		return result
 	}
 
 	get pathJumps(): number {
@@ -411,27 +460,33 @@ export default class RegionMapContextMenu extends Vue {
 		systemManager.markSystem(this.system, true)
 	}
 
-	goToJBNeighbourRegion() {
+	goToJBNeighbourRegion(jb: EVEJumpBridge) {
 		this.closeMenu()
-		if (!this.jbToNeighbourRegion) return
 
-		systemManager.markSystem(this.jb!.systemTo!, true)
+		systemManager.markSystem(jb.systemTo!, true)
 	}
 
-	get jb(): EVEJumpBridge | null {
-		if (!this.system) return null
+	get JBs(): EVEJumpBridge[] {
+		if (!this.system) return []
 
-		const jb = systemManager.jbBySystemId[this.system.id]
+		const jbs = systemManager.jbBySystemId[this.system.id]
 
-		return jb?.systemToId ? jb as EVEJumpBridge : null
+		if (!jbs) return []
+
+		const result = Object.values(jbs)
+
+		return result as unknown as EVEJumpBridge[]
 	}
 
-	get jbToNeighbourRegion(): EVERegion | null {
-		if (!this.jb) return null
-
-		return this.jb.systemTo!.region_id === systemManager.currentRegion?.id
-			? null
-			: systemManager.regions[this.jb.systemTo!.region_id] as EVERegion
+	get neighbourRegionsThroughJB(): { jb: EVEJumpBridge, region: EVERegion }[] {
+		return this.JBs
+			.filter(jb => jb.systemTo!.region_id !== systemManager.currentRegion?.id)
+			.map(jb => {
+				return {
+					jb,
+					region: systemManager.regions[jb.systemTo!.region_id] as EVERegion
+				}
+			})
 	}
 
 	get isAuthed(): boolean {
@@ -463,20 +518,6 @@ export default class RegionMapContextMenu extends Vue {
 		try {
 			await characterManager.activeCharacter?.setWaypoint(
 				this.options.system_id,
-				false, false
-			)
-			// eslint-disable-next-line no-empty
-		} catch (e) {
-		}
-	}
-
-	async apiAddWaypointJB() {
-		this.closeMenu()
-		if (!this.jb || !this.jb.structure_id) return
-
-		try {
-			await characterManager.activeCharacter?.setWaypoint(
-				this.jb.structure_id,
 				false, false
 			)
 			// eslint-disable-next-line no-empty
@@ -541,8 +582,8 @@ export default class RegionMapContextMenu extends Vue {
 		"no_auth": "No authorization",
 		"show_system_log": "Show system log",
 		"set_system_as_current_for_character": "Set as current for \"{name}\"",
-		"region": "Region",
-		"adjacent": "adjacent",
+		"region": "region",
+		"adjacent": "Adj",
 		"character_list": "Characters"
 	},
 	"ru": {
@@ -554,8 +595,8 @@ export default class RegionMapContextMenu extends Vue {
 		"no_auth": "Вы не авторизованы",
 		"show_system_log": "Лог системы",
 		"set_system_as_current_for_character": "Установить текущей для \"{name}\"",
-		"region": "Регион",
-		"adjacent": "соседний",
+		"region": "регион",
+		"adjacent": "Соседний",
 		"character_list": "Персонажи"
 	}
 }

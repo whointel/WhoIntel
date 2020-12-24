@@ -93,7 +93,7 @@ export default class RegionMapJumpBridges extends Vue {
 
 		const jbData: JB_DATA[] = []
 
-		let jbs = new Set<number>()
+		let jbs = new Set<string>()
 
 		systemManager.jb.forEach(jb => {
 			if (!systemManager.currentRegion) return
@@ -115,10 +115,14 @@ export default class RegionMapJumpBridges extends Vue {
 				return
 			}
 
-			if (jbs.has(systemFrom.id)) return
+			let uniq_id = `${systemFrom.id}_${systemTo.id}`
+			if (systemFrom.id > systemTo.id) {
+				uniq_id = `${systemTo.id}_${systemFrom.id}`
+			}
 
-			jbs.add(systemFrom.id)
-			jbs.add(systemTo.id)
+			if (jbs.has(uniq_id)) return
+
+			jbs.add(uniq_id)
 
 			let direction: JB_DIRECTION_DIRECTION =
 				systemManager.jbBySystemId[systemTo.id] ? JB_DIRECTION_DIRECTION.TO_BOTH : JB_DIRECTION_DIRECTION.TO_RIGHT

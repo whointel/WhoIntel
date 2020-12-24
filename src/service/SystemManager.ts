@@ -25,7 +25,7 @@ class SystemManager {
 
 	jb: EVEJumpBridge[] = []
 	jbByStructure: { [key: string]: EVEJumpBridge } = {}
-	jbBySystemId: { [key: number]: EVEJumpBridge } = {}
+	jbBySystemId: { [key: number]: { [key: number]: EVEJumpBridge } } = {}
 	#jbIDtoSystemID: { [key: number]: number } = {}
 
 	constructor() {
@@ -147,14 +147,17 @@ class SystemManager {
 		const systemFromId = this.#jbIDtoSystemID[jb.structure_id]
 		if (systemFromId) {
 			delete this.#jbIDtoSystemID[jb.structure_id]
-			delete this.jbBySystemId[jb.systemFromId]
+			delete this.jbBySystemId[jb.systemFromId][jb.systemToId]
 		}
 
 		if (value) {
 			jb = Object.assign(jb, value)
 		}
 		if (jb.systemFromId && jb.status === EVE_JUMP_BRIDGE_STATUS.API_FOUND) {
-			this.jbBySystemId[jb.systemFromId] = jb
+			if (!this.jbBySystemId[jb.systemFromId]) {
+				this.jbBySystemId[jb.systemFromId] = {}
+			}
+			this.jbBySystemId[jb.systemFromId][jb.systemToId] = jb
 			this.#jbIDtoSystemID[jb.structure_id] = jb.systemFromId
 		}
 	}
@@ -164,7 +167,7 @@ class SystemManager {
 		const systemFromId = this.#jbIDtoSystemID[jb.structure_id]
 		if (systemFromId) {
 			delete this.#jbIDtoSystemID[jb.structure_id]
-			delete this.jbBySystemId[jb.systemFromId]
+			delete this.jbBySystemId[jb.systemFromId][jb.systemToId]
 		}
 		delete this.jbByStructure[jb.structure_id]
 		const index = findIndex(this.jb, {structure_id: jb.structure_id})

@@ -47,6 +47,10 @@ export default class EVEJumpBridge implements IEVEJumpBridgeExport {
 		this.expires = new Date()
 	}
 
+	get nameDebug(): string {
+		return `EVEJumpBridge [${this.name} #${this.structure_id}]`
+	}
+
 	// need to notify systemManager
 	async save() {
 		await (await db()).put("jb", {
