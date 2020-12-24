@@ -152,8 +152,6 @@ export default class RegionMap extends Vue {
 		const uses: { [key: number]: MapCoordinates } = {}
 
 		chee("#sysuse > use").each((index, use) => {
-			use = use as cheerio.TagElement
-
 			const href = use.attribs["href"]
 			const id = Number(href.substring(4)) // eg xlink:href="#def10000001"
 			uses[id] = {
