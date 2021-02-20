@@ -6,7 +6,7 @@
   "extends": [
     "plugin:vue/essential",
     "eslint:recommended",
-    "@vue/typescript"
+		"@vue/typescript/recommended"
   ],
   "plugins": [
     "vuetify"
@@ -21,6 +21,7 @@
     "no-console": "off"
   },
   "parserOptions": {
-    "parser": "@typescript-eslint/parser"
-  }
+    "parser": "@typescript-eslint/parser",
+		"ecmaVersion": 2020
+	}
 }
