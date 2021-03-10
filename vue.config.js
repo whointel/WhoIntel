@@ -3,12 +3,13 @@ module.exports = {
 	transpileDependencies: [
 		'vuetify'
 	],
+
 	configureWebpack: {
 		devtool: 'source-map',
 		target: 'electron-renderer'
 	},
-	pluginOptions: {
 
+	pluginOptions: {
 		electronBuilder: {
 			mainProcessWatch: ['src/background/*'],
 			builderOptions: {

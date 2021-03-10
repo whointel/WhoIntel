@@ -50,8 +50,9 @@ class LayoutsWindow {
 			height: 900,
 			webPreferences: {
 				nodeIntegration: true,
+				contextIsolation: false,
 				enableRemoteModule: true,
-			}
+			},
 		})
 
 		this.win.setMenu(null)

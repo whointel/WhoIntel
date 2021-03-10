@@ -116,8 +116,9 @@ class MainWindow {
 				nodeIntegration: true,
 				enableRemoteModule: true,
 				backgroundThrottling: false,
+				contextIsolation: false,
 				autoplayPolicy: "no-user-gesture-required", // default, used for alarm sound play
-			}
+			},
 		})
 
 		this.win.setMenu(getMenu())

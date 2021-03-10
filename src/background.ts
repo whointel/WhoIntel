@@ -17,6 +17,8 @@ import layoutsWindow from "@/background/LayoutsWindow"
 import {dirname} from "path"
 import {isPlatformMacOS, isPlatformWin} from "@/background/helpers"
 
+import * as remoteMain from "@electron/remote/main"
+
 log.transports.file.maxSize = 1024 * 1024 * 20; // 20Mb
 
 // (async () => {
@@ -61,6 +63,8 @@ if (!gotTheLock) {
 		mainWindow.show()
 	})
 }
+
+remoteMain.initialize()
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
@@ -166,4 +170,4 @@ setInterval(() => {
 		log.info("memory usage", mem)
 	}
 	mainWindow.send("memoryUsage", mem)
-}, 60_000)
+}, 60000)
