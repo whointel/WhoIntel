@@ -96,7 +96,7 @@ export default class AuthEVE {
 				height: 700,
 				webPreferences: {
 					nodeIntegration: false, // disabling nodeIntegration for security.
-					contextIsolation: true // enabling contextIsolation for security.
+					contextIsolation: true, // enabling contextIsolation for security.
 					// see https://github.com/electron/electron/blob/master/docs/tutorial/security.md
 				},
 			})
@@ -157,13 +157,14 @@ export default class AuthEVE {
 			throw new Error("Can't decode access_token to jwt")
 		}
 
-		const key = await client.getSigningKeyAsync(token.kid)
+		const key = await client.getSigningKey(token.kid)
 
 		const signingKey = key.getPublicKey()
 
 		jwt.verify(access_token, signingKey, {
 			issuer: "login.eveonline.com",
 		})
+
 		return token
 	}
 
