@@ -4,6 +4,7 @@ import isAfter from "date-fns/isAfter"
 import subDays from "date-fns/subDays"
 import addHours from "date-fns/addHours"
 import * as log from "electron-log"
+import {firstValueFrom} from "rxjs"
 
 class CharacterResolveService {
 	constructor() {
@@ -67,7 +68,7 @@ class CharacterResolveService {
 
 			// If expired
 			try {
-				const {data: {character: apiIDs}} = await api.searchCharacter$(name).toPromise()
+				const {data: {character: apiIDs}} = await firstValueFrom(api.searchCharacter$(name))
 				if (!apiIDs || apiIDs.length === 0) {
 					const dbCharNew: ICharacterExport = {
 						id: 0,
@@ -82,7 +83,7 @@ class CharacterResolveService {
 				}
 
 				for (let i = 0; i < apiIDs.length; i++) {
-					const {data: apiChar, headers: {expires}} = await api.getCharacter$(apiIDs[i]).toPromise()
+					const {data: apiChar, headers: {expires}} = await firstValueFrom(api.getCharacter$(apiIDs[i]))
 					const dbCharNew: ICharacterExport = {
 						id: apiIDs[i],
 						name: apiChar.name,
@@ -105,7 +106,7 @@ class CharacterResolveService {
 		}
 
 		try {
-			const {data: {character: apiIDs}} = await api.searchCharacter$(name).toPromise()
+			const {data: {character: apiIDs}} = await firstValueFrom(api.searchCharacter$(name))
 			if (!apiIDs || apiIDs.length === 0) {
 				const dbCharNew: ICharacterExport = {
 					id: 0,
@@ -120,7 +121,7 @@ class CharacterResolveService {
 			}
 
 			for (let i = 0; i < apiIDs.length; i++) {
-				const {data: apiChar, headers: {expires}} = await api.getCharacter$(apiIDs[i]).toPromise()
+				const {data: apiChar, headers: {expires}} = await firstValueFrom(api.getCharacter$(apiIDs[i]))
 
 				const dbCharNew: ICharacterExport = {
 					id: apiIDs[i],
@@ -171,7 +172,7 @@ class CharacterResolveService {
 
 			// If expired
 			try {
-				const {data: apiChar, headers: {expires}} = await api.getCharacter$(id).toPromise()
+				const {data: apiChar, headers: {expires}} = await firstValueFrom(api.getCharacter$(id))
 
 				const dbCharNew: ICharacterExport = {
 					id: id,
@@ -189,7 +190,7 @@ class CharacterResolveService {
 		}
 
 		try {
-			const {data: apiChar, headers: {expires}} = await api.getCharacter$(id).toPromise()
+			const {data: apiChar, headers: {expires}} = await firstValueFrom(api.getCharacter$(id))
 			const dbCharNew: ICharacterExport = {
 				id: id,
 				name: apiChar.name,

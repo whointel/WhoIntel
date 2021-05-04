@@ -4,6 +4,7 @@ import db from "@/service/Database"
 import isAfter from "date-fns/isAfter"
 import {API_STRUCTURE} from "@/types/API"
 import characterManager from "@/service/CharacterManager"
+import {firstValueFrom} from "rxjs"
 
 const ESI_API_TYPE_JUMP_GATE_ID = 35841
 
@@ -76,8 +77,9 @@ export default class EVEJumpBridge implements IEVEJumpBridgeExport {
 		let structure: API_STRUCTURE
 		let expires: string
 		try {
-			({data: structure, headers: {expires}} = await characterManager.activeCharacter.getStructure$(this.structure_id)
-				.toPromise())
+			({data: structure, headers: {expires}} = await firstValueFrom(
+				characterManager.activeCharacter.getStructure$(this.structure_id))
+			)
 		} catch (error) {
 			this.expires = new Date()
 

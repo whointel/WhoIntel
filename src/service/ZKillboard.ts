@@ -11,7 +11,7 @@ import store from "@/store"
 import {ZKB_STATUS} from "@/types/ZKillboard"
 
 import {QueueingSubject} from "queueing-subject"
-import {Observable, Subscription} from "rxjs"
+import {firstValueFrom, Observable, Subscription} from "rxjs"
 import {share, switchMap, map, tap} from "rxjs/operators"
 import makeWebSocketObservable from "@/service/WS"
 import {retryBackoff} from "backoff-rxjs"
@@ -119,7 +119,7 @@ class ZKillboard {
 		const zk_data = data
 		let killmail: API_KILLMAIL
 		try {
-			({data: killmail} = await api.killmail$(zk_data.killID, zk_data.hash).toPromise())
+			({data: killmail} = await firstValueFrom(api.killmail$(zk_data.killID, zk_data.hash)))
 			log.warn("zkillboard: killmail", killmail)
 		} catch (e) {
 			log.warn(e)
