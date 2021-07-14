@@ -114,7 +114,6 @@ class MainWindow {
 			icon: path.join(__static, "icon.png"),
 			webPreferences: {
 				nodeIntegration: true,
-				enableRemoteModule: true,
 				backgroundThrottling: false,
 				contextIsolation: false,
 				autoplayPolicy: "no-user-gesture-required", // default, used for alarm sound play

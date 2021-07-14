@@ -115,8 +115,7 @@ import {PlayAlarm, StopAlarm} from "@/service/PlayAlarm"
 import settingsService from "@/service/settings"
 import logReader from "@/service/LogReader"
 import {LOG_ENTRY_TYPE} from "@/types/ILogEntry"
-
-const {dialog} = require("electron").remote
+import {ipcRenderer} from "electron"
 
 @Component
 export default class ConfigWindow extends Vue {
@@ -159,13 +158,7 @@ export default class ConfigWindow extends Vue {
 		this.$emit("lock")
 
 		try {
-			let result = await dialog.showOpenDialog({
-				title: "Choose Alarm media",
-				properties: ["openFile", "dontAddToRecent"],
-				filters: [
-					{name: "Media", extensions: ["mp3", "wav", "ogg"]},
-				]
-			})
+			const result = await ipcRenderer.invoke("openSoundDialog")
 			if (!result.canceled) {
 				const file = result.filePaths[0]
 				if (file) {
@@ -175,6 +168,7 @@ export default class ConfigWindow extends Vue {
 
 			// eslint-disable-next-line no-empty
 		} catch (e) {
+			console.debug(e)
 		}
 		this.isAlarmMediaDialogShow = false
 		this.$emit("unlock")

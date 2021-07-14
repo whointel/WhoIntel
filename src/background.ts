@@ -1,4 +1,4 @@
-import {app, protocol, ipcMain, shell} from "electron"
+import {app, protocol, ipcMain, shell, dialog} from "electron"
 import eveMap from "@/background/EVEMap"
 import installExtension, {VUEJS_DEVTOOLS} from "electron-devtools-installer"
 import LogListener, {EVE_LOG_FOLDER} from "@/background/LogReader"
@@ -16,8 +16,6 @@ import {registerSoundProtocol} from "@/background/SoundProtocol"
 import layoutsWindow from "@/background/LayoutsWindow"
 import {dirname} from "path"
 import {isPlatformMacOS, isPlatformWin} from "@/background/helpers"
-
-import * as remoteMain from "@electron/remote/main"
 
 log.transports.file.maxSize = 1024 * 1024 * 20; // 20Mb
 
@@ -50,7 +48,8 @@ let authEVE: AuthEVE
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{scheme: "app", privileges: {secure: true, standard: true}}])
 
-const contextMenu = require("electron-context-menu")
+import contextMenu from "electron-context-menu"
+
 contextMenu()
 
 const gotTheLock = app.requestSingleInstanceLock()
@@ -63,8 +62,6 @@ if (!gotTheLock) {
 		mainWindow.show()
 	})
 }
-
-remoteMain.initialize()
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
@@ -141,6 +138,16 @@ app.on("ready", async () => {
 
 	ipcMain.on("openLogFolderGame", () => {
 		shell.openPath(EVE_LOG_FOLDER)
+	})
+
+	ipcMain.handle("openSoundDialog", () => {
+		return dialog.showOpenDialog({
+			title: "Choose Alarm media",
+			properties: ["openFile", "dontAddToRecent"],
+			filters: [
+				{name: "Media", extensions: ["mp3", "wav", "ogg"]},
+			]
+		})
 	})
 
 	eveMap.init()
