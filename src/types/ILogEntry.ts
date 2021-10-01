@@ -17,6 +17,8 @@ export interface ILogEntry {
 	type: LOG_ENTRY_TYPE
 	zk?: {
 		npcOnly: boolean
+		attackersCnt: number
+		victimShipTypeId: number
 		character_id: number
 		url: string
 		old: boolean

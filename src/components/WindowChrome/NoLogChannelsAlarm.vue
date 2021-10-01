@@ -13,7 +13,7 @@
 				</v-icon>
 
 			</template>
-			<span>No Secure channels for watching</span>
+			<span class="text-caption">No Secure channels for watching</span>
 		</v-tooltip>
 	</div>
 </template>

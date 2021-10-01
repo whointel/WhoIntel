@@ -4,8 +4,12 @@
 			<v-icon>{{ icon }}</v-icon>
 		</v-list-item-icon>
 		<v-list-item-content>
-			<v-list-item-subtitle v-if="isZKillboard">{{ time }} - {{ regionNames }} - {{ entry.channel }}</v-list-item-subtitle>
-			<v-list-item-subtitle v-else>{{ time }} - {{ regionNames }} - {{ entry.sender }} - {{ entry.channel }}</v-list-item-subtitle>
+			<v-list-item-subtitle v-if="isZKillboard">
+				{{ time }} - {{ regionNames }} - {{ entry.channel }}
+			</v-list-item-subtitle>
+			<v-list-item-subtitle v-else>
+				{{ time }} - {{ regionNames }} - {{ entry.sender }} - {{ entry.channel }}
+			</v-list-item-subtitle>
 			<v-list-item-title class="log-message-text" v-html="message"/>
 		</v-list-item-content>
 	</v-list-item>
@@ -111,14 +115,27 @@ export default class LogEntry extends Vue {
 	}
 
 	async parseMessageZKB() {
-		this.messageParts[0] = `<a href="#" class="system_mark_pointer" data-id="${this.entry.systems[0].id}">${this.entry.systems[0].name}</a>`
-		this.messageParts[1] = `<a href="${this.entry.zk!.url}" data-link="${this.entry.zk!.url}" class="external-link">${this.entry.zk!.url}</a>`
+		if (!this.entry.zk) return
 
-		const character = await characterResolveService.findById(this.entry.zk!.character_id)
+		this.messageParts[0] = `<a href="#" class="system_mark_pointer" data-id="${this.entry.systems[0].id}">${this.entry.systems[0].name}</a>`
+		this.messageParts[1] = `<a href="${this.entry.zk.url}" data-link="${this.entry.zk.url}" class="external-link">${this.entry.zk.url}</a>`
+		if (this.entry.zk.npcOnly) {
+			this.messageParts[2] = "<span class='text-caption'>/NPC only/</span>"
+		} else if (this.entry.zk.attackersCnt === 1) {
+			this.messageParts[2] = " /Solo/"
+		} else {
+			this.messageParts[2] = ` /${this.entry.zk.attackersCnt}/`
+		}
+
+		if (this.entry.zk.victimShipTypeId === 670) {
+			this.messageParts[3] = "/Capsule/"
+		}
+
+		const character = await characterResolveService.findById(this.entry.zk.character_id)
 
 		if (character.exists) {
 			this.$set(this.messageParts, 1,
-				`<a href="${this.entry.zk!.url}" data-link="${this.entry.zk!.url}" class="external-link">${character.name}</a>`
+				`<a href="${this.entry.zk.url}" data-link="${this.entry.zk.url}" class="external-link">${character.name}</a>`
 			)
 		}
 	}

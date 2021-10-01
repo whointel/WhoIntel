@@ -1,7 +1,7 @@
 import {app, BrowserWindow, ipcMain, IpcMainInvokeEvent, protocol, ProtocolRequest} from "electron"
 import * as crypto from "crypto"
 import base64url from "base64url"
-import axios from "axios"
+import axios, {AxiosResponse} from "axios"
 import * as url from "url"
 import * as querystring from "querystring"
 import jwt from "jsonwebtoken"
@@ -42,7 +42,11 @@ export default class AuthEVE {
 				throw new Error("state doesn't match")
 			}
 
-			const {data} = await axios.post(OAUTH_TOKEN_URL, querystring.stringify({
+			const {data} = await axios.post<any, AxiosResponse<{
+				refresh_token: string,
+				access_token: string,
+			}>>(OAUTH_TOKEN_URL,
+				querystring.stringify({
 					grant_type: "authorization_code",
 					client_id: OAUTH_CLIENT_ID,
 					code: code,
@@ -170,7 +174,11 @@ export default class AuthEVE {
 
 	async refreshAuth(event: IpcMainInvokeEvent, old_refresh_token: string | null): Promise<IAuthBackend> {
 		try {
-			const {data} = await axios.post(OAUTH_TOKEN_URL, querystring.stringify({
+			const {data} = await axios.post<any, AxiosResponse<{
+				refresh_token: string,
+				access_token: string,
+			}>>(OAUTH_TOKEN_URL,
+				querystring.stringify({
 					grant_type: "refresh_token",
 					client_id: OAUTH_CLIENT_ID,
 					refresh_token: old_refresh_token,
@@ -181,8 +189,8 @@ export default class AuthEVE {
 					}
 				})
 
-			const refresh_token = data.refresh_token as string
-			const access_token = data.access_token as string
+			const refresh_token = data.refresh_token
+			const access_token = data.access_token
 
 			const token: IAuthToken = await this.verifyToken(access_token)
 

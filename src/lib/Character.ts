@@ -27,9 +27,11 @@ export default class Character extends EVEApi {
 				this.auth.character_id = Number(part)
 
 				this.name = auth.token.name
-				this.axios$.defaults.headers.authorization = `Bearer ${auth.access_token}`
+				if (this.axios$.defaults && this.axios$.defaults.headers) {
+					this.axios$.defaults.headers.authorization = `Bearer ${auth.access_token}`
+				}
 			} else {
-				delete this.axios$.defaults.headers.authorization
+				delete this.axios$.defaults?.headers?.authorization
 			}
 			this.saveDB()
 

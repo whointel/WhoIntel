@@ -1,10 +1,18 @@
 <template>
 	<div>
-		<v-chip
-			x-small :color="isShow ? 'green' : 'red'" outlined label
-			@click="switchShow"
-		>pf
-		</v-chip>
+		<v-tooltip bottom transition="fade-transition">
+			<template v-slot:activator="{on, attrs}">
+				<v-chip
+					@click="switchShow"
+					v-on="on"
+					v-bind="attrs"
+					:color="isShow ? 'green' : 'red'"
+					x-small outlined label
+				>pf
+				</v-chip>
+			</template>
+			<span class="text-caption">Path finder</span>
+		</v-tooltip>
 	</div>
 </template>
 

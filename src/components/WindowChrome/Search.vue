@@ -4,12 +4,12 @@
 			<template v-slot:activator="{ on, attrs }">
 				<v-icon
 					@click="openSearch"
-					v-bind="attrs"
 					v-on="on"
+					v-bind="attrs"
 				>mdi-magnify
 				</v-icon>
 			</template>
-			<span>Ctrl+F</span>
+			<span class="text-caption">Ctrl+F</span>
 		</v-tooltip>
 		<v-dialog
 			v-model="isShow"
@@ -20,6 +20,7 @@
 				<v-container class="pa-y px-2">
 					<v-autocomplete
 						@change="onFound"
+						ref="input"
 						v-model="select"
 						:items="items"
 						:search-input.sync="search"
@@ -28,7 +29,6 @@
 						hide-no-data no-filter auto-select-first dense autofocus
 						placeholder="Search for.."
 						return-object
-						ref="input"
 					>
 						<template v-slot:item="{item}">
 							<v-list-item-content>

@@ -83,8 +83,8 @@ class ZKillboard {
 		store.commit("setZKBStatus", ZKB_STATUS.CONNECTING)
 		this.messagesSubscription = this.messages$.subscribe(
 			this.processZK.bind(this),
-			() => {
-			},
+			// () => {
+			// },
 			this.disconnectZK.bind(this)
 		)
 	}
@@ -156,6 +156,8 @@ class ZKillboard {
 			character: null,
 			zk: {
 				npcOnly: ZKillboard.isNPC(killmail),
+				attackersCnt: killmail.attackers.length,
+				victimShipTypeId: killmail.victim?.ship_type_id,
 				character_id: zk_data.character_id,
 				url: zk_data.url,
 				old: isOld,

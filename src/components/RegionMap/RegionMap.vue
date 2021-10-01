@@ -4,13 +4,13 @@
 		class="content-container"
 	>
 		<div
-			ref="svgContainer"
-			class="svg-container"
 			@wheel="onScroll"
 			@mousedown="mousedown"
 			@dragscrollend="mouseup"
 			@mouseup="mouseup"
+			ref="svgContainer"
 			v-dragscroll.noback.noforward="true"
+			class="svg-container"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -124,7 +124,10 @@ export default class RegionMap extends Vue {
 		this.svgContainer.addEventListener("contextmenu", this.contextMenuOpen)
 		events.$on("electron:window:layouts:get:MapScroll", this.sendMapScroll)
 
-		this.ps = Object.preventExtensions(new PerfectScrollbar(this.svgContainer, {wheelPropagation: false}))
+		// wait for rendering component, fix PerfectScrollbar glitch
+		this.$nextTick(() => {
+			this.ps = Object.preventExtensions(new PerfectScrollbar(this.svgContainer, {wheelPropagation: false}))
+		})
 
 		// fix map reloading for dev server
 		this.loadMap()

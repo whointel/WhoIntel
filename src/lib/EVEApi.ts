@@ -205,7 +205,7 @@ function axiosShouldRetryOnServerError(error: AxiosError) {
 	return code > 0 && (code >= 500 && code <= 504)
 }
 
-export function extractExpires(response: AxiosResponse): Date {
+export function extractExpires(response: AxiosResponse<any>): Date {
 	if (!response.headers.expires) {
 		throw new Error("no expires header")
 	}
@@ -216,7 +216,7 @@ export function extractExpires(response: AxiosResponse): Date {
 /**
  * @return milliseconds
  */
-export function expireIn(response: AxiosResponse): number {
+export function expireIn(response: AxiosResponse<any>): number {
 	const expires = extractExpires(response)
 
 	return differenceInMilliseconds(expires, new Date())

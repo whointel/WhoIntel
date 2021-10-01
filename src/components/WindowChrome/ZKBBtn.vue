@@ -1,10 +1,17 @@
 <template>
 	<div>
-		<v-chip
-			x-small :color="color" outlined label
-			@click="switchZKB"
-		>zkb
-		</v-chip>
+		<v-tooltip bottom transition="fade-transition">
+			<template v-slot:activator="{on, attrs}">
+				<v-chip
+					@click="switchZKB"
+					v-on="on"
+					v-bind="attrs"
+					x-small :color="color" outlined label
+				>zkb
+				</v-chip>
+			</template>
+			<span class="text-caption">ZKillboard logs</span>
+		</v-tooltip>
 	</div>
 </template>
 

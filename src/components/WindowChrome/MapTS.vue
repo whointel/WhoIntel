@@ -12,8 +12,13 @@ export default class MapTS extends Vue {
 	updateInterval: any = null
 
 	get time() {
-		const ts = systemManager.currentRegion?.tsUpdate
-		return ts ? formatDistanceToNow(ts) : null
+		if (
+			!systemManager.currentRegion
+			|| !systemManager.currentRegion.tsUpdate
+		) return null
+
+		const ts = systemManager.currentRegion.tsUpdate as Date
+		return formatDistanceToNow(ts)
 	}
 
 	mounted() {
