@@ -3,7 +3,7 @@ jobs:
     - os: osx
       osx_image: xcode10.2
       language: node_js
-      node_js: "14.17.0"
+      node_js: "16.14.2"
       env:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
@@ -18,7 +18,7 @@ jobs:
 
     - os: windows
       language: node_js
-      node_js: "14.17.0"
+      node_js: "16.14.2"
       script: yarn electron:build --win
       env:
         - YARN_GPG=no
