@@ -7,6 +7,7 @@ jobs:
       env:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+      before_install: corepack enable
       script: yarn electron:build --mac
       cache:
         yarn: true
