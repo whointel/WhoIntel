@@ -69,7 +69,7 @@ export default class LogListener {
 			})
 			.on("add", async (filepath, stats) => {
 					if (!stats) {
-						log.warn(`LogListener: File has no stats`, filepath)
+						log.warn("LogListener: File has no stats", filepath)
 						return
 					}
 
@@ -79,8 +79,7 @@ export default class LogListener {
 					}
 
 					const filename = path.basename(filepath)
-					const file_name_parts = filename.split("_")
-					const channel = file_name_parts[0]
+					const channel = filename.substring(0, filename.length - 31)
 
 					if (!this.channels.includes(channel)) {
 						log.info("LogListener: File ignored", filepath)
